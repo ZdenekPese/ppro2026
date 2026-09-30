@@ -1,0 +1,34 @@
+# OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDE & Editors
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.secret
+*.pem
+*.key
+
+# Build outputs & dependencies
+bin/
+obj/
+dist/
+build/
+out/
+target/
+node_modules/
+__pycache__/
+*.pyc
+
+# Docker logs
+*.log
