@@ -1,0 +1,37 @@
+#!/bin/sh
+# Git pre-commit hook pro PPRO
+# Vynucuje udržování README.md jako jediného zdroje pravdy (SSOT)
+
+# Zjištění změněných a připravených souborů k commitu
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Pokud nejsou žádné soubory, nic neřešíme
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+# Pokud se mění cokoliv v projektu (zdrojové kódy, konfigurace, atd.) kromě samotného README.md
+NON_DOC_FILES=$(echo "$STAGED_FILES" | grep -v -E '^(README\.md|\.gitignore|\.agents/|\.githooks/|AGENTS\.md)')
+
+if [ -n "$NON_DOC_FILES" ]; then
+    # Zkontrolujeme, zda je README.md mezi staged soubory
+    echo "$STAGED_FILES" | grep -q "^README\.md$"
+    README_STAGED=$?
+
+    if [ $README_STAGED -ne 0 ]; then
+        echo ""
+        echo "======================================================================="
+        echo " [CHYBA: GIT PRE-COMMIT HOOK - KONTROLA DOKUMENTACE]"
+        echo " V commitu jsou změny v projektových souborech, ale README.md není upraven!"
+        echo ""
+        echo " Pravidlo projektu (SSOT):"
+        echo " README.md slouží jako jediný zdroj pravdy (technická dokumentace,"
+        echo " rozhodnutí a deník změn). Před commitem aktualizujte README.md a přidejte"
+        echo " jej do stage (git add README.md)."
+        echo "======================================================================="
+        echo ""
+        exit 1
+    fi
+fi
+
+exit 0
