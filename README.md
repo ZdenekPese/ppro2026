@@ -131,6 +131,10 @@ V souladu s pokyny zadání pro otevřené body klienta zde definujeme jednozna�
   Po expedici (vyskladnění) je objednávka uzamčena proti změnám a jakýkoliv další požadavek zákazníka se řeší jako nová objednávka nebo vratka/reklamace.
 - **Zdůvodnění:** Chrání sklad před odesláním neúplného či nezaplaceného zboží a udržuje soulad mezi platbou, rezervací a fyzickým výdejem.
 
+### ADR 6: Volba technologického stacku (Python ekosystém)
+- **Rozhodnutí:** Projekt bude realizován v programovacím jazyce **Python (3.11+)** s využitím moderního webového frameworku **FastAPI**, relační databáze **PostgreSQL 16**, ORM nástroje **SQLAlchemy 2.0** a migračního systému **Alembic**. Pro pilotní klientské rozhraní se využije šablonovací engine **Jinja2 s responzivním Vanilla CSS** a automatická interaktivní dokumentace **OpenAPI / Swagger UI**.
+- **Zdůvodnění:** Python a FastAPI umožňují čisté oddělení tří vrstev, striktní typování pomocí Pydantic schémat, automatickou tvorbu API dokumentace pro e-shop a rychlé nasazení do Docker kontejnerů s minimální režií.
+
 ---
 
 ## 🗄️ Datový model a doménové entity
@@ -242,27 +246,28 @@ erDiagram
 Aplikace je navržena striktně podle požadavku na **tři vrstvy se závislostmi jedním směrem**:
 
 ```
-+-------------------------------------------------------------+
-|                     1. PREZENTAČNÍ VRSTVA                  |
-|  - Webové UI (HTML5 / Moderní Vanilla CSS / Responsive JS)  |
-|  - REST API Controllery / Handlery pro e-shop a skladníky   |
-+-------------------------------------------------------------+
-                              |
-                              v (závisí na)
-+-------------------------------------------------------------+
-|                2. APLIKAČNÍ A DOMÉNOVÁ VRSTVA               |
-|  - Služby pro správu zásob (StockService, OrderService)     |
-|  - Validace obchodních pravidel (zákaz záporu, rezervace)   |
-|  - Řízení transakcí a auditní logování pohybů               |
-+-------------------------------------------------------------+
-                              |
-                              v (závisí na)
-+-------------------------------------------------------------+
-|             3. PERSISTENČNÍ A INFRASTRUKTURNÍ VRSTVA        |
-|  - Databázový kontext, repozitáře                           |
-|  - Databázové schéma, řízené migrace                        |
-|  - PostgreSQL v Docker kontejneru                           |
-+-------------------------------------------------------------+
++-----------------------------------------------------------------------------------+
+|                           1. PREZENTAČNÍ VRSTVA                                   |
+|  - Webové rozhraní pro skladníka (FastAPI + Jinja2 + Responsive Vanilla CSS)      |
+|  - REST API routery pro e-shop (/api/products, /api/orders, Swagger UI na /docs)  |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v (závisí na)
++-----------------------------------------------------------------------------------+
+|                      2. APLIKAČNÍ A DOMÉNOVÁ VRSTVA                               |
+|  - Byznys služby (ProductService, StockService, OrderService)                      |
+|  - Validace doménových pravidel (Pydantic validátory, kontrola záporu a rezervací)|
+|  - Doménové výjimky a transakční hranice                                          |
++-----------------------------------------------------------------------------------+
+                                          |
+                                          v (závisí na)
++-----------------------------------------------------------------------------------+
+|                   3. PERSISTENČNÍ A INFRASTRUKTURNÍ VRSTVA                        |
+|  - Repozitáře (ProductRepository, StockRepository)                                |
+|  - SQLAlchemy 2.0 mapování, relace a constraints                                 |
+|  - Verzované databázové migrace přes Alembic                                      |
+|  - PostgreSQL 16 v Docker kontejneru                                              |
++-----------------------------------------------------------------------------------+
 ```
 
 ---
@@ -313,6 +318,82 @@ docker compose run --rm app-tests
   - Propojen vzdálený repozitář `https://github.com/ZdenekPese/ppro2026.git`.
   - Nastaveno pravidlo repozitáře: **striktní zákaz automatického pushování bez explicitního povelu uživatele**.
   - Zaveden Git pre-commit hook (`.git/hooks/pre-commit`) vynucující synchronizaci kódu a dokumentace.
+---
+
+## 🛠️ Implementační plán – Pilotní demo (Správa entit Product)
+
+Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonicky kompletní vertikálu** (všechny 3 vrstvy + DB + Docker) spravující centrální entitu systému: **`Product` (Dřevěná hračka)**. Toto demo bude předvedeno klientovi (vyučujícímu) pro získání první zpětné vazby.
+
+### Proč právě entita `Product`?
+1. Je to ústřední byznys entita firmy *Dřevěnka s.r.o.* (hračky, káči, koníci, vláčky).
+2. Okamžitě demonstruje nahrazení chaotické excelovské tabulky strukturovaným katalogem.
+3. Demonstruje povinné atributy zadání: název, SKU kód, popis, nákupní cena, prodejní cena, minimální zásoba.
+4. Připravuje půdu pro navázání kategorií (M:N) a skladových zásob (Hradec Králové vs. Třebechovice).
+
+### Fáze realizace pilotního dema:
+
+```
+[Krok 1: Kostra projektu] ---> [Krok 2: Persistenční vrstva] ---> [Krok 3: Aplikační logika]
+(Dockerfile, Compose, DB)      (SQLAlchemy, Alembic migrace)      (Pydantic, ProductService)
+                                                                           |
+[Krok 6: Předvedení klientovi]<-- [Krok 5: Testy a seed dat] <--- [Krok 4: Prezentační vrstva]
+(Zpětná vazba, cvičení)        (pytest, demo data hraček)         (REST API + Webové UI)
+```
+
+#### Krok 1: Inicializace skeletonu, Dockeru a databáze
+- Vytvoření souborů `Dockerfile`, `docker-compose.yml`, `requirements.txt` a `.env.example`.
+- Nastavení služeb:
+  - `db`: PostgreSQL 16 s trvalým svazkem (volume) a healthcheckem.
+  - `web`: Python 3.11+ / FastAPI aplikace s automatickým reloadem pro vývoj.
+- Nastavení centrálního konfiguračního modulu `app/core/config.py` a správy DB spojení `app/core/database.py`.
+
+#### Krok 2: Persistenční vrstva (Infrastruktura a migrace)
+- Inicializace migračního nástroje **Alembic** (`alembic/`).
+- Definice ORM modelu `Product` v `app/infrastructure/db/models.py` (včetně kontrolních omezení `selling_price >= 0`, `purchase_price >= 0` a unikátnosti `code`).
+- Vytvoření a aplikace první migrace `001_create_products_table`.
+- Implementace `ProductRepository` v `app/infrastructure/repositories/product_repository.py` (metody `list_all`, `get_by_id`, `get_by_code`, `create`, `update`, `delete/deactivate`).
+
+#### Krok 3: Aplikační a doménová vrstva (Byznys logika)
+- Definice DTO / Pydantic schémat v `app/domain/models/product.py`:
+  - `ProductCreate`, `ProductUpdate`, `ProductResponse`.
+- Implementace doménových výjimek v `app/domain/exceptions.py` (`ProductNotFoundError`, `DuplicateProductCodeError`, `InvalidPriceError`).
+- Implementace `ProductService` v `app/domain/services/product_service.py` s validací byznys pravidel:
+  - Zajištění unikátnosti SKU kódu před uložením.
+  - Kontrola, že prodejní cena je vyšší než nákupní (varování / validace marže).
+  - Validace nezápornosti cen a minimální skladové hladiny.
+
+#### Krok 4: Prezentační vrstva (REST API a Web UI pro klienta)
+- **REST API:**
+  - Vytvoření routeru `app/presentation/api/product_router.py` s endpointy:
+    - `GET /api/products` (seznam s možností filtrování / vyhledávání)
+    - `GET /api/products/{id}` (detail produktu)
+    - `POST /api/products` (založení nového produktu)
+    - `PUT /api/products/{id}` (úprava cen, minimální zásoby či popisu)
+  - Automatická interaktivní dokumentace na `/docs` (Swagger UI).
+- **Web UI pro skladníka a klienta:**
+  - Šablony Jinja2 v `app/presentation/templates/`:
+    - `base.html` – přehledný layout, responzivní pro mobil i desktop.
+    - `product_list.html` – katalog dřevěných hraček, vyhledávací pole, barevné indikátory cen a stavů.
+    - `product_form.html` – intuitivní formulář pro přidání/editaci hračky.
+  - Vlastní čistý CSS styl `app/presentation/static/css/style.css` (moderní design, žádné zbytečné externí knihovny, ergonomické pro mobilní skladníky).
+
+#### Krok 5: Syntetická data a automatizované testy
+- Vytvoření seedovacího skriptu s realistickými dřevěnými hračkami Dřevěnky (např. *Buková káča*, *Dřevěný vláček s vagóny*, *Tahací kačer*, *Houpací koník*, *Stavebnice z kostek*).
+- Zavedení automatizovaných testů pomocí `pytest`:
+  - Unit testy `ProductService` (validace cen, ošetření duplicitního kódu).
+  - Integrační test API endpointů.
+
+---
+
+## 📝 Deník postupu a historie změn (Changelog)
+
+- **2026-09-30 (Fáze 0 – Inicializace a stanovení SSOT):**
+  - Inicializován Git repozitář a nastavena hlavní větev `main`.
+  - Propojen vzdálený repozitář `https://github.com/ZdenekPese/ppro2026.git`.
+  - Nastaveno pravidlo repozitáře: **striktní zákaz automatického pushování bez explicitního povelu uživatele**.
+  - Zaveden Git pre-commit hook (`.git/hooks/pre-commit`) vynucující synchronizaci kódu a dokumentace.
   - Vytvořena komplexní technická dokumentace a rozpracována rozhodnutí pro **Zadání B (Sklad pro malý e-shop - Dřevěnka s.r.o.)**.
   - Vytvořen kořenový konfigurační soubor [AGENTS.md](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/AGENTS.md) definující pravidla a standardy pro AI asistenty.
   - Zaveden verzovaný Git hook v `.githooks/pre-commit` a nastaveno `git config core.hooksPath .githooks`.
+  - Schválen technologický stack (Python 3.11+, FastAPI, PostgreSQL 16, SQLAlchemy 2.0, Alembic) – zaznamenáno v ADR 6.
+  - Vypracován podrobný implementační plán pro pilotní demo spravující entitu `Product`.
