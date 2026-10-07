@@ -15,7 +15,9 @@
 7. [Architektura a vrstvy systému](#-architektura-a-vrstvy-systému)
 8. [Uživatelské rozhraní a ergonomie (UI/UX)](#-uživatelské-rozhraní-a-ergonomie-uiux)
 9. [Instalace a spuštění](#-instalace-a-spuštění)
-10. [Deník postupu a historie změn (Changelog)](#-deník-postupu-a-historie-změn-changelog)
+10. [Celkový fázový plán vývoje projektu (Roadmap)](#-celkový-fázový-plán-vývoje-projektu-roadmap)
+11. [Implementační plán – Pilotní demo](#-implementační-plán--pilotní-demo-správa-entit-product)
+12. [Deník postupu a historie změn (Changelog)](#-deník-postupu-a-historie-změn-changelog)
 
 ---
 
@@ -311,13 +313,32 @@ docker compose run --rm app-tests
 
 ---
 
-## 📝 Deník postupu a historie změn (Changelog)
+## 🗺️ Celkový fázový plán vývoje projektu (Roadmap)
 
-- **2026-09-30 (Fáze 0 – Inicializace a stanovení SSOT):**
-  - Inicializován Git repozitář a nastavena hlavní větev `main`.
-  - Propojen vzdálený repozitář `https://github.com/ZdenekPese/ppro2026.git`.
-  - Nastaveno pravidlo repozitáře: **striktní zákaz automatického pushování bez explicitního povelu uživatele**.
-  - Zaveden Git pre-commit hook (`.git/hooks/pre-commit`) vynucující synchronizaci kódu a dokumentace.
+Pro přehledný, iterativní a bezpečný vývoj je projekt rozdělen do **8 logických fází** podle principu *Tracer Bullet / Walking Skeleton* (od tenké spustitelné vertikály k postupnému nabalování doménové logiky):
+
+```mermaid
+flowchart TD
+    F1["Fáze 1: Walking Skeleton & Docker"] --> F2["Fáze 2: Pilotní demo (Product)"]
+    F2 --> F3["Fáze 3: Kategorie & M:N vazba"]
+    F3 --> F4["Fáze 4: Sklady & Dvojí stav zásob"]
+    F4 --> F5["Fáze 5: Pohyby & Audit trail"]
+    F5 --> F6["Fáze 6: Zákazníci & Objednávky"]
+    F6 --> F7["Fáze 7: Reporting po kategoriích"]
+    F7 --> F8["Fáze 8: Testy & Obhajoba"]
+```
+
+| Fáze | Název fáze | Klíčový cíl a náplň | Hlavní výstup |
+| :--- | :--- | :--- | :--- |
+| **Fáze 1** | **Walking Skeleton & Infrastruktura** | Docker Compose (`app` + `db`), PostgreSQL 16, konfigurace SQLAlchemy 2.0 a Alembic migrací. | Běžící skeleton na 1 příkaz, `/docs` a `/health`. |
+| **Fáze 2** | **Pilotní demo – Správa produktů (`Product`)** | Kompletní 3vrstvá vertikála pro dřevěné hračky: ORM, repozitář, service s validací marží/cen, REST API a responzivní web UI. | **Demo pro klienta/vyučujícího na cvičení** pro 1. feedback. |
+| **Fáze 3** | **Kategorie a M:N vazba (`Category`)** | Zavedení kategorií a vazební tabulky `ProductCategory` (splnění povinného minima M:N). Filtrování v katalogu. | Tatáž hračka ve více kategoriích naráz. |
+| **Fáze 4** | **Sklady a Zásoby (`Warehouse`, `Stock`)** | Evidence 2 skladů (Hradec Králové vs. Garáž Třebechovice). Dvoustupňový model: fyzická vs. rezervovaná zásoba. | Dashboard skladu s indikací „co hoří“ pod minimem. |
+| **Fáze 5** | **Pohyby a Auditní stopa (`StockMovement`)** | Vynucení zákazu záporu (`quantity >= 0`). Audit 100 % pohybů (příjem, transfer Hradec-Třebechovice, inventurní vyrovnání). | Zpětná dohledatelnost („kde je ta káča...“). |
+| **Fáze 6** | **Zákazníci a Objednávky (`Customer`, `Order`)** | Rezervace při objednání, neměnnost prodejní ceny v `OrderItem`, fyzický odpis při expedici, zákaz mazání zákazníků. | Kompletní nákupní a expediční proces z e-shopu. |
+| **Fáze 7** | **Reporting a Analytika** | Měsíční obrat po kategoriích, přehled ziskovosti a automatický seznam položek k doobjednání. | Manažerské výkazy pro majitele Petra Doležala. |
+| **Fáze 8** | **Testy, optimalizace a Obhajoba** | Komplexní sada unit/integračních testů v `pytest`, revize SSOT dokumentace, finální verifikace před odevzdáním. | Projekt připravený k bezchybné obhajobě. |
+
 ---
 
 ## 🛠️ Implementační plán – Pilotní demo (Správa entit Product)
@@ -397,3 +418,6 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Zaveden verzovaný Git hook v `.githooks/pre-commit` a nastaveno `git config core.hooksPath .githooks`.
   - Schválen technologický stack (Python 3.11+, FastAPI, PostgreSQL 16, SQLAlchemy 2.0, Alembic) – zaznamenáno v ADR 6.
   - Vypracován podrobný implementační plán pro pilotní demo spravující entitu `Product`.
+- **2026-10-07 (Fáze 0 – Strukturování etap projektu):**
+  - Rozpracována celková 8fázová roadmapa vývoje celého projektu od skeletonu po finální obhajobu.
+  - Aktualizována pravidla v [AGENTS.md](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/AGENTS.md) pro fázový iterativní postup.

@@ -76,3 +76,19 @@ Při řešení každého úkolu postupujte podle tohoto cyklu:
 4. **Aktualizace SSOT:** Zapište změny, nová rozhodnutí a aktualizujte sekci *Changelog* v [README.md](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/README.md).
 5. **Commit:** Přidejte změněné soubory i `README.md` do Gitu a proveďte commit.
 6. **Report uživateli:** Stručně shrňte výsledek a v případě potřeby pushnutí požádejte o schválení.
+
+---
+
+## 🗺️ 5. Fázový plán vývoje (Postup po částech)
+
+Vývoj projektu probíhá striktně iterativně po ucelených fázích definovaných v [README.md](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/README.md):
+- **Fáze 1: Walking Skeleton & Infrastruktura** (Docker Compose, PostgreSQL 16, kostra 3 vrstev, `/docs`, `/health`).
+- **Fáze 2: Pilotní demo – Správa produktů (`Product`)** (3vrstvá vertikála pro dřevěné hračky k předvedení klientovi).
+- **Fáze 3: Kategorie a M:N vazba (`Category` $\leftrightarrow$ `Product`)** (více kategorií k jedné hračce).
+- **Fáze 4: Sklady a Skladové zásoby (`Warehouse`, `WarehouseStock`)** (Hradec vs. Třebechovice, dvojí stav zásob).
+- **Fáze 5: Pohyby a Auditní stopa (`StockMovement`)** (zákaz záporu, audit 100 % změn, inventura garáže).
+- **Fáze 6: Zákazníci a Objednávky (`Customer`, `Order`, `OrderItem`)** (rezervace při objednání, neměnnost cen, odpis při expedici).
+- **Fáze 7: Reporting a Analytika** (obrat po kategoriích, přehled k doobjednání).
+- **Fáze 8: Testy, optimalizace a příprava na obhajobu** (pytest byznys pravidel, kompletní SSOT revize).
+
+Pravidlo: **Nikdy nepřeskakujte fáze ani neimplementujte složitější doménové koncepty dříve, než je otestována a zdokumentována předchozí vrstva.**
