@@ -421,3 +421,11 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
 - **2026-10-07 (Fáze 0 – Strukturování etap projektu):**
   - Rozpracována celková 8fázová roadmapa vývoje celého projektu od skeletonu po finální obhajobu.
   - Aktualizována pravidla v [AGENTS.md](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/AGENTS.md) pro fázový iterativní postup.
+- **2026-10-07 (Fáze 1 – Walking Skeleton & Infrastruktura dokončena):**
+  - Vytvořen `Dockerfile` (Python 3.12-slim) a `docker-compose.yml` (služby `web` a `db` s PostgreSQL 16 a healthcheckem).
+  - Vytvořena konfigurace závislostí `requirements.txt` a vzor `.env.example`.
+  - Založena modulární třívrstvá struktura projektu (`core`, `domain`, `infrastructure`, `presentation`).
+  - Nastaveno databázové spojení SQLAlchemy v `app/core/database.py` a migrační nástroj Alembic (`alembic.ini`, `alembic/env.py`).
+  - Implementován `health_router` na `/api/health` s testem spojení na databázi.
+  - Vytvořen základní responzivní design systém v `app/presentation/static/css/style.css` a Jinja2 layout `base.html`.
+  - Přidány základní unit testy v `tests/test_health.py`.

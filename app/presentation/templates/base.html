@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sklad Dřevěnka s.r.o.{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="navbar">
+        <a href="/" class="navbar-brand">
+            🪵 Dřevěnka s.r.o.
+            <span class="brand-badge">Skladový systém</span>
+        </a>
+        <nav class="nav-links">
+            <a href="/products" class="nav-link">🧸 Produkty</a>
+            <a href="/docs" target="_blank" class="nav-link">📖 API Dokumentace</a>
+            <a href="/health" class="nav-link">🩺 Stav systému</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% block content %}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Vítejte ve skladovém systému Dřevěnka s.r.o.</h2>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Tento systém řeší evidenci skladových zásob dřevěných hraček pro hlavní sklad v Hradci Králové a sezónní garáž v Třebechovicích.
+            </p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="/products" class="btn btn-primary">Přejít do správy produktů</a>
+                <a href="/docs" target="_blank" class="btn btn-secondary">Prohlédnout REST API (Swagger)</a>
+            </div>
+        </div>
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        Sklad Dřevěnka s.r.o. &bull; Semestrální projekt PPRO 2026/2027 &bull; FIM UHK
+    </footer>
+</body>
+</html>
