@@ -428,4 +428,5 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Nastaveno databázové spojení SQLAlchemy v `app/core/database.py` a migrační nástroj Alembic (`alembic.ini`, `alembic/env.py`).
   - Implementován `health_router` na `/api/health` s testem spojení na databázi.
   - Vytvořen základní responzivní design systém v `app/presentation/static/css/style.css` a Jinja2 layout `base.html`.
-  - Přidány základní unit testy v `tests/test_health.py`.
+  - Upraveno volání `TemplateResponse` pro plnou kompatibilitu s novějšími verzemi Starlette/FastAPI.
+  - Přidány základní unit testy v `tests/test_health.py` (úspěšně ověřeny v běžícím Docker kontejneru).

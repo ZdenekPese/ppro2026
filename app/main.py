@@ -31,6 +31,8 @@ app.include_router(health_router, prefix="/api")
 def home_page(request: Request):
     """Úvodní stránka skladového systému."""
     return templates.TemplateResponse(
-        "base.html",
-        {"request": request, "title": "Sklad Dřevěnka s.r.o. - Úvod"},
+        request=request,
+        name="base.html",
+        context={"title": "Sklad Dřevěnka s.r.o. - Úvod"},
     )
+
