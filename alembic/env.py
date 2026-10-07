@@ -5,6 +5,8 @@ from alembic import context
 
 from app.core.config import settings
 from app.infrastructure.db.base import Base
+import app.infrastructure.db.models  # noqa: F401 - načtení modelů pro metadata
+
 
 # Alembic Config objekt
 config = context.config

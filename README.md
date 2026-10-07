@@ -430,3 +430,12 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Vytvořen základní responzivní design systém v `app/presentation/static/css/style.css` a Jinja2 layout `base.html`.
   - Upraveno volání `TemplateResponse` pro plnou kompatibilitu s novějšími verzemi Starlette/FastAPI.
   - Přidány základní unit testy v `tests/test_health.py` (úspěšně ověřeny v běžícím Docker kontejneru).
+- **2026-10-07 (Fáze 2 – Pilotní demo: Správa produktů Product dokončena):**
+  - Vytvořen SQLAlchemy ORM model `Product` s integritními omezeními (unikátní SKU, nezáporné ceny, nezáporná minimální zásoba).
+  - Vygenerována a aplikována 1. databázová migrace `b996581df047_create_products_table.py` přes Alembic.
+  - Implementován `ProductRepository` s metodami CRUD a fulltextovým vyhledáváním.
+  - Vytvořena doménová a byznys vrstva: Pydantic schémata (`ProductCreate`, `ProductUpdate`, `ProductResponse`), výjimky a `ProductService` s validací pravidel.
+  - Vytvořeno REST API rozhraní `/api/products` (CRUD operace, Swagger na `/docs`).
+  - Vytvořeno webové klientské UI na `/products` s katalogem dřevěných hraček, vyhledáváním a formulářem pro přidání a editaci položky.
+  - Vytvořen seedovací skript `app/infrastructure/db/seed.py` naplňující 5 typických hraček Dřevěnky (Káča, Vláček, Tahací kačer, Houpací koník, Kostky).
+  - Napsány automatizované testy v `tests/test_products.py` (ověření unikátnosti SKU, odmítnutí záporných cen, vyhledávání). Všech 6 testů úspěšně prochází.
