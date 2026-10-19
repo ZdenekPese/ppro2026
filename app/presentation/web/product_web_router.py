@@ -31,6 +31,11 @@ def product_list_view(
 ):
     """Zobrazení katalogu dřevěných hraček v přehledné tabulce."""
     products = service.list_products(search=search)
+    total_products = len(products)
+    active_products = sum(1 for p in products if p.is_active)
+    avg_price = (sum(p.selling_price for p in products) / total_products) if total_products > 0 else Decimal("0.00")
+    avg_margin = (sum(p.selling_price - p.purchase_price for p in products) / total_products) if total_products > 0 else Decimal("0.00")
+
     return templates.TemplateResponse(
         request=request,
         name="product_list.html",
@@ -38,8 +43,13 @@ def product_list_view(
             "products": products,
             "search": search or "",
             "title": "Katalog hraček - Dřevěnka s.r.o.",
+            "total_products": total_products,
+            "active_products": active_products,
+            "avg_price": avg_price,
+            "avg_margin": avg_margin,
         },
     )
+
 
 
 @router.get("/new", response_class=HTMLResponse)

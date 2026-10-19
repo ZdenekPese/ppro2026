@@ -274,15 +274,40 @@ Aplikace je navržena striktně podle požadavku na **tři vrstvy se závislostm
 
 ---
 
-## 🎨 Uživatelské rozhraní a ergonomie (UI/UX)
+## 🎨 Uživatelské rozhraní a ergonomie (UI/UX) – Standard 2026
 
-Na základě přání klienta („ať to jde používat z mobilu“ a „barevně, ať vidím, co hoří“) systém obsahuje:
-- **Responzivní rozhraní pro mobil i tablet:** Velké dotykové ovládací prvky vhodné pro práci ve skladu i se čtečkou čárových kódů.
-- **Barevný status dashboard:**
-  - 🔴 **Kritická zásoba (Červená):** Aktuální zásoba je na nebo pod hodnotou `min_stock_level`. Položka se automaticky zobrazuje v seznamu „Co ihned doobjednat“.
-  - 🟠 **Blíží se limitu (Oranžová):** Zásoba je v rozmezí 100 % – 130 % minimální hodnoty.
-  - 🟢 **Dostatek (Zelená):** Zásoba je bezpečná.
-- **Rychlý přehled skladů:** Přehledná matice zobrazující stav položky v Hradci Králové a v Garáži v Třebechovicích na jednom řádku.
+Webové rozhraní je navrženo ve standardu moderních B2B SaaS a ERP aplikací roku 2026 (inspirováno systémy jako Linear, Katana Cloud Manufacturing nebo Shopify Warehouse). Rozhraní striktně odmítá levná AI klišé a emoji ikony – staví na čisté vektorové grafice (inline SVG), přehledné informační hierarchii a ergonomii pro skladníky u dotykových terminálů i manažery u velkých obrazovek.
+
+### 1. Závazná barevná paleta (9 odstínů)
+Design systém staví na vyladěné devítiúrovňové paletě přecházející od syté karmínové přes ametystovou až po hlubokou petroliovou modř:
+- `#b7094c` (Primary Crimson) – Hlavní akcentní barva, branding, primární CTA tlačítka, aktivní linky.
+- `#a01a58` (Crimson Hover / Accent 2) – Hover stavy primárních akcí a zvýraznění.
+- `#892b64` (Wine / Accent 3) – Ohraničení aktivních prvků a jemné přechody.
+- `#723c70` (Plum / Accent 4) – Sekundární akcenty a štítky.
+- `#5c4d7d` (Purple Slate / Accent 5) – Přechodové prvky a indikátory.
+- `#455e89` (Steel Slate / Accent 6) – Podkladové struktury, ohraničení karet a tabulek.
+- `#2e6f95` (Ocean Blue / Accent 7) – Sekundární tlačítka, SKU badge ohraničení.
+- `#1780a1` (Teal / Accent 8) – Informační indikátory a doplňkové grafické prvky.
+- `#0091ad` (Cyan Teal / Accent 9) – Indikátory marží, pozitivních stavů a databázového propojení.
+
+### 2. Typografie a informační hierarchie
+- **UI & Nadpisy:** Google Font *Plus Jakarta Sans* (váhy 400, 500, 600, 700) pro maximální čitelnost a prémiový firemní vzhled.
+- **SKU kódy, ceny a časová razítka:** Google Font *JetBrains Mono* (monospaced) pro nekompromisní čitelnost kódů hraček a zarovnání číselných hodnot.
+
+### 3. Architektura rozhraní (ERP Shell)
+- **Profesionální postranní panel (Sidebar):**
+  - Brand značka Dřevěnka s.r.o. s logem a indikací verze systému.
+  - Vektorová navigace se sémantickými SVG ikonami (Katalog, Sklady, Pohyby, Objednávky, Zákazníci, Reporty, API Swagger).
+  - Přímý status monitor obou skladových uzlů: **Centrální sklad Hradec Králové** a **Sklad Třebechovice pod Orebem** s live indikátorem dostupnosti.
+- **Top Bar a Drobečková navigace:**
+  - Kontextová navigace s indikací aktuální lokace v systému.
+  - Stav spojení na PostgreSQL 16 v reálném čase.
+- **Metrické karty (KPI Overview):**
+  - Okamžitý přehled nad katalogem: *Celkem položek*, *Aktivní v prodeji*, *Průměrná prodejní cena*, *Průměrná marže*.
+- **Přehledová tabulka a formuláře:**
+  - Bohaté tabulky s jemným hover efektem, monospaced SKU štítky, barevně odlišenými cenovými hladinami a marží.
+  - Rychlé fulltextové vyhledávání s okamžitým resetem.
+  - Dvou-sloupcové přehledné editační formuláře s inline nápovědou a validací.
 
 ---
 
@@ -444,3 +469,13 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Pomocí moderního nástroje `uv` bylo v projektu inicializováno plnohodnotné lokální virtuální prostředí `.venv` s nativním Pythonem 3.12.15 a všemi závislostmi.
   - Editor nyní disponuje plně funkčním interpretrem a bezchybným IntelliSense.
   - Aktualizována idempotence testů v `tests/test_products.py`. Všechny testy procházejí jak lokálně, tak v Docker kontejneru.
+- **2026-10-19 (Kompletní 2026 Redesign webového rozhraní):**
+  - Proveden kompletní redesign webového rozhraní dle standardu moderních B2B ERP/SaaS systémů (Linear, Katana ERP) a přísných ergonomických požadavků klienta.
+  - Využita závazná devítiúrovňová barevná paleta: `["#b7094c", "#a01a58", "#892b64", "#723c70", "#5c4d7d", "#455e89", "#2e6f95", "#1780a1", "#0091ad"]`.
+  - Striktně odstraněny veškeré emoji a AI klišé prvky; implementována čistá vektorová inline SVG grafika pro všechny navigační i akční prvky.
+  - Nasazena moderní čitelná typografie (Google Fonts *Plus Jakarta Sans* a *JetBrains Mono* pro SKU kódy a číselné hodnoty).
+  - Implementován moderní ERP shell: postranní panel (sidebar) s live indikátory stavu obou skladů (*Hradec Králové* a *Třebechovice pod Orebem*), kontextový topbar s drobečkovou navigací a kontrolou stavu DB.
+  - V `product_list.html` zavedeny 4 souhrnné KPI karty (*Celkem položek*, *Aktivní v prodeji*, *Průměrná prodejní cena*, *Průměrná marže*) počítané v reálném čase v `product_web_router.py`.
+  - Přepracován editační formulář `product_form.html` na čisté dvou-sloupcové rozvržení se strukturovanými poli pro marži, nákupní a prodejní cenu.
+  - Všech 6 automatizovaných testů v `pytest` úspěšně prochází.
+
