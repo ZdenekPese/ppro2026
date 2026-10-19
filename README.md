@@ -439,3 +439,5 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Vytvořeno webové klientské UI na `/products` s katalogem dřevěných hraček, vyhledáváním a formulářem pro přidání a editaci položky.
   - Vytvořen seedovací skript `app/infrastructure/db/seed.py` naplňující 5 typických hraček Dřevěnky (Káča, Vláček, Tahací kačer, Houpací koník, Kostky).
   - Napsány automatizované testy v `tests/test_products.py` (ověření unikátnosti SKU, odmítnutí záporných cen, vyhledávání). Všech 6 testů úspěšně prochází.
+- **2026-10-19 (Konfigurace IDE a typové kontroly):**
+  - Přidána konfigurace `pyrightconfig.json` a `.vscode/settings.json` potlačující falešné chyby nerozpoznaných importů (`reportMissingImports: none`) na hostitelském Windows systému, když závislosti běží v Dockeru.

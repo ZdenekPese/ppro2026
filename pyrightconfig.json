@@ -1,0 +1,10 @@
+{
+  "include": [
+    "app",
+    "tests",
+    "alembic"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "reportMissingTypeStubs": false
+}

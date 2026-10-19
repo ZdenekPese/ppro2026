@@ -29,6 +29,8 @@ target/
 node_modules/
 __pycache__/
 *.pyc
+.venv/
+venv/
 
 # Docker logs
 *.log
