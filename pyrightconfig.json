@@ -1,8 +1,8 @@
 {
-  "include": [
-    "app",
-    "tests",
-    "alembic"
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": [
+    ".venv/Lib/site-packages"
   ],
   "reportMissingImports": "none",
   "reportMissingModuleSource": "none",
