@@ -1,15 +1,13 @@
+import uuid
 from decimal import Decimal
 import pytest
-from app.domain.exceptions import DuplicateProductCodeError, InvalidPriceError
-from app.domain.models.product import ProductCreate, ProductUpdate
-from app.domain.services.product_service import ProductService
-from app.infrastructure.db.models import Product
 
 
 def test_create_product_success(client):
     """Ověření úspěšného vytvoření nového produktu přes REST API."""
+    unique_code = f"AUT-{uuid.uuid4().hex[:6].upper()}"
     payload = {
-        "code": "TEST-AUT-001",
+        "code": unique_code,
         "name": "Dřevěné autíčko sportovní",
         "description": "Bukové autíčko s otáčivými koly",
         "purchase_price": "85.00",
@@ -20,15 +18,16 @@ def test_create_product_success(client):
     response = client.post("/api/products", json=payload)
     assert response.status_code == 201
     data = response.json()
-    assert data["code"] == "TEST-AUT-001"
+    assert data["code"] == unique_code
     assert data["name"] == "Dřevěné autíčko sportovní"
     assert float(data["selling_price"]) == 210.00
 
 
 def test_create_product_duplicate_code_fails(client):
     """Ověření, že duplicitní kód produktu (SKU) vrátí 409 Conflict."""
+    unique_code = f"DUP-{uuid.uuid4().hex[:6].upper()}"
     payload = {
-        "code": "TEST-DUP-001",
+        "code": unique_code,
         "name": "Testovací hračka 1",
         "purchase_price": "50.00",
         "selling_price": "100.00",
@@ -47,7 +46,7 @@ def test_create_product_duplicate_code_fails(client):
 def test_create_product_negative_price_fails(client):
     """Ověření, že záporná nákupní nebo prodejní cena je odmítnuta."""
     payload = {
-        "code": "TEST-NEG-001",
+        "code": f"NEG-{uuid.uuid4().hex[:6].upper()}",
         "name": "Záporná cena",
         "purchase_price": "-10.00",
         "selling_price": "100.00",

@@ -441,4 +441,6 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Napsány automatizované testy v `tests/test_products.py` (ověření unikátnosti SKU, odmítnutí záporných cen, vyhledávání). Všech 6 testů úspěšně prochází.
 - **2026-10-19 (Konfigurace IDE a typové kontroly):**
   - Přidána konfigurace `pyproject.toml`, `pyrightconfig.json` a `.vscode/settings.json`.
-  - Do lokálního `.venv` byly přímo z Docker kontejneru nakopírovány nainstalované balíčky (`sqlalchemy`, `fastapi`, `pydantic` atd.), aby jazykový server v editoru bezchybně našel všechny moduly a nabízel plný IntelliSense i na Windows.
+  - Pomocí moderního nástroje `uv` bylo v projektu inicializováno plnohodnotné lokální virtuální prostředí `.venv` s nativním Pythonem 3.12.15 a všemi závislostmi.
+  - Editor nyní disponuje plně funkčním interpretrem a bezchybným IntelliSense.
+  - Aktualizována idempotence testů v `tests/test_products.py`. Všechny testy procházejí jak lokálně, tak v Docker kontejneru.
