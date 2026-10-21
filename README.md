@@ -360,7 +360,7 @@ flowchart TD
 | **Fáze 3** | **Kategorie a M:N vazba (`Category`)** *(Dokončeno)* | Zavedení kategorií a vazební tabulky `product_categories` (splnění povinného minima M:N). Filtrování a výběr kategorií v katalogu i formuláři. | Tatáž hračka ve více kategoriích naráz (káča pro batolata i dárky do 500 Kč). |
 | **Fáze 4** | **Sklady a Zásoby (`Warehouse`, `Stock`)** *(Dokončeno)* | Evidence 2 skladů (Hradec Králové vs. Garáž Třebechovice). Dvoustupňový model: fyzická vs. rezervovaná zásoba. Barevný dashboard na úvodní stránce. | Barevný dashboard „co hoří“ pod minimem a matice skladů. |
 
-| **Fáze 5** | **Pohyby a Auditní stopa (`StockMovement`)** | Vynucení zákazu záporu (`quantity >= 0`). Audit 100 % pohybů (příjem, transfer Hradec-Třebechovice, inventurní vyrovnání). | Zpětná dohledatelnost („kde je ta káča...“). |
+| **Fáze 5** | **Pohyby a Auditní stopa (`StockMovement`)** *(Dokončeno)* | Vynucení zákazu záporu (`quantity >= 0`). Audit 100 % pohybů (příjem, transfer Hradec-Třebechovice, inventurní vyrovnání). | Zpětná dohledatelnost („kde je ta káča...“) a správa převozů a inventury. |
 | **Fáze 6** | **Zákazníci a Objednávky (`Customer`, `Order`)** | Rezervace při objednání, neměnnost prodejní ceny v `OrderItem`, fyzický odpis při expedici, zákaz mazání zákazníků. | Kompletní nákupní a expediční proces z e-shopu. |
 | **Fáze 7** | **Reporting a Analytika** | Měsíční obrat po kategoriích, přehled ziskovosti a automatický seznam položek k doobjednání. | Manažerské výkazy pro majitele Petra Doležala. |
 | **Fáze 8** | **Testy, optimalizace a Obhajoba** | Komplexní sada unit/integračních testů v `pytest`, revize SSOT dokumentace, finální verifikace před odevzdáním. | Projekt připravený k bezchybné obhajobě. |
@@ -517,6 +517,27 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - V katalogu `/products` doplněna indikace disponibilní zásoby přímo u minimální hladiny.
   - Aktualizován seedovací skript `app/infrastructure/db/seed.py`: inicializovány oba sklady (`WH-HK`, `WH-TREB`) a naplněno 10 stavů zásob pro všech 5 hraček (včetně realistického scénáře, kde vláček a tahací kačer klesly pod minimum a vyžadují pozornost).
   - Přidána sada 6 nových integračních a unit testů v `tests/test_warehouses.py`. Celkem prochází všech 22 testů projektu v pytest.
+- **2026-10-21 (Fáze 5 – Pohyby a Auditní stopa StockMovement dokončena):**
+  - Implementován SQLAlchemy ORM model `StockMovement` s integritním omezením `CheckConstraint("quantity > 0")`, cizími klíči na produkt a zdrojový/cílový sklad (`SET NULL` při smazání skladu, `CASCADE` při smazání produktu) a indexovaným časovým razítkem `created_at` a typem `movement_type`.
+  - Vygenerována a aplikována nová Alembic migrace `1dcb7e2afc1c_create_stock_movements_table.py`.
+  - Vytvořena doménová vrstva pro skladové operace:
+    - Enum `StockMovementType` (`receipt`, `dispatch`, `transfer`, `inventory_adjustment`).
+    - DTO schémata `StockReceiptCreate`, `StockDispatchCreate`, `StockTransferCreate`, `InventoryAdjustmentCreate` a `StockMovementResponse`.
+  - Vytvořen repozitář `StockMovementRepository` s metodami `create`, `get_by_id` a `list_all` (s filtry dle produktu, skladu, typu pohybu a stránkovacím limitem).
+  - Vytvořena doménová a byznys služba `StockMovementService` vynucující klíčová pravidla zadání:
+    - **Zákaz záporného stavu zásob (`quantity >= 0`):** Výdej i transfer nad disponibilní limit jsou striktně odmítnuty vyvoláním `InsufficientStockError`.
+    - **Meziskladový přesun (Transfer):** Řešení požadavku klienta na transfer ze sezónní garáže Třebechovice do Hradce Králové. Provedeno atomicky v jediné databázové transakci.
+    - **Inventurní vyrovnání (ADR 3):** Řešení situace, kdy v garáži „stav nesedí“. Umožňuje zadat skutečně nalezený fyzický počet s povinným auditním zdůvodněním; automaticky detekuje manko či přebytek a vytvoří příslušný auditní pohyb.
+    - **100% dohledatelnost:** Každá manipulace má zaznamenán zdroj, cíl, datum, čas, počet kusů, číslo dokladu i textovou poznámku.
+  - Vytvořen REST API router `app/presentation/api/stock_movement_router.py` pokrývající endpointy `GET /api/movements`, `POST /api/movements/receipt`, `POST /api/movements/dispatch`, `POST /api/movements/transfer`, `POST /api/movements/inventory-adjustment` a integrován do `app/main.py`.
+  - Vytvořeno klientské webové rozhraní pro skladníky i vedení:
+    - Stránka `/movements` (`stock_movements.html`) s kompletním auditním deníkem, filtrovací lištou dle produktu, skladu a typu pohybu, barevnými odznáčky operací a rychlými dlaždicemi pro založení pohybu.
+    - Stránka `/movements/new` (`stock_movement_form.html`) se záložkovým přepínačem pro příjem, meziskladový transfer a inventurní dorovnání.
+    - Do globální navigace (`base.html`) přidána položka *„Pohyby & Audit“* s aktivním stavem.
+    - Doplněny vizuální styly v `app/presentation/static/css/style.css` (odznáčky `.pill-receipt`, `.pill-dispatch`, `.pill-transfer`, `.pill-adjustment`, form intro karty, tabs) v souladu s 9-barevnou paletou.
+  - Aktualizován seedovací skript `app/infrastructure/db/seed.py` o vložení 5 realistických auditních pohybů (příjmy z truhlárny, převoz do HK, expedice zákazníkovi, inventura v garáži).
+  - Přidána sada 8 nových integračních a unit testů v `tests/test_stock_movements.py` pokrývající příjem, výdej se zákazem záporu, validace převodu a inventurní manko i přebytek. Všech 30 testů v projektu úspěšně prochází.
+
 
 
 

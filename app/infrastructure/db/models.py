@@ -164,6 +164,13 @@ class Product(Base):
         cascade="all, delete-orphan",
         lazy="selectin",
     )
+    movements: Mapped[list["StockMovement"]] = relationship(
+        "StockMovement",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
 
     @property
     def total_physical_quantity(self) -> int:
@@ -308,5 +315,86 @@ class WarehouseStock(Base):
             f"<WarehouseStock(warehouse_id={self.warehouse_id}, product_id={self.product_id}, "
             f"phys={self.physical_quantity}, res={self.reserved_quantity})>"
         )
+
+
+class StockMovement(Base):
+    """SQLAlchemy ORM entita pro 100% auditní stopu skladových pohybů (Fáze 5)."""
+
+    __tablename__ = "stock_movements"
+
+    __table_args__ = (
+        CheckConstraint("quantity > 0", name="ck_stock_movements_quantity_positive"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("products.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    source_warehouse_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("warehouses.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    destination_warehouse_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("warehouses.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    movement_type: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        index=True,
+    )  # 'receipt', 'dispatch', 'transfer', 'inventory_adjustment'
+    quantity: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+    note: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    reference_code: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True,
+    )
+
+    product: Mapped["Product"] = relationship(
+        "Product",
+        back_populates="movements",
+        lazy="selectin",
+    )
+    source_warehouse: Mapped[Optional["Warehouse"]] = relationship(
+        "Warehouse",
+        foreign_keys=[source_warehouse_id],
+        lazy="selectin",
+    )
+    destination_warehouse: Mapped[Optional["Warehouse"]] = relationship(
+        "Warehouse",
+        foreign_keys=[destination_warehouse_id],
+        lazy="selectin",
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<StockMovement(type='{self.movement_type}', product_id={self.product_id}, "
+            f"qty={self.quantity}, from={self.source_warehouse_id}, to={self.destination_warehouse_id})>"
+        )
+
 
 

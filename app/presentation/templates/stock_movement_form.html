@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} &bull; Dřevěnka s.r.o.{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-titles">
+        <h1 class="page-title">Zadání skladového pohybu</h1>
+        <p class="page-subtitle">
+            Evidujte naskladnění z truhlárny, převoz mezi Hradcem a garáží nebo dorovnejte inventurní nesrovnalosti.
+        </p>
+    </div>
+    <div class="header-actions">
+        <a href="/movements" class="btn btn-secondary">
+            &larr; Zpět do auditního deníku
+        </a>
+    </div>
+</div>
+
+<div class="form-container">
+    {% if error %}
+    <div class="alert-box">
+        <strong>Chyba při zpracování pohybu:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Přepínač operací -->
+    <div class="tab-switcher">
+        <button type="button" class="tab-btn {% if active_type == 'receipt' %}active{% endif %}" onclick="switchTab('receipt')">
+            Příjem na sklad
+        </button>
+        <button type="button" class="tab-btn {% if active_type == 'transfer' %}active{% endif %}" onclick="switchTab('transfer')">
+            Meziskladový převoz (Garáž &harr; HK)
+        </button>
+        <button type="button" class="tab-btn {% if active_type == 'inventory_adjustment' %}active{% endif %}" onclick="switchTab('inventory_adjustment')">
+            Inventurní vyrovnání
+        </button>
+    </div>
+
+    <!-- FORMULÁŘ 1: Příjem na sklad -->
+    <div id="tab-receipt" class="tab-content-panel {% if active_type == 'receipt' %}active{% endif %}">
+        <div class="panel-card form-card">
+            <div class="form-card-intro">
+                <h3>Příjem dřevěných hraček na sklad</h3>
+                <p>Závoz z vlastní truhlárny nebo nákup od externího dodavatele. Fyzická zásoba na zvoleném skladě se navýší o zadaný počet kusů.</p>
+            </div>
+
+            <form method="post" action="/movements/receipt" class="product-form">
+                <div class="form-group">
+                    <label class="form-label" for="receipt_warehouse_id">Cílový sklad (kam naskladnit)</label>
+                    <select id="receipt_warehouse_id" name="warehouse_id" class="form-control" required>
+                        {% for wh in warehouses %}
+                            <option value="{{ wh.id }}" {% if wh.is_primary %}selected{% endif %}>
+                                {{ wh.name }} ({{ wh.code }}) {% if wh.is_primary %}— Centrální expedice{% else %}— Garáž Třebechovice{% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <span class="field-hint">Běžné zboží směřuje do Hradce Králové, sezónní nadzásoby do garáže v Třebechovicích.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="receipt_product_id">Dřevěná hračka</label>
+                    <select id="receipt_product_id" name="product_id" class="form-control" required>
+                        <option value="">-- Vyberte produkt --</option>
+                        {% for prod in products %}
+                            <option value="{{ prod.id }}" {% if selected_product_id and (selected_product_id == prod.id or selected_product_id|string == prod.id|string) %}selected{% endif %}>
+                                {{ prod.code }} - {{ prod.name }} (Prodejní cena: {{ "%.2f"|format(prod.selling_price) }} Kč)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="receipt_quantity">Přijaté množství (ks)</label>
+                        <input 
+                            type="number" 
+                            id="receipt_quantity" 
+                            name="quantity" 
+                            class="form-control font-mono" 
+                            min="1" 
+                            value="10" 
+                            required
+                        >
+                        <span class="field-hint">Musí být kladné číslo větší než 0.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="receipt_ref">Číslo dokladu / dodacího listu</label>
+                        <input 
+                            type="text" 
+                            id="receipt_ref" 
+                            name="reference_code" 
+                            class="form-control font-mono" 
+                            placeholder="Např. DL-2026/042"
+                        >
+                        <span class="field-hint">Párovací symbol s fakturou či dodacím listem od truhláře.</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="receipt_note">Poznámka / doplňující popis</label>
+                    <textarea 
+                        id="receipt_note" 
+                        name="note" 
+                        class="form-control" 
+                        rows="2" 
+                        placeholder="Např. Dodávka z dílny pana Doležala, 2. série lakování..."
+                    ></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Zaznamenat příjem do skladu
+                    </button>
+                    <a href="/movements" class="btn btn-secondary">Zrušit</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FORMULÁŘ 2: Meziskladový transfer HK <-> Garáž -->
+    <div id="tab-transfer" class="tab-content-panel {% if active_type == 'transfer' %}active{% endif %}">
+        <div class="panel-card form-card">
+            <div class="form-card-intro">
+                <h3>Vnitroskladový přesun (Garáž Třebechovice &harr; Hradec Králové)</h3>
+                <p>Řešení požadavku klienta: Pokud zboží chybí v centrálním skladu v Hradci, převeze se ze sezónní garáže. Přesun probíhá atomicky v jedné transakci.</p>
+            </div>
+
+            <form method="post" action="/movements/transfer" class="product-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="transfer_src_wh">Zdrojový sklad (odkud převézt)</label>
+                        <select id="transfer_src_wh" name="source_warehouse_id" class="form-control" required>
+                            {% for wh in warehouses %}
+                                <option value="{{ wh.id }}" {% if not wh.is_primary %}selected{% endif %}>
+                                    {{ wh.name }} ({{ wh.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="transfer_dst_wh">Cílový sklad (kam dovézt)</label>
+                        <select id="transfer_dst_wh" name="destination_warehouse_id" class="form-control" required>
+                            {% for wh in warehouses %}
+                                <option value="{{ wh.id }}" {% if wh.is_primary %}selected{% endif %}>
+                                    {{ wh.name }} ({{ wh.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="transfer_product_id">Dřevěná hračka k převozu</label>
+                    <select id="transfer_product_id" name="product_id" class="form-control" required>
+                        <option value="">-- Vyberte produkt --</option>
+                        {% for prod in products %}
+                            <option value="{{ prod.id }}" {% if selected_product_id and (selected_product_id == prod.id or selected_product_id|string == prod.id|string) %}selected{% endif %}>
+                                {{ prod.code }} - {{ prod.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="transfer_quantity">Počet kusů k převozu</label>
+                        <input 
+                            type="number" 
+                            id="transfer_quantity" 
+                            name="quantity" 
+                            class="form-control font-mono" 
+                            min="1" 
+                            value="5" 
+                            required
+                        >
+                        <span class="field-hint">Na zdrojovém skladě musí být dostatek volných (nereservovaných) kusů.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="transfer_ref">Číslo převodky</label>
+                        <input 
+                            type="text" 
+                            id="transfer_ref" 
+                            name="reference_code" 
+                            class="form-control font-mono" 
+                            placeholder="Např. PREV-2026/05"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="transfer_note">Poznámka / Jméno řidiče</label>
+                    <textarea 
+                        id="transfer_note" 
+                        name="note" 
+                        class="form-control" 
+                        rows="2" 
+                        placeholder="Např. Převoz dodávkou před víkendovou expedicí, veze pan Petr..."
+                    ></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Provést meziskladový transfer
+                    </button>
+                    <a href="/movements" class="btn btn-secondary">Zrušit</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FORMULÁŘ 3: Inventurní vyrovnání -->
+    <div id="tab-inventory_adjustment" class="tab-content-panel {% if active_type == 'inventory_adjustment' %}active{% endif %}">
+        <div class="panel-card form-card">
+            <div class="form-card-intro">
+                <h3>Inventurní vyrovnání skladu (Dorovnání nesrovnalostí)</h3>
+                <p>Řešení požadavku klienta: „V garáži stav nikdy nesedí“. Zadejte reálně nalezený fyzický počet kusů na regále. Systém automaticky vytvoří záznam o inventuře a zaznamená manko či přebytek.</p>
+            </div>
+
+            <form method="post" action="/movements/inventory-adjustment" class="product-form">
+                <div class="form-group">
+                    <label class="form-label" for="adj_warehouse_id">Kontrolovaný sklad</label>
+                    <select id="adj_warehouse_id" name="warehouse_id" class="form-control" required>
+                        {% for wh in warehouses %}
+                            <option value="{{ wh.id }}" {% if not wh.is_primary %}selected{% endif %}>
+                                {{ wh.name }} ({{ wh.code }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="adj_product_id">Kontrolovaná dřevěná hračka</label>
+                    <select id="adj_product_id" name="product_id" class="form-control" required>
+                        <option value="">-- Vyberte produkt --</option>
+                        {% for prod in products %}
+                            <option value="{{ prod.id }}" {% if selected_product_id and (selected_product_id == prod.id or selected_product_id|string == prod.id|string) %}selected{% endif %}>
+                                {{ prod.code }} - {{ prod.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="adj_quantity">Skutečně fyzicky nalezený počet kusů (ks)</label>
+                    <input 
+                        type="number" 
+                        id="adj_quantity" 
+                        name="actual_quantity" 
+                        class="form-control font-mono" 
+                        min="0" 
+                        value="0" 
+                        required
+                    >
+                    <span class="field-hint">Přesný počet kusů, který jste právě spočítali na skladovém regále. Nesmí být nižší než aktuální rezervace.</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="adj_note">Povinné zdůvodnění inventurního rozdílu</label>
+                    <textarea 
+                        id="adj_note" 
+                        name="note" 
+                        class="form-control" 
+                        rows="3" 
+                        placeholder="Povinné vysvětlení: např. Nalezeny 2 krabice zapadlé za skříní v rohu garáže / Poškozeno při manipulaci..."
+                        required
+                    ></textarea>
+                    <span class="field-hint">Vedení firmy vyžaduje auditní vysvětlení pro každé manko i přebytek.</span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Uložit inventurní stav a vytvořit auditní záznam
+                    </button>
+                    <a href="/movements" class="btn btn-secondary">Zrušit</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchTab(type) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content-panel').forEach(p => p.classList.remove('active'));
+    
+    // Aktivace tlačítka
+    const buttons = document.querySelectorAll('.tab-btn');
+    if (type === 'receipt') buttons[0]?.classList.add('active');
+    if (type === 'transfer') buttons[1]?.classList.add('active');
+    if (type === 'inventory_adjustment') buttons[2]?.classList.add('active');
+    
+    // Aktivace panelu
+    const panel = document.getElementById('tab-' + type);
+    if (panel) panel.classList.add('active');
+    
+    // Aktualizace URL bez reloadu
+    const url = new URL(window.location);
+    url.searchParams.set('movement_type', type);
+    window.history.replaceState({}, '', url);
+}
+</script>
+{% endblock %}

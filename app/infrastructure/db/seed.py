@@ -1,6 +1,6 @@
 from decimal import Decimal
 from app.core.database import SessionLocal
-from app.infrastructure.db.models import Product, Category, Warehouse, WarehouseStock
+from app.infrastructure.db.models import Product, Category, Warehouse, WarehouseStock, StockMovement
 
 SAMPLE_CATEGORIES = [
     {
@@ -201,6 +201,82 @@ def seed_database() -> None:
                     stock.reserved_quantity = quant_data["reserved"]
 
         db.commit()
+
+        # Seed ukázkových skladových pohybů pro auditní deník (Fáze 5)
+        movements_count = db.query(StockMovement).count()
+        if movements_count == 0:
+            hk_wh = db.query(Warehouse).filter(Warehouse.code == "WH-HK").first()
+            treb_wh = db.query(Warehouse).filter(Warehouse.code == "WH-TREB").first()
+            kac_prod = db.query(Product).filter(Product.code == "KAC-001").first()
+            vlk_prod = db.query(Product).filter(Product.code == "VLK-001").first()
+            kos_prod = db.query(Product).filter(Product.code == "KOS-001").first()
+
+            sample_movements = []
+            if treb_wh and kac_prod:
+                sample_movements.append(
+                    StockMovement(
+                        product_id=kac_prod.id,
+                        source_warehouse_id=None,
+                        destination_warehouse_id=treb_wh.id,
+                        movement_type="receipt",
+                        quantity=16,
+                        note="Závoz nové série bukových káč z truhlárny pana Doležala",
+                        reference_code="DL-2026/012",
+                    )
+                )
+            if hk_wh and treb_wh and kac_prod:
+                sample_movements.append(
+                    StockMovement(
+                        product_id=kac_prod.id,
+                        source_warehouse_id=treb_wh.id,
+                        destination_warehouse_id=hk_wh.id,
+                        movement_type="transfer",
+                        quantity=4,
+                        note="Pravidelný závoz ze sezónní garáže Třebechovice do centrály v HK",
+                        reference_code="PREV-2026/03",
+                    )
+                )
+            if hk_wh and vlk_prod:
+                sample_movements.append(
+                    StockMovement(
+                        product_id=vlk_prod.id,
+                        source_warehouse_id=None,
+                        destination_warehouse_id=hk_wh.id,
+                        movement_type="receipt",
+                        quantity=5,
+                        note="Příjem 5 ks malovaných vláčků z dílny",
+                        reference_code="DL-2026/014",
+                    )
+                )
+                sample_movements.append(
+                    StockMovement(
+                        product_id=vlk_prod.id,
+                        source_warehouse_id=hk_wh.id,
+                        destination_warehouse_id=None,
+                        movement_type="dispatch",
+                        quantity=3,
+                        note="Expedice zákazníkovi – objednávka z e-shopu",
+                        reference_code="OBJ-2026/101",
+                    )
+                )
+            if treb_wh and kos_prod:
+                sample_movements.append(
+                    StockMovement(
+                        product_id=kos_prod.id,
+                        source_warehouse_id=None,
+                        destination_warehouse_id=treb_wh.id,
+                        movement_type="inventory_adjustment",
+                        quantity=2,
+                        note="Inventurní přebytek (+2 ks): Nalezeny 2 zapadlé krabice za paletou v garáži",
+                        reference_code="INVENTURA",
+                    )
+                )
+
+            for sm in sample_movements:
+                db.add(sm)
+            db.commit()
+            print(f"[SEED] Úspěšně vloženo {len(sample_movements)} ukázkových pohybů pro auditní deník.")
+
         print(
             f"[SEED] Úspěšně vloženo {inserted_count} hraček, "
             f"aktualizováno {updated_count} hraček, zkontrolováno {stocks_seeded} zásob."
