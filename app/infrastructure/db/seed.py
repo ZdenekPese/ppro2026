@@ -1,6 +1,16 @@
 from decimal import Decimal
+from datetime import datetime
 from app.core.database import SessionLocal
-from app.infrastructure.db.models import Product, Category, Warehouse, WarehouseStock, StockMovement
+from app.infrastructure.db.models import (
+    Product,
+    Category,
+    Warehouse,
+    WarehouseStock,
+    StockMovement,
+    Customer,
+    Order,
+    OrderItem,
+)
 
 SAMPLE_CATEGORIES = [
     {
@@ -281,6 +291,99 @@ def seed_database() -> None:
             f"[SEED] Úspěšně vloženo {inserted_count} hraček, "
             f"aktualizováno {updated_count} hraček, zkontrolováno {stocks_seeded} zásob."
         )
+
+        # Seed zákazníků a objednávek (Fáze 6)
+        if db.query(Customer).count() == 0:
+            cust_marie = Customer(
+                first_name="Marie",
+                last_name="Svobodová",
+                email="marie.svobodova@seznam.cz",
+                phone="+420 603 112 233",
+                address="Smetanovo nábřeží 124, 500 02 Hradec Králové",
+                is_active=True,
+            )
+            cust_petr = Customer(
+                first_name="Petr",
+                last_name="Černý",
+                email="petr.cerny@email.cz",
+                phone="+420 774 445 566",
+                address="Komenského 88, 530 02 Pardubice",
+                is_active=True,
+            )
+            cust_jana = Customer(
+                first_name="Jana",
+                last_name="Dvořáková",
+                email="jana.dvorakova@post.cz",
+                phone="+420 721 998 877",
+                address="Lipová 512, 503 46 Třebechovice pod Orebem",
+                is_active=True,
+            )
+            db.add_all([cust_marie, cust_petr, cust_jana])
+            db.commit()
+            print("[SEED] Úspěšně vloženi 3 demo zákazníci.")
+
+            hk_wh = db.query(Warehouse).filter(Warehouse.code == "WH-HK").first()
+            kac_prod = db.query(Product).filter(Product.code == "KAC-001").first()
+            vlk_prod = db.query(Product).filter(Product.code == "VLK-001").first()
+            kon_prod = db.query(Product).filter(Product.code == "KON-001").first()
+
+            if hk_wh and kac_prod and vlk_prod and kon_prod:
+                # Objednávka 1: Expedovaná
+                ord1 = Order(
+                    order_number="OBJ-2026-0001",
+                    customer_id=cust_marie.id,
+                    warehouse_id=hk_wh.id,
+                    status="DISPATCHED",
+                    total_price=Decimal("240.00"),
+                    note="Vánoční balení s mašlí",
+                    dispatched_at=datetime.now(),
+                    items=[
+                        OrderItem(
+                            product_id=kac_prod.id,
+                            quantity=2,
+                            unit_price=Decimal("120.00"),
+                        )
+                    ],
+                )
+
+                # Objednávka 2: Rezervovaná (k expedici)
+                ord2 = Order(
+                    order_number="OBJ-2026-0002",
+                    customer_id=cust_petr.id,
+                    warehouse_id=hk_wh.id,
+                    status="RESERVED",
+                    total_price=Decimal("450.00"),
+                    note="Doručit na recepci firmy",
+                    items=[
+                        OrderItem(
+                            product_id=vlk_prod.id,
+                            quantity=1,
+                            unit_price=Decimal("450.00"),
+                        )
+                    ],
+                )
+
+                # Objednávka 3: Rezervovaná (Houpací koník)
+                ord3 = Order(
+                    order_number="OBJ-2026-0003",
+                    customer_id=cust_jana.id,
+                    warehouse_id=hk_wh.id,
+                    status="RESERVED",
+                    total_price=Decimal("1490.00"),
+                    note="Dárek pro vnuka k 2. narozeninám",
+                    items=[
+                        OrderItem(
+                            product_id=kon_prod.id,
+                            quantity=1,
+                            unit_price=Decimal("1490.00"),
+                        )
+                    ],
+                )
+
+                db.add_all([ord1, ord2, ord3])
+                db.commit()
+                print("[SEED] Úspěšně vloženy 3 demo objednávky.")
+
     except Exception as exc:
         db.rollback()
         print(f"[SEED ERROR] Chyba při seedování: {exc}")

@@ -397,4 +397,199 @@ class StockMovement(Base):
         )
 
 
+class Customer(Base):
+    """SQLAlchemy ORM entita reprezentující zákazníka e-shopu Dřevěnka s.r.o. (Fáze 6)."""
+
+    __tablename__ = "customers"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    first_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+    last_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        index=True,
+    )
+    email: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        index=True,
+    )
+    phone: Mapped[Optional[str]] = mapped_column(
+        String(50),
+        nullable=True,
+    )
+    address: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )  # Fyzicky se zákazníci nemažou (historie reklamací dle zadání B)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    orders: Mapped[list["Order"]] = relationship(
+        "Order",
+        back_populates="customer",
+        lazy="selectin",
+    )
+
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+
+    def __repr__(self) -> str:
+        return f"<Customer(name='{self.full_name}', email='{self.email}')>"
+
+
+class Order(Base):
+    """SQLAlchemy ORM entita reprezentující objednávku dřevěných hraček (Fáze 6)."""
+
+    __tablename__ = "orders"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    order_number: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+        index=True,
+    )  # Např. OBJ-2026-0001
+    customer_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("customers.id", ondelete="RESTRICT"),  # Ochrana před smazáním zákazníka
+        nullable=False,
+        index=True,
+    )
+    warehouse_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("warehouses.id", ondelete="RESTRICT"),  # Expediční sklad (HK dle ADR 1)
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(
+        String(30),
+        default="RESERVED",
+        nullable=False,
+        index=True,
+    )  # 'NEW', 'RESERVED', 'DISPATCHED', 'CANCELLED'
+    total_price: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2),
+        default=Decimal("0.00"),
+        nullable=False,
+    )
+    note: Mapped[Optional[str]] = mapped_column(
+        Text,
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        index=True,
+    )
+    dispatched_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+    customer: Mapped["Customer"] = relationship(
+        "Customer",
+        back_populates="orders",
+        lazy="selectin",
+    )
+    warehouse: Mapped["Warehouse"] = relationship(
+        "Warehouse",
+        lazy="selectin",
+    )
+    items: Mapped[list["OrderItem"]] = relationship(
+        "OrderItem",
+        back_populates="order",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    def __repr__(self) -> str:
+        return f"<Order(number='{self.order_number}', status='{self.status}', total={self.total_price})>"
+
+
+class OrderItem(Base):
+    """SQLAlchemy ORM entita položky objednávky s fixovanou prodejní cenou v čase nákupu."""
+
+    __tablename__ = "order_items"
+
+    __table_args__ = (
+        CheckConstraint("quantity > 0", name="ck_order_items_quantity_positive"),
+        CheckConstraint("unit_price >= 0", name="ck_order_items_unit_price_non_negative"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    order_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("orders.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("products.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    quantity: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+    unit_price: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2),
+        nullable=False,
+    )  # Neměnnost prodejní ceny v objednávce dle zadání B
+
+    order: Mapped["Order"] = relationship(
+        "Order",
+        back_populates="items",
+        lazy="selectin",
+    )
+    product: Mapped["Product"] = relationship(
+        "Product",
+        lazy="selectin",
+    )
+
+    @property
+    def total_price(self) -> Decimal:
+        return Decimal(self.quantity) * self.unit_price
+
+    def __repr__(self) -> str:
+        return (
+            f"<OrderItem(order_id={self.order_id}, product_id={self.product_id}, "
+            f"qty={self.quantity}, unit_price={self.unit_price})>"
+        )
+
+
+
 

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} &bull; Dřevěnka s.r.o.{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-titles">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+            <h1 class="page-title" style="margin-bottom: 0;">Objednávka {{ order.order_number }}</h1>
+            {% if order.status == 'RESERVED' %}
+                <span class="order-pill pill-reserved">Rezervováno (K expedici)</span>
+            {% elif order.status == 'DISPATCHED' %}
+                <span class="order-pill pill-dispatched">Odesláno zákazníkovi</span>
+            {% elif order.status == 'CANCELLED' %}
+                <span class="order-pill pill-cancelled">Stornováno</span>
+            {% else %}
+                <span class="order-pill">{{ order.status }}</span>
+            {% endif %}
+        </div>
+        <p class="page-subtitle">
+            Přijato dne {{ order.created_at.strftime('%d.%m.%Y v %H:%M') }}
+            {% if order.dispatched_at %}
+                &bull; Fyzicky expedováno: {{ order.dispatched_at.strftime('%d.%m.%Y v %H:%M') }}
+            {% endif %}
+        </p>
+    </div>
+    <div class="header-actions">
+        <a href="/orders" class="btn btn-secondary">
+            &larr; Zpět na seznam objednávek
+        </a>
+    </div>
+</div>
+
+<!-- Oznámení -->
+{% if success %}
+    <div class="alert-box alert-success" style="background-color: rgba(18, 200, 232, 0.15); border: 1px solid var(--c-9); color: #fff; padding: 0.85rem 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+        <strong>Úspěch:</strong> {{ success }}
+    </div>
+{% endif %}
+
+{% if error %}
+    <div class="alert-box" style="margin-bottom: 1.25rem;">
+        <strong>Upozornění:</strong> {{ error }}
+    </div>
+{% endif %}
+
+<!-- Upozornění na chybějící kusy v Hradci a nutnost převozu z garáže (ADR 1) -->
+{% if order.requires_transfer_from_garage and order.status == 'RESERVED' %}
+<div class="critical-alert-section" style="margin-bottom: 1.5rem;">
+    <div class="critical-header">
+        <div class="critical-title-wrap">
+            <span class="pulse-indicator"></span>
+            <h2 class="critical-title">Pozor skladníku: Položky se nacházejí v sezónní garáži Třebechovice!</h2>
+        </div>
+        <span class="critical-subtitle">
+            Pro kompletní expedici z centrály v Hradci je nutné nejprve provést meziskladový převoz (ADR 1).
+        </span>
+    </div>
+    <div style="margin-top: 0.85rem;">
+        <a href="/movements/new?movement_type=transfer" class="btn btn-primary btn-sm">
+            Provést převoz ze sezónní garáže
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<!-- Karty zákazníka a skladu -->
+<div class="order-grid">
+    <div class="panel-card">
+        <h3 class="card-subtitle">Zákazník a doručovací adresa</h3>
+        <div class="customer-info-box">
+            <div class="info-row">
+                <span class="info-label">Jméno:</span>
+                <strong>{{ order.customer_name }}</strong>
+            </div>
+            <div class="info-row">
+                <span class="info-label">E-mail:</span>
+                <span class="font-mono text-dim">{{ order.customer_email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Doručovací adresa:</span>
+                <span>{{ order.customer_name }}<br>{{ order.customer_id }}</span>
+            </div>
+            {% if order.note %}
+            <div class="info-row" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);">
+                <span class="info-label">Poznámka k objednávce:</span>
+                <span class="text-dim"><em>{{ order.note }}</em></span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel-card">
+        <h3 class="card-subtitle">Expediční sklad a byznys pravidla</h3>
+        <div class="customer-info-box">
+            <div class="info-row">
+                <span class="info-label">Sklad expedice:</span>
+                <span class="warehouse-tag tag-dst">{{ order.warehouse_name }} ({{ order.warehouse_code }})</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Ochrana cen:</span>
+                <span class="text-teal">&check; Ceny položek jsou fixovány v čase nákupu</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Stav zásob:</span>
+                <span>
+                    {% if order.status == 'RESERVED' %}
+                        Kusy jsou blokovány v rezervaci (zamezeno přeprodeji)
+                    {% elif order.status == 'DISPATCHED' %}
+                        Kusy byly fyzicky odepsány z regálu se záznamem v auditu
+                    {% else %}
+                        Rezervace uvolněna
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabulka položek objednávky -->
+<div class="panel-card" style="margin-top: 1.5rem;">
+    <h3 class="card-subtitle" style="margin-bottom: 1rem;">Objednané dřevěné hračky</h3>
+    <div class="table-responsive">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th style="width: 120px;">Kód (SKU)</th>
+                    <th>Dřevěná hračka</th>
+                    <th style="width: 140px; text-align: right;">Fixovaná cena / ks</th>
+                    <th style="width: 120px; text-align: center;">Počet kusů</th>
+                    <th style="width: 150px; text-align: right;">Celkem</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td>
+                        <span class="sku-badge">{{ item.product_code }}</span>
+                    </td>
+                    <td>
+                        <strong class="product-name" style="font-size: 0.95rem;">{{ item.product_name }}</strong>
+                    </td>
+                    <td style="text-align: right;" class="font-mono">
+                        {{ "%.2f"|format(item.unit_price) }} Kč
+                    </td>
+                    <td style="text-align: center;" class="font-mono">
+                        <strong>{{ item.quantity }} ks</strong>
+                    </td>
+                    <td style="text-align: right;" class="font-mono text-teal">
+                        <strong>{{ "%.2f"|format(item.total_price) }} Kč</strong>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="border-top: 2px solid var(--border-color); background-color: rgba(255, 255, 255, 0.02);">
+                    <td colspan="4" style="text-align: right; padding: 1rem; font-weight: 700; color: #fff;">
+                        Celková částka k úhradě:
+                    </td>
+                    <td style="text-align: right; padding: 1rem;">
+                        <strong class="font-mono text-teal" style="font-size: 1.25rem;">
+                            {{ "%.2f"|format(order.total_price) }} Kč
+                        </strong>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Akce objednávky pro skladníka -->
+    <div class="order-actions-bar" style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end; align-items: center; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+        {% if order.can_dispatch %}
+            <form method="post" action="/orders/{{ order.id }}/dispatch" onsubmit="return confirm('Opravdu chcete objednávku označit jako odeslanou a fyzicky odepsat zboží ze skladu?');">
+                <button type="submit" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Expedovat balík zákazníkovi</span>
+                </button>
+            </form>
+        {% endif %}
+
+        {% if order.can_cancel %}
+            <form method="post" action="/orders/{{ order.id }}/cancel" onsubmit="return confirm('Opravdu chcete objednávku stornovat? Rezervované kusy se vrátí do volného prodeje.');">
+                <button type="submit" class="btn btn-ghost" style="color: #fb7185;">
+                    Stornovat objednávku
+                </button>
+            </form>
+        {% endif %}
+
+        <a href="/orders" class="btn btn-secondary">Zpět</a>
+    </div>
+</div>
+{% endblock %}

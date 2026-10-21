@@ -361,7 +361,7 @@ flowchart TD
 | **Fáze 4** | **Sklady a Zásoby (`Warehouse`, `Stock`)** *(Dokončeno)* | Evidence 2 skladů (Hradec Králové vs. Garáž Třebechovice). Dvoustupňový model: fyzická vs. rezervovaná zásoba. Barevný dashboard na úvodní stránce. | Barevný dashboard „co hoří“ pod minimem a matice skladů. |
 
 | **Fáze 5** | **Pohyby a Auditní stopa (`StockMovement`)** *(Dokončeno)* | Vynucení zákazu záporu (`quantity >= 0`). Audit 100 % pohybů (příjem, transfer Hradec-Třebechovice, inventurní vyrovnání). | Zpětná dohledatelnost („kde je ta káča...“) a správa převozů a inventury. |
-| **Fáze 6** | **Zákazníci a Objednávky (`Customer`, `Order`)** | Rezervace při objednání, neměnnost prodejní ceny v `OrderItem`, fyzický odpis při expedici, zákaz mazání zákazníků. | Kompletní nákupní a expediční proces z e-shopu. |
+| **Fáze 6** | **Zákazníci a Objednávky (`Customer`, `Order`)** *(Dokončeno)* | Rezervace při objednání, neměnnost prodejní ceny v `OrderItem`, fyzický odpis při expedici, zákaz mazání zákazníků. | Kompletní nákupní a expediční proces z e-shopu s ochranou před přeprodejem. |
 | **Fáze 7** | **Reporting a Analytika** | Měsíční obrat po kategoriích, přehled ziskovosti a automatický seznam položek k doobjednání. | Manažerské výkazy pro majitele Petra Doležala. |
 | **Fáze 8** | **Testy, optimalizace a Obhajoba** | Komplexní sada unit/integračních testů v `pytest`, revize SSOT dokumentace, finální verifikace před odevzdáním. | Projekt připravený k bezchybné obhajobě. |
 
@@ -537,6 +537,33 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Doplněny vizuální styly v `app/presentation/static/css/style.css` (odznáčky `.pill-receipt`, `.pill-dispatch`, `.pill-transfer`, `.pill-adjustment`, form intro karty, tabs) v souladu s 9-barevnou paletou.
   - Aktualizován seedovací skript `app/infrastructure/db/seed.py` o vložení 5 realistických auditních pohybů (příjmy z truhlárny, převoz do HK, expedice zákazníkovi, inventura v garáži).
   - Přidána sada 8 nových integračních a unit testů v `tests/test_stock_movements.py` pokrývající příjem, výdej se zákazem záporu, validace převodu a inventurní manko i přebytek. Všech 30 testů v projektu úspěšně prochází.
+- **2026-10-21 (Fáze 6 – Zákazníci a Objednávky Customer, Order, OrderItem dokončena):**
+  - Implementovány SQLAlchemy ORM modely:
+    - `Customer`: jméno, příjmení, e-mail, telefon, doručovací adresa, stav aktivity (zákaz fyzického mazání).
+    - `Order`: unikátní číslo objednávky (`order_number`), vazba na zákazníka a expediční sklad, stavy `NEW`, `RESERVED`, `DISPATCHED`, `CANCELLED`, celková částka, čas vytvoření a expedice.
+    - `OrderItem`: položka objednávky s `CheckConstraint("quantity > 0")`, `CheckConstraint("unit_price >= 0")` a fixovanou prodejní cenou v čase koupě.
+  - Vygenerována a aplikována nová verzovaná migrace `2a2030e9ef30_create_customers_orders_and_order_items_.py`.
+  - Vytvořena doménová vrstva a DTO:
+    - Pydantic schémata zákazníků (`CustomerBase`, `CustomerCreate`, `CustomerUpdate`, `CustomerResponse`).
+    - Pydantic schémata objednávek (`OrderStatus`, `OrderItemCreate`, `OrderCreate`, `OrderItemResponse`, `OrderResponse`).
+    - Doménové výjimky `CustomerNotFoundError`, `CustomerDeletionForbiddenError`, `OrderNotFoundError`, `DuplicateOrderNumberError`, `InvalidOrderStatusError`.
+  - Implementovány repozitáře `CustomerRepository` a `OrderRepository` (s automatickým generováním sekvenčních čísel objednávek).
+  - Implementovány byznys služby `CustomerService` a `OrderService` vynucující klíčová pravidla:
+    - **Okamžitá rezervace (ochrana před přeprodejem):** Při zadání objednávky se okamžitě navýší `reserved_quantity`, čímž se zamezí prodeji neexistujícího zboží (vyřešení největší bolesti pana Doležala).
+    - **Neměnnost ceny v čase:** Jednotková cena položky se fixuje v `OrderItem.unit_price`. Pozdější přecenění produktu v katalogu cenu v existující objednávce nikdy nezmění.
+    - **Zákaz mazání zákazníků:** Fyzické smazání zákazníka je blokováno; provádí se výhradně měkká deaktivace bez ztráty vazeb a historie reklamací.
+    - **Dvoufázový odpis:** Fyzický odpis ze skladu se provádí až při expedici (`DISPATCHED`) s automatickým zápisem do auditní stopy `StockMovement` (typ `dispatch`).
+    - **Uvolnění při stornu:** Při stornu se rezervované kusy vrátí do volného disponibilního prodeje.
+  - Vytvořeny REST API routery `app/presentation/api/customer_router.py` a `app/presentation/api/order_router.py` a integrovány do `app/main.py`.
+  - Vytvořeno webové rozhraní:
+    - `/orders` (`orders.html`): přehled objednávek se stavovými záložkami (Všechny, K expedici, Odeslané, Stornované), vyhledáváním a upozorněním na nutnost převozu ze sezónní garáže.
+    - `/orders/{id}` (`order_detail.html`): detail objednávky s kartou zákazníka, doručovací adresou, fixovanými cenami a akčními tlačítky pro expedici a storno.
+    - `/orders/new` (`order_form.html`): formulář pro zadání objednávky s možností výběru stávajícího zákazníka nebo rychlého založení nového.
+    - `/customers` (`customers.html`): adresář zákazníků s počty objednávek a indikátorem aktivity.
+    - Doplněna navigace v `base.html` o odkazy *„Objednávky“* a *„Zákazníci“*, rozšířen `style.css` o styly objednávkových záložek a odznáčků.
+  - Rozšířen seedovací skript `app/infrastructure/db/seed.py` o 3 demo zákazníky a 3 reálné objednávky (odeslanou i rezervované).
+  - Vytvořena testovací sada `tests/test_orders.py` se 7 unit a integračními testy. Všech 37 testů v projektu úspěšně prochází.
+
 
 
 

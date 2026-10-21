@@ -19,7 +19,7 @@
         }
     </style>
     
-    <link rel="stylesheet" href="/static/css/style.css?v=20261021_v8">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261021_v9">
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -45,6 +45,12 @@
                         </a>
                         <a href="/movements" class="nav-link {% if request.url.path.startswith('/movements') %}active{% endif %}">
                             Pohyby &amp; Audit
+                        </a>
+                        <a href="/orders" class="nav-link {% if request.url.path.startswith('/orders') %}active{% endif %}">
+                            Objednávky
+                        </a>
+                        <a href="/customers" class="nav-link {% if request.url.path.startswith('/customers') %}active{% endif %}">
+                            Zákazníci
                         </a>
                         <a href="/docs" target="_blank" class="nav-link">
                             REST API (Swagger)

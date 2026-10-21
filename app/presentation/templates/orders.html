@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} &bull; Dřevěnka s.r.o.{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-left">
+        <h1 class="page-title">Správa objednávek z e-shopu</h1>
+        <p class="page-subtitle">
+            Okamžitá rezervace kusů pro zamezení přeprodeje, fixace prodejních cen a bezpečný odpis až při fyzické expedici.
+        </p>
+
+        <!-- Přehled metrik pod sebou na levé straně -->
+        <div class="overview-vertical-list">
+            <div class="overview-row">
+                <span class="overview-dot dot-c9"></span>
+                <span class="overview-label">Objednávky k expedici:</span>
+                <strong class="overview-value text-teal">{{ count_reserved }} objednávek</strong>
+                <span class="overview-note">&bull; zarezervováno na skladě, čeká na zabalení</span>
+            </div>
+            <div class="overview-row">
+                <span class="overview-dot dot-c7"></span>
+                <span class="overview-label">Úspěšně odesláno:</span>
+                <strong class="overview-value">{{ count_dispatched }} zásilek</strong>
+                <span class="overview-note">&bull; fyzicky odepsáno ze skladových regálů</span>
+            </div>
+            <div class="overview-row">
+                <span class="overview-dot dot-c1"></span>
+                <span class="overview-label">Celkem v evidenci:</span>
+                <strong class="overview-value">{{ count_all }} objednávek</strong>
+                <span class="overview-note">&bull; z toho {{ count_cancelled }} stornováno bez ztráty zásob</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <a href="/orders/new" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Vytvořit objednávku</span>
+        </a>
+        <a href="/customers" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Adresář zákazníků</span>
+        </a>
+    </div>
+</div>
+
+<!-- Filtrační lišta se záložkami stavů -->
+<div class="panel-card" style="margin-top: 1.5rem;">
+    <div class="panel-toolbar">
+        <div class="order-status-tabs">
+            <a href="/orders" class="order-tab {% if not status_filter %}active{% endif %}">
+                Všechny ({{ count_all }})
+            </a>
+            <a href="/orders?status=RESERVED" class="order-tab {% if status_filter == 'RESERVED' %}active{% endif %}">
+                K expedici ({{ count_reserved }})
+            </a>
+            <a href="/orders?status=DISPATCHED" class="order-tab {% if status_filter == 'DISPATCHED' %}active{% endif %}">
+                Odeslané ({{ count_dispatched }})
+            </a>
+            <a href="/orders?status=CANCELLED" class="order-tab {% if status_filter == 'CANCELLED' %}active{% endif %}">
+                Stornované ({{ count_cancelled }})
+            </a>
+        </div>
+
+        <form method="get" action="/orders" class="search-form">
+            {% if status_filter %}
+                <input type="hidden" name="status" value="{{ status_filter }}">
+            {% endif %}
+            <div class="search-input-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input 
+                    type="text" 
+                    name="search" 
+                    value="{{ search }}" 
+                    placeholder="Číslo objednávky nebo zákazník..."
+                    class="search-field"
+                >
+            </div>
+            <button type="submit" class="btn btn-secondary btn-sm">Hledat</button>
+            {% if search %}
+                <a href="/orders{% if status_filter %}?status={{ status_filter }}{% endif %}" class="btn btn-ghost btn-sm">Zrušit</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th style="width: 140px;">Číslo objednávky</th>
+                    <th style="width: 130px;">Datum přijetí</th>
+                    <th>Zákazník</th>
+                    <th style="width: 160px;">Expediční sklad</th>
+                    <th style="width: 140px; text-align: center;">Stav</th>
+                    <th style="width: 120px; text-align: right;">Cena celkem</th>
+                    <th style="width: 110px; text-align: center;">Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o in orders %}
+                <tr>
+                    <td>
+                        <a href="/orders/{{ o.id }}" class="sku-badge font-mono" style="text-decoration: none;">
+                            {{ o.order_number }}
+                        </a>
+                        {% if o.requires_transfer_from_garage %}
+                            <span class="transfer-alert-chip" title="Nutno nejprve převézt kusy ze sezónní garáže Třebechovice!">
+                                Převoz z garáže!
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td class="text-dim font-mono" style="font-size: 0.82rem; white-space: nowrap;">
+                        {{ o.created_at.strftime('%d.%m.%Y %H:%M') }}
+                    </td>
+
+                    <td>
+                        <strong class="product-name" style="font-size: 0.92rem;">{{ o.customer_name }}</strong>
+                        <div class="text-dim" style="font-size: 0.78rem;">{{ o.customer_email }}</div>
+                    </td>
+
+                    <td>
+                        <span class="warehouse-tag tag-dst">
+                            {{ o.warehouse_name }}
+                        </span>
+                    </td>
+
+                    <td style="text-align: center;">
+                        {% if o.status == 'RESERVED' %}
+                            <span class="order-pill pill-reserved">
+                                K expedici
+                            </span>
+                        {% elif o.status == 'DISPATCHED' %}
+                            <span class="order-pill pill-dispatched">
+                                Odesláno
+                            </span>
+                        {% elif o.status == 'CANCELLED' %}
+                            <span class="order-pill pill-cancelled">
+                                Stornováno
+                            </span>
+                        {% else %}
+                            <span class="order-pill">
+                                {{ o.status }}
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td style="text-align: right;">
+                        <strong class="font-mono text-teal" style="font-size: 0.95rem;">
+                            {{ "%.2f"|format(o.total_price) }} Kč
+                        </strong>
+                        <div class="text-dim" style="font-size: 0.75rem;">{{ o.items|length }} položek</div>
+                    </td>
+
+                    <td style="text-align: center;">
+                        <a href="/orders/{{ o.id }}" class="btn btn-action">
+                            Detail
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="table-empty">
+                        <p>Nebyly nalezeny žádné objednávky splňující zadaná kritéria.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

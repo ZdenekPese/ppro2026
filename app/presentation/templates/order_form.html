@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} &bull; Dřevěnka s.r.o.{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-titles">
+        <h1 class="page-title">Vytvoření nové e-shopové objednávky</h1>
+        <p class="page-subtitle">
+            Při zadání objednávky systém okamžitě zarezervuje kusy na skladě (ochrana před přeprodejem) a zafixuje platné prodejní ceny.
+        </p>
+    </div>
+    <div class="header-actions">
+        <a href="/orders" class="btn btn-secondary">
+            &larr; Zpět na seznam objednávek
+        </a>
+    </div>
+</div>
+
+<div class="form-container">
+    {% if error %}
+    <div class="alert-box">
+        <strong>Chyba při vytváření objednávky:</strong> {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="panel-card form-card">
+        <form method="post" action="/orders/new" class="product-form">
+            
+            <!-- Volba zákazníka -->
+            <div class="form-card-intro">
+                <h3>1. Výběr nebo založení zákazníka</h3>
+                <p>Můžete zvolit existujícího zákazníka z adresáře nebo rovnou zadat nového.</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Způsob zadání zákazníka</label>
+                <div style="display: flex; gap: 1.5rem; margin-top: 0.35rem;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; color: #fff; cursor: pointer;">
+                        <input type="radio" name="customer_mode" value="existing" checked onchange="toggleCustomerMode('existing')">
+                        <span>Vybrat stávajícího zákazníka</span>
+                    </label>
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; color: #fff; cursor: pointer;">
+                        <input type="radio" name="customer_mode" value="new" onchange="toggleCustomerMode('new')">
+                        <span>Zadat nového zákazníka</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Existující zákazník -->
+            <div id="section-existing-customer" class="form-group">
+                <label class="form-label" for="existing_customer_id">Vyberte zákazníka z databáze</label>
+                <select id="existing_customer_id" name="existing_customer_id" class="form-control">
+                    {% for c in customers %}
+                        <option value="{{ c.id }}">{{ c.last_name }} {{ c.first_name }} ({{ c.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Nový zákazník -->
+            <div id="section-new-customer" style="display: none; padding: 1rem; background-color: rgba(0, 0, 0, 0.15); border-radius: var(--radius-sm); margin-bottom: 1.5rem; border: 1px dashed var(--border-color);">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="first_name">Jméno</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" placeholder="Např. Jan">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="last_name">Příjmení</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control" placeholder="Např. Novák">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="email">E-mail</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="jan.novak@email.cz">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Telefon</label>
+                        <input type="text" id="phone" name="phone" class="form-control" placeholder="+420 777 123 456">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="address">Doručovací adresa</label>
+                    <textarea id="address" name="address" class="form-control" rows="2" placeholder="Ulice a číslo, Město, PSČ"></textarea>
+                </div>
+            </div>
+
+            <!-- Výběr skladu -->
+            <div class="form-card-intro" style="margin-top: 1.5rem;">
+                <h3>2. Expediční sklad</h3>
+                <p>Centrální expedice probíhá z Hradce Králové dle ADR 1.</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="warehouse_id">Expediční sklad</label>
+                <select id="warehouse_id" name="warehouse_id" class="form-control">
+                    {% for wh in warehouses %}
+                        <option value="{{ wh.id }}" {% if wh.is_primary %}selected{% endif %}>
+                            {{ wh.name }} ({{ wh.code }}) {% if wh.is_primary %}— Centrální expedice{% else %}— Garáž Třebechovice{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Položky objednávky -->
+            <div class="form-card-intro" style="margin-top: 1.5rem;">
+                <h3>3. Objednané položky</h3>
+                <p>Zvolte dřevěné hračky a počty kusů. Systém ihned po odeslání zarezervuje disponibilní zásobu.</p>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label class="form-label" for="product_id_1">Dřevěná hračka (1. položka)</label>
+                    <select id="product_id_1" name="product_id_1" class="form-control" required>
+                        {% for p in products %}
+                            <option value="{{ p.id }}">
+                                {{ p.code }} - {{ p.name }} ({{ "%.2f"|format(p.selling_price) }} Kč, skladem volno: {{ p.total_available_quantity }} ks)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="quantity_1">Počet kusů</label>
+                    <input type="number" id="quantity_1" name="quantity_1" class="form-control font-mono" min="1" value="1" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label class="form-label" for="product_id_2">Dřevěná hračka (2. volitelná položka)</label>
+                    <select id="product_id_2" name="product_id_2" class="form-control">
+                        <option value="">-- Žádná další položka --</option>
+                        {% for p in products %}
+                            <option value="{{ p.id }}">
+                                {{ p.code }} - {{ p.name }} ({{ "%.2f"|format(p.selling_price) }} Kč, skladem volno: {{ p.total_available_quantity }} ks)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label" for="quantity_2">Počet kusů</label>
+                    <input type="number" id="quantity_2" name="quantity_2" class="form-control font-mono" min="1" value="1">
+                </div>
+            </div>
+
+            <!-- Poznámka -->
+            <div class="form-group">
+                <label class="form-label" for="note">Poznámka zákazníka k objednávce</label>
+                <textarea id="note" name="note" class="form-control" rows="2" placeholder="Např. Prosím zabalit jako vánoční dárek..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Vytvořit objednávku a zarezervovat kusy
+                </button>
+                <a href="/orders" class="btn btn-secondary">Zrušit</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleCustomerMode(mode) {
+    const secExisting = document.getElementById('section-existing-customer');
+    const secNew = document.getElementById('section-new-customer');
+    if (mode === 'existing') {
+        secExisting.style.display = 'block';
+        secNew.style.display = 'none';
+    } else {
+        secExisting.style.display = 'none';
+        secNew.style.display = 'block';
+    }
+}
+</script>
+{% endblock %}

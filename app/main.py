@@ -10,9 +10,12 @@ from app.presentation.api.product_router import router as product_router
 from app.presentation.api.category_router import router as category_router
 from app.presentation.api.warehouse_router import router as warehouse_router
 from app.presentation.api.stock_movement_router import router as stock_movement_router
+from app.presentation.api.customer_router import router as customer_router
+from app.presentation.api.order_router import router as order_router
 from app.presentation.web.product_web_router import router as product_web_router
 from app.presentation.web.dashboard_web_router import router as dashboard_web_router
 from app.presentation.web.stock_movement_web_router import router as stock_movement_web_router
+from app.presentation.web.order_web_router import router as order_web_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -36,10 +39,13 @@ app.include_router(product_router, prefix="/api")
 app.include_router(category_router, prefix="/api")
 app.include_router(warehouse_router, prefix="/api")
 app.include_router(stock_movement_router, prefix="/api")
+app.include_router(customer_router, prefix="/api")
+app.include_router(order_router, prefix="/api")
 
 # Registrace webových routerů
 app.include_router(dashboard_web_router)
 app.include_router(product_web_router)
 app.include_router(stock_movement_web_router)
+app.include_router(order_web_router)
 
 

@@ -69,3 +69,36 @@ class NegativeStockError(DomainException):
         super().__init__(message)
 
 
+class CustomerNotFoundError(DomainException):
+    """Výjimka vyvolaná, pokud zákazník nebyl nalezen."""
+    def __init__(self, identifier: str):
+        super().__init__(f"Zákazník s identifikátorem '{identifier}' nebyl nalezen.")
+
+
+class CustomerDeletionForbiddenError(DomainException):
+    """Výjimka vyvolaná při pokusu smazat zákazníka (zákaz mazání dle zadání B)."""
+    def __init__(self, identifier: str, reason: str = "Zákazníky nelze z důvodu historie reklamací fyzicky mazat."):
+        super().__init__(f"Smazání zákazníka '{identifier}' je zakázáno: {reason}")
+
+
+class OrderNotFoundError(DomainException):
+    """Výjimka vyvolaná, pokud objednávka nebyla nalezena."""
+    def __init__(self, identifier: str):
+        super().__init__(f"Objednávka s identifikátorem '{identifier}' nebyla nalezena.")
+
+
+class DuplicateOrderNumberError(DomainException):
+    """Výjimka vyvolaná při pokusu vytvořit objednávku s duplicitním číslem."""
+    def __init__(self, order_number: str):
+        super().__init__(f"Objednávka s číslem '{order_number}' již existuje.")
+
+
+class InvalidOrderStatusError(DomainException):
+    """Výjimka vyvolaná při neplatném přechodu stavu objednávky."""
+    def __init__(self, current_status: str, target_status: str, reason: str = ""):
+        super().__init__(
+            f"Neplatný přechod stavu objednávky z '{current_status}' do '{target_status}'. {reason}".strip()
+        )
+
+
+
