@@ -11,6 +11,7 @@ from app.core.database import get_db
 from app.domain.exceptions import DuplicateProductCodeError, ProductNotFoundError, InvalidPriceError
 from app.domain.models.product import ProductCreate, ProductUpdate
 from app.domain.services.product_service import ProductService
+from app.infrastructure.repositories.category_repository import CategoryRepository
 
 router = APIRouter(prefix="/products", tags=["Web Produkty"])
 
@@ -27,10 +28,15 @@ def get_service(db: Session = Depends(get_db)) -> ProductService:
 def product_list_view(
     request: Request,
     search: Optional[str] = None,
+    category_id: Optional[UUID] = None,
+    db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
 ):
-    """Zobrazení katalogu dřevěných hraček v přehledné tabulce."""
-    products = service.list_products(search=search)
+    """Zobrazení katalogu dřevěných hraček v přehledné tabulce s filtrem kategorií."""
+    products = service.list_products(search=search, category_id=category_id)
+    cat_repo = CategoryRepository(db)
+    categories = cat_repo.list_all()
+
     total_products = len(products)
     active_products = sum(1 for p in products if p.is_active)
     avg_price = (sum(p.selling_price for p in products) / total_products) if total_products > 0 else Decimal("0.00")
@@ -42,28 +48,39 @@ def product_list_view(
         context={
             "products": products,
             "search": search or "",
+            "categories": categories,
+            "selected_category_id": category_id,
             "title": "Katalog hraček - Dřevěnka s.r.o.",
             "total_products": total_products,
             "active_products": active_products,
             "avg_price": avg_price,
             "avg_margin": avg_margin,
+            "total_categories": len(categories),
         },
     )
 
 
-
 @router.get("/new", response_class=HTMLResponse)
-def product_create_view(request: Request):
-    """Zobrazení formuláře pro přidání nové dřevěné hračky."""
+def product_create_view(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Zobrazení formuláře pro přidání nové dřevěné hračky včetně výběru kategorií."""
+    cat_repo = CategoryRepository(db)
+    categories = cat_repo.list_all()
     return templates.TemplateResponse(
         request=request,
         name="product_form.html",
         context={
             "product": None,
+            "categories": categories,
+            "selected_category_ids": [],
             "title": "Přidat novou hračku - Dřevěnka s.r.o.",
             "error": None,
+            "errors": {},
         },
     )
+
 
 
 from sqlalchemy.exc import SQLAlchemyError, DataError
@@ -106,9 +123,13 @@ def product_create_submit(
     purchase_price: Decimal = Form(...),
     selling_price: Decimal = Form(...),
     min_stock_level: int = Form(5),
+    category_ids: list[UUID] = Form(default=[]),
+    db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
 ):
-    """Zpracování formuláře pro přidání hračky."""
+    """Zpracování formuláře pro přidání hračky včetně kategorií."""
+    cat_repo = CategoryRepository(db)
+    all_categories = cat_repo.list_all()
     try:
         dto = ProductCreate(
             code=code,
@@ -117,6 +138,7 @@ def product_create_submit(
             purchase_price=purchase_price,
             selling_price=selling_price,
             min_stock_level=min_stock_level,
+            category_ids=category_ids,
         )
         service.create_product(dto)
         return RedirectResponse(url="/products", status_code=status.HTTP_303_SEE_OTHER)
@@ -138,6 +160,8 @@ def product_create_submit(
                     "selling_price": selling_price,
                     "min_stock_level": min_stock_level,
                 },
+                "categories": all_categories,
+                "selected_category_ids": category_ids,
                 "title": "Přidat novou hračku - Chyba",
                 "error": main_error,
                 "errors": field_errors,
@@ -150,16 +174,22 @@ def product_create_submit(
 def product_edit_view(
     request: Request,
     product_id: UUID,
+    db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
 ):
     """Zobrazení formuláře pro editaci hračky."""
     try:
         product = service.get_product(product_id)
+        cat_repo = CategoryRepository(db)
+        all_categories = cat_repo.list_all()
+        selected_category_ids = [c.id for c in product.categories]
         return templates.TemplateResponse(
             request=request,
             name="product_form.html",
             context={
                 "product": product,
+                "categories": all_categories,
+                "selected_category_ids": selected_category_ids,
                 "title": f"Upravit: {product.name}",
                 "error": None,
                 "errors": {},
@@ -179,9 +209,13 @@ def product_edit_submit(
     selling_price: Decimal = Form(...),
     min_stock_level: int = Form(5),
     is_active: bool = Form(False),
+    category_ids: list[UUID] = Form(default=[]),
+    db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
 ):
-    """Uložení upraveného produktu."""
+    """Uložení upraveného produktu včetně přiřazených kategorií."""
+    cat_repo = CategoryRepository(db)
+    all_categories = cat_repo.list_all()
     try:
         dto = ProductUpdate(
             name=name,
@@ -190,6 +224,7 @@ def product_edit_submit(
             selling_price=selling_price,
             min_stock_level=min_stock_level,
             is_active=is_active,
+            category_ids=category_ids,
         )
         service.update_product(product_id, dto)
         return RedirectResponse(url="/products", status_code=status.HTTP_303_SEE_OTHER)
@@ -220,9 +255,12 @@ def product_edit_submit(
             name="product_form.html",
             context={
                 "product": product_data,
+                "categories": all_categories,
+                "selected_category_ids": category_ids,
                 "title": f"Upravit: {name} - Chyba",
                 "error": main_error,
                 "errors": field_errors,
             },
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         )
+

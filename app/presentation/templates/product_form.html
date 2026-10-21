@@ -78,7 +78,30 @@
                 >{{ product.description if product and product.description else '' }}</textarea>
             </div>
 
+            <div class="form-group">
+                <label class="form-label">Zařazení do kategorií (M:N vazba)</label>
+                {% if categories %}
+                <div class="category-selection-grid">
+                    {% for cat in categories %}
+                    <label class="category-select-item">
+                        <input 
+                            type="checkbox" 
+                            name="category_ids" 
+                            value="{{ cat.id }}"
+                            {% if selected_category_ids and (cat.id in selected_category_ids or cat.id|string in selected_category_ids|map('string')|list) %}checked{% endif %}
+                        >
+                        <span class="category-select-pill">{{ cat.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <span class="field-hint">Produkt může patřit do více kategorií naráz (např. tatáž káča je současně „Pro batolata“ i „Dárky do 500 Kč“).</span>
+                {% else %}
+                <p class="field-hint">Zatím nebyly definovány žádné kategorie.</p>
+                {% endif %}
+            </div>
+
             <div class="form-row">
+
                 <div class="form-col">
                     <label class="form-label" for="purchase_price">Nákupní / výrobní cena (Kč)</label>
                     <input 

@@ -4,8 +4,11 @@ from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.domain.models.category import CategoryResponse
+
 
 MAX_PRICE = Decimal("99999999.99")
+
 
 
 class ProductBase(BaseModel):
@@ -68,7 +71,10 @@ class ProductBase(BaseModel):
 
 class ProductCreate(ProductBase):
     """Schéma pro vytvoření nového produktu."""
-    pass
+    category_ids: list[UUID] = Field(
+        default_factory=list,
+        description="Seznam ID kategorií přiřazených k produktu",
+    )
 
 
 class ProductUpdate(BaseModel):
@@ -79,6 +85,10 @@ class ProductUpdate(BaseModel):
     selling_price: Optional[Decimal] = Field(None, ge=Decimal(0), le=MAX_PRICE)
     min_stock_level: Optional[int] = Field(None, ge=0, le=1_000_000)
     is_active: Optional[bool] = None
+    category_ids: Optional[list[UUID]] = Field(
+        None,
+        description="Seznam ID kategorií přiřazených k produktu (None = beze změny)",
+    )
 
 
 class ProductResponse(ProductBase):
@@ -86,5 +96,10 @@ class ProductResponse(ProductBase):
     id: UUID
     created_at: datetime
     updated_at: datetime
+    categories: list[CategoryResponse] = Field(
+        default_factory=list,
+        description="Seznam přiřazených kategorií",
+    )
 
     model_config = ConfigDict(from_attributes=True)
+

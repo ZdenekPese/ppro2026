@@ -17,15 +17,17 @@ class ProductService:
     """Byznys služba pro správu dřevěných hraček a vynucování doménových pravidel."""
 
     def __init__(self, db: Session):
+        self.db = db
         self.repository = ProductRepository(db)
 
     def list_products(
         self,
         search: Optional[str] = None,
         is_active: Optional[bool] = None,
+        category_id: Optional[UUID] = None,
     ) -> List[Product]:
-        """Získání seznamu produktů dle kritérií."""
-        return self.repository.list_all(search=search, is_active=is_active)
+        """Získání seznamu produktů dle kritérií a volitelného filtru kategorie."""
+        return self.repository.list_all(search=search, is_active=is_active, category_id=category_id)
 
     def get_product(self, product_id: UUID) -> Product:
         """Získání detailu produktu s ověřením existence."""
@@ -35,7 +37,7 @@ class ProductService:
         return product
 
     def create_product(self, dto: ProductCreate) -> Product:
-        """Založení nového produktu s validací obchodních pravidel."""
+        """Založení nového produktu s validací obchodních pravidel a přiřazením kategorií."""
         # 1. Kontrola unikátnosti kódu SKU
         existing = self.repository.get_by_code(dto.code)
         if existing:
@@ -52,7 +54,14 @@ class ProductService:
         if dto.selling_price > MAX_PRICE:
             raise InvalidPriceError("Prodejní cena nesmí překročit 99 999 999,99 Kč.", field="selling_price")
 
-        # 3. Vytvoření ORM entity
+        # 3. Načtení kategorií k přiřazení
+        categories = []
+        if dto.category_ids:
+            from app.infrastructure.repositories.category_repository import CategoryRepository
+            cat_repo = CategoryRepository(self.db)
+            categories = cat_repo.get_by_ids(dto.category_ids)
+
+        # 4. Vytvoření ORM entity
         product = Product(
             code=dto.code,
             name=dto.name,
@@ -61,11 +70,12 @@ class ProductService:
             selling_price=dto.selling_price,
             min_stock_level=dto.min_stock_level,
             is_active=dto.is_active,
+            categories=categories,
         )
         return self.repository.create(product)
 
     def update_product(self, product_id: UUID, dto: ProductUpdate) -> Product:
-        """Aktualizace existujícího produktu."""
+        """Aktualizace existujícího produktu včetně přiřazených kategorií."""
         product = self.get_product(product_id)
 
         # Validace cen, pokud se mění
@@ -94,6 +104,11 @@ class ProductService:
         if dto.is_active is not None:
             product.is_active = dto.is_active
 
+        if dto.category_ids is not None:
+            from app.infrastructure.repositories.category_repository import CategoryRepository
+            cat_repo = CategoryRepository(self.db)
+            product.categories = cat_repo.get_by_ids(dto.category_ids)
+
         return self.repository.update(product)
 
     def toggle_active(self, product_id: UUID) -> Product:
@@ -101,3 +116,4 @@ class ProductService:
         product = self.get_product(product_id)
         product.is_active = not product.is_active
         return self.repository.update(product)
+

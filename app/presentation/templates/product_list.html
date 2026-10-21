@@ -19,6 +19,12 @@
                 <span class="overview-note">&bull; všechny zalistované hračky v systému</span>
             </div>
             <div class="overview-row">
+                <span class="overview-dot dot-c5"></span>
+                <span class="overview-label">Kategorie sortimentu:</span>
+                <strong class="overview-value">{{ total_categories }}</strong>
+                <span class="overview-note">&bull; možnost vícenásobného zařazení (M:N)</span>
+            </div>
+            <div class="overview-row">
                 <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Aktivní v prodeji:</span>
                 <strong class="overview-value text-teal">{{ active_products }}</strong>
@@ -63,13 +69,27 @@
                     type="text" 
                     name="search" 
                     value="{{ search }}" 
-                    placeholder="Vyhledat kód SKU, název hračky nebo popis materiálu..."
+                    placeholder="Vyhledat kód SKU, název hračky nebo popis..."
                     class="search-field"
                 >
             </div>
-            <button type="submit" class="btn btn-secondary btn-sm">Hledat</button>
-            {% if search %}
-                <a href="/products" class="btn btn-ghost btn-sm">Zrušit filtr ({{ search }})</a>
+
+            {% if categories %}
+            <div class="category-filter-wrapper">
+                <select name="category_id" class="category-select" onchange="this.form.submit()">
+                    <option value="">Všechny kategorie</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selected_category_id and (selected_category_id == cat.id or selected_category_id|string == cat.id|string) %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-secondary btn-sm">Filtrovat</button>
+            {% if search or selected_category_id %}
+                <a href="/products" class="btn btn-ghost btn-sm">Zrušit filtry</a>
             {% endif %}
         </form>
 
@@ -83,7 +103,7 @@
             <thead>
                 <tr>
                     <th style="width: 130px;">Kód (SKU)</th>
-                    <th>Produkt & Popis</th>
+                    <th>Produkt & Kategorie</th>
                     <th style="text-align: right; width: 140px;">Nákupní cena</th>
                     <th style="text-align: right; width: 140px;">Prodejní cena</th>
                     <th style="text-align: right; width: 120px;">Marže</th>
@@ -103,7 +123,15 @@
                         {% if p.description %}
                             <div class="product-desc">{{ p.description }}</div>
                         {% endif %}
+                        {% if p.categories %}
+                            <div class="product-category-badges">
+                                {% for cat in p.categories %}
+                                    <span class="category-badge">{{ cat.name }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </td>
+
                     <td style="text-align: right;">
                         <span class="price-dim">{{ "%.2f"|format(p.purchase_price) }} Kč</span>
                     </td>

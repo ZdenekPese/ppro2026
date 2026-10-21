@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy import select, or_
 from sqlalchemy.orm import Session
 
-from app.infrastructure.db.models import Product
+from app.infrastructure.db.models import Product, Category
 
 
 class ProductRepository:
@@ -16,12 +16,16 @@ class ProductRepository:
         self,
         search: Optional[str] = None,
         is_active: Optional[bool] = None,
+        category_id: Optional[UUID] = None,
     ) -> List[Product]:
-        """Získání seznamu produktů s volitelným fulltextovým vyhledáváním a filtrem aktivity."""
+        """Získání seznamu produktů s volitelným vyhledáváním, filtrem aktivity a kategorií."""
         stmt = select(Product)
 
         if is_active is not None:
             stmt = stmt.where(Product.is_active == is_active)
+
+        if category_id is not None:
+            stmt = stmt.where(Product.categories.any(Category.id == category_id))
 
         if search:
             search_term = f"%{search.strip()}%"
@@ -35,6 +39,7 @@ class ProductRepository:
 
         stmt = stmt.order_by(Product.name.asc())
         return list(self.db.scalars(stmt).all())
+
 
     def get_by_id(self, product_id: UUID) -> Optional[Product]:
         """Vyhledání produktu podle primárního klíče (UUID)."""

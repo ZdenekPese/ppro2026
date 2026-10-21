@@ -357,7 +357,7 @@ flowchart TD
 | :--- | :--- | :--- | :--- |
 | **Fáze 1** | **Walking Skeleton & Infrastruktura** | Docker Compose (`app` + `db`), PostgreSQL 16, konfigurace SQLAlchemy 2.0 a Alembic migrací. | Běžící skeleton na 1 příkaz, `/docs` a `/health`. |
 | **Fáze 2** | **Pilotní demo – Správa produktů (`Product`)** | Kompletní 3vrstvá vertikála pro dřevěné hračky: ORM, repozitář, service s validací marží/cen, REST API a responzivní web UI. | **Demo pro klienta/vyučujícího na cvičení** pro 1. feedback. |
-| **Fáze 3** | **Kategorie a M:N vazba (`Category`)** | Zavedení kategorií a vazební tabulky `ProductCategory` (splnění povinného minima M:N). Filtrování v katalogu. | Tatáž hračka ve více kategoriích naráz. |
+| **Fáze 3** | **Kategorie a M:N vazba (`Category`)** *(Dokončeno)* | Zavedení kategorií a vazební tabulky `product_categories` (splnění povinného minima M:N). Filtrování a výběr kategorií v katalogu i formuláři. | Tatáž hračka ve více kategoriích naráz (káča pro batolata i dárky do 500 Kč). |
 | **Fáze 4** | **Sklady a Zásoby (`Warehouse`, `Stock`)** | Evidence 2 skladů (Hradec Králové vs. Garáž Třebechovice). Dvoustupňový model: fyzická vs. rezervovaná zásoba. | Dashboard skladu s indikací „co hoří“ pod minimem. |
 | **Fáze 5** | **Pohyby a Auditní stopa (`StockMovement`)** | Vynucení zákazu záporu (`quantity >= 0`). Audit 100 % pohybů (příjem, transfer Hradec-Třebechovice, inventurní vyrovnání). | Zpětná dohledatelnost („kde je ta káča...“). |
 | **Fáze 6** | **Zákazníci a Objednávky (`Customer`, `Order`)** | Rezervace při objednání, neměnnost prodejní ceny v `OrderItem`, fyzický odpis při expedici, zákaz mazání zákazníků. | Kompletní nákupní a expediční proces z e-shopu. |
@@ -490,6 +490,20 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Do webového formuláře `product_form.html` přidány atributy `max="99999999.99"` a inline vizualizace chyb u konkrétních polí (`.input-error`, `.field-error`).
   - Router `product_web_router.py` a repozitář byly zabezpečeny: chyby `DataError` a `SQLAlchemyError` jsou bezpečně zachyceny s rollbackem transakce a vráceny jako HTTP 422 s chybovou hláškou přímo u inputu ceny.
   - Rozšířena sada automatizovaných testů v `tests/test_products.py` na celkových 9 testů (pokrývající limit cen v API, při zakládání i editaci produktu). Všech 9 testů prochází.
+- **2026-10-21 (Fáze 3 – Kategorie a M:N vazba Category <-> Product dokončena):**
+  - Implementován SQLAlchemy ORM model `Category` a asociační vazební tabulka `product_categories` s kaskádovým mazáním (`ondelete="CASCADE"`) a vzájemnou relací s `lazy="selectin"` (eliminace N+1 dotazů).
+  - Vygenerována a aplikována nová Alembic migrace `5d6604bc6566_create_categories_and_product_categories.py`.
+  - Vytvořena doménová vrstva pro kategorie: Pydantic schémata (`CategoryBase`, `CategoryCreate`, `CategoryUpdate`, `CategoryResponse`), doménové výjimky `CategoryNotFoundError`, `DuplicateCategoryNameError` a byznys služba `CategoryService`.
+  - Rozšířena schémata `ProductCreate` a `ProductUpdate` o parametr `category_ids: list[UUID]` a `ProductResponse` o `categories: list[CategoryResponse]`.
+  - Implementována podpora filtrování produktů dle `category_id` v `ProductRepository` a `ProductService` pomocí dotazu `Product.categories.any(Category.id == category_id)`.
+  - Vytvořen kompletní REST API router `app/presentation/api/category_router.py` pro CRUD operace kategorií (`/api/categories`) a integrován do `app/main.py`.
+  - Rozšířen endpoint `GET /api/products` o filtrování dle `category_id`.
+  - Aktualizováno klientské webové rozhraní:
+    - V katalogu `product_list.html` přidán výběrový filtr kategorií, vizuální štítky přiřazených kategorií u každého produktu a metrika *Kategorie sortimentu* v levém přehledu metrik.
+    - Ve formuláři `product_form.html` implementován interaktivní výběr více kategorií současně pomocí stylových přepínačů (pill chips).
+  - Rozšířen seedovací skript `app/infrastructure/db/seed.py` o 5 reálných kategorií Dřevěnky (*Pro batolata*, *Dárky do 500 Kč*, *Dopravní prostředky*, *Stavebnice a hlavolamy*, *Tradiční hračky*) s přiřazením více kategorií jednotlivým hračkám (Káča splňuje explicitní požadavek zadání na současné zařazení do batolat i dárků do 500 Kč).
+  - Přidána sada 7 nových integračních a unit testů v `tests/test_categories.py`. Všech 16 testů v projektu úspěšně prochází.
+
 
 
 

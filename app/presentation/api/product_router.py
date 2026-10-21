@@ -24,10 +24,12 @@ def get_product_service(db: Session = Depends(get_db)) -> ProductService:
 def list_products(
     search: Optional[str] = Query(None, description="Hledat podle kódu, názvu nebo popisu"),
     is_active: Optional[bool] = Query(None, description="Filtrovat podle aktivity"),
+    category_id: Optional[UUID] = Query(None, description="Filtrovat podle kategorie"),
     service: ProductService = Depends(get_product_service),
 ):
-    """Získání seznamu produktů (dřevěných hraček)."""
-    return service.list_products(search=search, is_active=is_active)
+    """Získání seznamu produktů (dřevěných hraček) s možností filtrování dle kategorie."""
+    return service.list_products(search=search, is_active=is_active, category_id=category_id)
+
 
 
 @router.get("/{product_id}", response_model=ProductResponse)

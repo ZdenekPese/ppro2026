@@ -386,6 +386,10 @@ body {
   background-color: var(--c-1);
 }
 
+.overview-dot.dot-c5 {
+  background-color: var(--c-5);
+}
+
 .overview-dot.dot-c9 {
   background-color: var(--c-9);
   box-shadow: 0 0 8px var(--c-9);
@@ -394,6 +398,7 @@ body {
 .overview-dot.dot-c7 {
   background-color: var(--c-7);
 }
+
 
 .overview-label {
   font-weight: 500;
@@ -479,6 +484,35 @@ body {
   box-shadow: 0 0 0 3px rgba(0, 145, 173, 0.15);
 }
 
+.category-filter-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.category-select {
+  padding: 0.6rem 2rem 0.6rem 0.85rem;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 13px;
+  transition: border-color 0.15s ease;
+}
+
+.category-select:focus {
+  border-color: var(--c-9);
+  box-shadow: 0 0 0 3px rgba(0, 145, 173, 0.15);
+}
+
 .records-count {
   font-size: 0.85rem;
   color: var(--text-muted);
@@ -547,6 +581,26 @@ body {
   color: var(--text-muted);
   max-width: 420px;
   line-height: 1.35;
+}
+
+.product-category-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.category-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #d8b4fe;
+  background-color: rgba(114, 60, 112, 0.28);
+  border: 1px solid rgba(137, 43, 100, 0.45);
+  border-radius: 4px;
+  padding: 0.12rem 0.48rem;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
 }
 
 .price-dim {
@@ -688,6 +742,54 @@ body {
   display: block;
 }
 
+.category-selection-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  margin-bottom: 0.25rem;
+}
+
+.category-select-item {
+  display: inline-flex;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+
+.category-select-item input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.category-select-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  transition: all 0.15s ease;
+}
+
+.category-select-item:hover .category-select-pill {
+  border-color: var(--c-7);
+  color: #fff;
+  background-color: rgba(46, 111, 149, 0.15);
+}
+
+.category-select-item input[type="checkbox"]:checked + .category-select-pill {
+  background-color: rgba(114, 60, 112, 0.35);
+  border-color: var(--c-4);
+  color: #fce7f3;
+  box-shadow: 0 0 0 1px var(--c-4), 0 2px 8px rgba(114, 60, 112, 0.4);
+}
+
 .checkbox-container {
   display: flex;
   align-items: center;
@@ -698,6 +800,7 @@ body {
   cursor: pointer;
   margin-top: 0.35rem;
 }
+
 
 .checkbox-container input[type="checkbox"] {
   width: 17px;
