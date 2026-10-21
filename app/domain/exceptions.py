@@ -36,3 +36,36 @@ class DuplicateCategoryNameError(DomainException):
     def __init__(self, name: str):
         super().__init__(f"Kategorie s názvem '{name}' již existuje.")
 
+
+class WarehouseNotFoundError(DomainException):
+    """Výjimka vyvolaná, pokud sklad nebyl v systému nalezen."""
+    def __init__(self, identifier: str):
+        super().__init__(f"Sklad s identifikátorem '{identifier}' nebyl nalezen.")
+
+
+class DuplicateWarehouseCodeError(DomainException):
+    """Výjimka vyvolaná při duplicitním kódu skladu."""
+    def __init__(self, code: str):
+        super().__init__(f"Sklad s kódem '{code}' již existuje.")
+
+
+class StockNotFoundError(DomainException):
+    """Výjimka vyvolaná, pokud skladová zásoba nebyla nalezena."""
+    def __init__(self, warehouse_id: str, product_id: str):
+        super().__init__(f"Zásoba pro produkt '{product_id}' na skladě '{warehouse_id}' nebyla nalezena.")
+
+
+class InsufficientStockError(DomainException):
+    """Výjimka vyvolaná při pokusu o rezervaci či výdej většího množství, než je disponibilní."""
+    def __init__(self, available: int, requested: int):
+        super().__init__(
+            f"Nedostatečná zásoba: požadováno {requested} ks, k dispozici je pouze {available} ks."
+        )
+
+
+class NegativeStockError(DomainException):
+    """Výjimka vyvolaná při pokusu snížit skladovou zásobu do záporných hodnot."""
+    def __init__(self, message: str = "Skladová zásoba nesmí klesnout do záporu."):
+        super().__init__(message)
+
+

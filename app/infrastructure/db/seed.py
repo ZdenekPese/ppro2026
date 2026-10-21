@@ -1,6 +1,6 @@
 from decimal import Decimal
 from app.core.database import SessionLocal
-from app.infrastructure.db.models import Product, Category
+from app.infrastructure.db.models import Product, Category, Warehouse, WarehouseStock
 
 SAMPLE_CATEGORIES = [
     {
@@ -25,6 +25,21 @@ SAMPLE_CATEGORIES = [
     },
 ]
 
+SAMPLE_WAREHOUSES = [
+    {
+        "code": "WH-HK",
+        "name": "Centrální sklad Hradec Králové",
+        "location": "Bratří Čapků 450, 500 02 Hradec Králové",
+        "is_primary": True,
+    },
+    {
+        "code": "WH-TREB",
+        "name": "Skladová garáž Třebechovice pod Orebem",
+        "location": "Palackého 12, 503 46 Třebechovice pod Orebem",
+        "is_primary": False,
+    },
+]
+
 SAMPLE_PRODUCTS = [
     {
         "code": "KAC-001",
@@ -34,6 +49,10 @@ SAMPLE_PRODUCTS = [
         "selling_price": Decimal("120.00"),
         "min_stock_level": 10,
         "categories": ["Pro batolata", "Dárky do 500 Kč", "Tradiční hračky"],
+        "stocks": {
+            "WH-HK": {"physical": 4, "reserved": 1},      # 3 volné
+            "WH-TREB": {"physical": 12, "reserved": 0},  # 12 volných => celkem 15 >= 10 (OK)
+        },
     },
     {
         "code": "VLK-001",
@@ -43,6 +62,10 @@ SAMPLE_PRODUCTS = [
         "selling_price": Decimal("450.00"),
         "min_stock_level": 5,
         "categories": ["Pro batolata", "Dopravní prostředky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 2, "reserved": 0},      # 2 volné
+            "WH-TREB": {"physical": 1, "reserved": 0},    # 1 volný => celkem 3 < 5 (DANGER - HOŘÍ)
+        },
     },
     {
         "code": "KAC-002",
@@ -52,6 +75,10 @@ SAMPLE_PRODUCTS = [
         "selling_price": Decimal("250.00"),
         "min_stock_level": 8,
         "categories": ["Pro batolata", "Dárky do 500 Kč", "Tradiční hračky"],
+        "stocks": {
+            "WH-HK": {"physical": 5, "reserved": 1},      # 4 volné
+            "WH-TREB": {"physical": 2, "reserved": 0},    # 2 volné => celkem 6 < 8 (DANGER - HOŘÍ)
+        },
     },
     {
         "code": "KON-001",
@@ -61,6 +88,10 @@ SAMPLE_PRODUCTS = [
         "selling_price": Decimal("1490.00"),
         "min_stock_level": 3,
         "categories": ["Pro batolata", "Tradiční hračky"],
+        "stocks": {
+            "WH-HK": {"physical": 4, "reserved": 0},      # 4 volné
+            "WH-TREB": {"physical": 0, "reserved": 0},    # 0 volných => celkem 4 >= 3 (OK)
+        },
     },
     {
         "code": "KOS-001",
@@ -70,15 +101,34 @@ SAMPLE_PRODUCTS = [
         "selling_price": Decimal("320.00"),
         "min_stock_level": 12,
         "categories": ["Stavebnice a hlavolamy", "Dárky do 500 Kč", "Pro batolata"],
+        "stocks": {
+            "WH-HK": {"physical": 8, "reserved": 0},      # 8 volných
+            "WH-TREB": {"physical": 10, "reserved": 0},   # 10 volných => celkem 18 >= 12 (OK)
+        },
     },
 ]
 
 
 def seed_database() -> None:
-    """Naplnění databáze vzorovými kategoriemi a produkty pro Dřevěnka s.r.o."""
+    """Naplnění databáze vzorovými sklady, kategoriemi, produkty a zásobami."""
     db = SessionLocal()
     try:
-        # 1. Seed kategorií
+        # 1. Seed skladů (Hradec Králové + Třebechovice)
+        warehouses_by_code = {}
+        for wh_data in SAMPLE_WAREHOUSES:
+            wh = db.query(Warehouse).filter(Warehouse.code == wh_data["code"]).first()
+            if not wh:
+                wh = Warehouse(
+                    code=wh_data["code"],
+                    name=wh_data["name"],
+                    location=wh_data["location"],
+                    is_primary=wh_data["is_primary"],
+                )
+                db.add(wh)
+                db.flush()
+            warehouses_by_code[wh.code] = wh
+
+        # 2. Seed kategorií
         categories_by_name = {}
         for cat_data in SAMPLE_CATEGORIES:
             cat = db.query(Category).filter(Category.name == cat_data["name"]).first()
@@ -91,7 +141,8 @@ def seed_database() -> None:
                 db.flush()
             categories_by_name[cat.name] = cat
 
-        # 2. Seed produktů a přiřazení kategorií (M:N)
+        # 3. Seed produktů a přiřazení kategorií (M:N)
+        products_by_code = {}
         inserted_count = 0
         updated_count = 0
         for item in SAMPLE_PRODUCTS:
@@ -110,15 +161,50 @@ def seed_database() -> None:
                     categories=cat_objs,
                 )
                 db.add(product)
+                db.flush()
                 inserted_count += 1
             else:
-                # Pokud již produkt existuje, přiřadíme mu kategorie, pokud je dosud nemá
                 if not product.categories:
                     product.categories = cat_objs
                     updated_count += 1
+            products_by_code[product.code] = product
+
+        # 4. Seed skladových zásob (WarehouseStock)
+        stocks_seeded = 0
+        for item in SAMPLE_PRODUCTS:
+            product = products_by_code[item["code"]]
+            for wh_code, quant_data in item.get("stocks", {}).items():
+                warehouse = warehouses_by_code.get(wh_code)
+                if not warehouse:
+                    continue
+
+                stock = (
+                    db.query(WarehouseStock)
+                    .filter(
+                        WarehouseStock.warehouse_id == warehouse.id,
+                        WarehouseStock.product_id == product.id,
+                    )
+                    .first()
+                )
+                if not stock:
+                    stock = WarehouseStock(
+                        warehouse_id=warehouse.id,
+                        product_id=product.id,
+                        physical_quantity=quant_data["physical"],
+                        reserved_quantity=quant_data["reserved"],
+                    )
+                    db.add(stock)
+                    stocks_seeded += 1
+                else:
+                    # Aktualizace stávajícího
+                    stock.physical_quantity = quant_data["physical"]
+                    stock.reserved_quantity = quant_data["reserved"]
 
         db.commit()
-        print(f"[SEED] Úspěšně vloženo {inserted_count} nových hraček, aktualizováno {updated_count} hraček.")
+        print(
+            f"[SEED] Úspěšně vloženo {inserted_count} hraček, "
+            f"aktualizováno {updated_count} hraček, zkontrolováno {stocks_seeded} zásob."
+        )
     except Exception as exc:
         db.rollback()
         print(f"[SEED ERROR] Chyba při seedování: {exc}")

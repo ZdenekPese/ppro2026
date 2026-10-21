@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Přehled skladu & Barevný dashboard &bull; Dřevěnka s.r.o.{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-left">
+        <h1 class="page-title">Skladový přehled & Barevný dashboard</h1>
+        <p class="page-subtitle">
+            Okamžitá kontrola disponibilních zásob pro centrální expedici v Hradci Králové a sezónní garáž v Třebechovicích.
+        </p>
+
+        <!-- Přehled metrik pod sebou na levé straně -->
+        <div class="overview-vertical-list">
+            <div class="overview-row">
+                <span class="overview-dot dot-c1"></span>
+                <span class="overview-label">Celková hodnota zásob:</span>
+                <strong class="overview-value">{{ "%.0f"|format(summary.total_stock_value) }} Kč</strong>
+                <span class="overview-note">&bull; ocenění fyzických kusů nákupní cenou dílny</span>
+            </div>
+            <div class="overview-row">
+                <span class="overview-dot dot-c9"></span>
+                <span class="overview-label">Disponibilní zásoba:</span>
+                <strong class="overview-value text-teal">{{ summary.total_available_count }} ks</strong>
+                <span class="overview-note">&bull; ihned volné k prodeji na e-shopu</span>
+            </div>
+            <div class="overview-row">
+                <span class="overview-dot dot-c7"></span>
+                <span class="overview-label">Fyzicky na regálech:</span>
+                <strong class="overview-value">{{ summary.total_physical_count }} ks</strong>
+                <span class="overview-note">&bull; z toho {{ summary.total_reserved_count }} ks blokováno v objednávkách</span>
+            </div>
+            <div class="overview-row">
+                {% if summary.critical_items_count > 0 %}
+                    <span class="overview-dot dot-danger-pulse"></span>
+                    <span class="overview-label text-danger font-bold">Kritický stav („Co hoří“):</span>
+                    <strong class="overview-value text-danger">{{ summary.critical_items_count }} položek</strong>
+                    <span class="overview-note text-danger">&bull; disponibilní zásoba klesla pod stanovené minimum!</span>
+                {% else %}
+                    <span class="overview-dot dot-c9"></span>
+                    <span class="overview-label">Stav minimálních zásob:</span>
+                    <strong class="overview-value text-teal">Vše v pořádku</strong>
+                    <span class="overview-note">&bull; žádný produkt není pod minimem</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <a href="/products" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <span>Katalog hraček</span>
+        </a>
+        <a href="/products/new" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Přidat produkt</span>
+        </a>
+    </div>
+</div>
+
+<!-- Karty jednotlivých skladů (Hradec Králové vs. Garáž Třebechovice) -->
+<div class="warehouses-grid">
+    {% for wh in summary.warehouses %}
+    <div class="warehouse-card {% if wh.is_primary %}warehouse-card-primary{% endif %}">
+        <div class="warehouse-card-header">
+            <div class="warehouse-badge-wrap">
+                <span class="warehouse-code-badge">{{ wh.warehouse_code }}</span>
+                {% if wh.is_primary %}
+                    <span class="warehouse-status-chip chip-primary">Centrální expedice</span>
+                {% else %}
+                    <span class="warehouse-status-chip chip-secondary">Sezónní odkladiště</span>
+                {% endif %}
+            </div>
+            <h3 class="warehouse-card-title">{{ wh.warehouse_name }}</h3>
+        </div>
+        <div class="warehouse-card-body">
+            <div class="warehouse-stat">
+                <span class="stat-num">{{ wh.total_items_count }}</span>
+                <span class="stat-unit">fyzických kusů skladem</span>
+            </div>
+            <div class="warehouse-meta">
+                Hodnota uskladněného zboží: <strong>{{ "%.0f"|format(wh.total_value) }} Kč</strong>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Sekce položek pod minimem („Co hoří“) -->
+{% if summary.critical_items_count > 0 %}
+<div class="critical-alert-section">
+    <div class="critical-header">
+        <div class="critical-title-wrap">
+            <span class="pulse-indicator"></span>
+            <h2 class="critical-title">Upozornění truhlárny: {{ summary.critical_items_count }} položek hoří pod minimem</h2>
+        </div>
+        <span class="critical-subtitle">Okamžitě naplánujte výrobu nebo meziskladový transfer ze sezónní garáže.</span>
+    </div>
+
+    <div class="critical-items-list">
+        {% for item in summary.critical_items %}
+        <div class="critical-card">
+            <div class="critical-card-info">
+                <span class="sku-badge">{{ item.product_code }}</span>
+                <strong class="critical-prod-name">{{ item.product_name }}</strong>
+            </div>
+            <div class="critical-card-quantities">
+                <div class="quant-col">
+                    <span class="quant-label">Disponibilní:</span>
+                    <span class="quant-val text-danger">{{ item.total_available }} ks</span>
+                </div>
+                <div class="quant-col">
+                    <span class="quant-label">Min. limit:</span>
+                    <span class="quant-val">{{ item.min_stock_level }} ks</span>
+                </div>
+                <div class="quant-col">
+                    <span class="quant-label">Hradec / Garáž:</span>
+                    <span class="quant-val font-mono">
+                        {{ item.stocks['WH-HK'].available_quantity if 'WH-HK' in item.stocks else 0 }} / 
+                        {{ item.stocks['WH-TREB'].available_quantity if 'WH-TREB' in item.stocks else 0 }} ks
+                    </span>
+                </div>
+            </div>
+            <div class="critical-action-wrap">
+                {% if 'WH-TREB' in item.stocks and item.stocks['WH-TREB'].available_quantity > 0 %}
+                    <span class="advice-chip advice-transfer">
+                        Možno převézt {{ item.stocks['WH-TREB'].available_quantity }} ks z garáže
+                    </span>
+                {% else %}
+                    <span class="advice-chip advice-produce">
+                        Nutno zadat do výroby
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Kompletní matice skladových zásob -->
+<div class="panel-card" style="margin-top: 1.5rem;">
+    <div class="panel-toolbar">
+        <form method="get" action="/" class="search-form">
+            <div class="search-input-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input 
+                    type="text" 
+                    name="search" 
+                    value="{{ search }}" 
+                    placeholder="Vyhledat v zásobách podle SKU nebo názvu..."
+                    class="search-field"
+                >
+            </div>
+
+            {% if categories %}
+            <div class="category-filter-wrapper">
+                <select name="category_id" class="category-select" onchange="this.form.submit()">
+                    <option value="">Všechny kategorie</option>
+                    {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if selected_category_id and (selected_category_id == cat.id or selected_category_id|string == cat.id|string) %}selected{% endif %}>
+                            {{ cat.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <div class="filter-toggle-wrapper">
+                <label class="filter-toggle-label">
+                    <input 
+                        type="checkbox" 
+                        name="only_critical" 
+                        value="true" 
+                        {% if only_critical %}checked{% endif %}
+                        onchange="this.form.submit()"
+                    >
+                    <span>Pouze hořící pod minimem</span>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-secondary btn-sm">Filtrovat</button>
+            {% if search or selected_category_id or only_critical %}
+                <a href="/" class="btn btn-ghost btn-sm">Zrušit filtry</a>
+            {% endif %}
+        </form>
+
+        <div class="records-count">
+            Zobrazeno <strong>{{ stocks|length }}</strong> položek
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="inventory-table">
+            <thead>
+                <tr>
+                    <th style="width: 120px;">Kód (SKU)</th>
+                    <th>Dřevěná hračka</th>
+                    <th style="text-align: center; width: 170px;">
+                        Hradec Králové<br>
+                        <small style="font-size: 0.72rem; color: var(--text-dim); text-transform: none; font-weight: 500;">(Fyzicky / Rezerv. / Volno)</small>
+                    </th>
+                    <th style="text-align: center; width: 170px;">
+                        Garáž Třebechovice<br>
+                        <small style="font-size: 0.72rem; color: var(--text-dim); text-transform: none; font-weight: 500;">(Fyzicky / Rezerv. / Volno)</small>
+                    </th>
+                    <th style="text-align: center; width: 120px;">Celkem volno</th>
+                    <th style="text-align: center; width: 100px;">Min. limit</th>
+                    <th style="text-align: center; width: 130px;">Stav zásoby</th>
+                    <th style="text-align: center; width: 90px;">Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in stocks %}
+                <tr class="{% if item.is_below_min %}row-danger-bg{% endif %}">
+                    <td>
+                        <span class="sku-badge">{{ item.product_code }}</span>
+                    </td>
+                    <td>
+                        <div class="product-name">{{ item.product_name }}</div>
+                        <div class="price-dim" style="font-size: 0.8rem;">Prodejní cena: {{ "%.2f"|format(item.selling_price) }} Kč</div>
+                    </td>
+
+                    <!-- Sklad Hradec Králové -->
+                    <td style="text-align: center;">
+                        {% set hk = item.stocks.get('WH-HK') %}
+                        {% if hk %}
+                            <div class="stock-quad-badge">
+                                <span class="quad-phys" title="Fyzicky skladem">{{ hk.physical_quantity }}</span>
+                                <span class="quad-sep">/</span>
+                                <span class="quad-res" title="Rezervováno">{{ hk.reserved_quantity }}</span>
+                                <span class="quad-sep">/</span>
+                                <strong class="quad-avail text-teal" title="Disponibilní">{{ hk.available_quantity }} ks</strong>
+                            </div>
+                        {% else %}
+                            <span class="text-dim">0 / 0 / 0 ks</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Garáž Třebechovice -->
+                    <td style="text-align: center;">
+                        {% set treb = item.stocks.get('WH-TREB') %}
+                        {% if treb %}
+                            <div class="stock-quad-badge">
+                                <span class="quad-phys" title="Fyzicky skladem">{{ treb.physical_quantity }}</span>
+                                <span class="quad-sep">/</span>
+                                <span class="quad-res" title="Rezervováno">{{ treb.reserved_quantity }}</span>
+                                <span class="quad-sep">/</span>
+                                <strong class="quad-avail" title="Disponibilní">{{ treb.available_quantity }} ks</strong>
+                            </div>
+                        {% else %}
+                            <span class="text-dim">0 / 0 / 0 ks</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Celkem k prodeji -->
+                    <td style="text-align: center;">
+                        <strong class="total-avail-chip {% if item.is_below_min %}text-danger{% else %}text-teal{% endif %}">
+                            {{ item.total_available }} ks
+                        </strong>
+                    </td>
+
+                    <!-- Min limit -->
+                    <td style="text-align: center;">
+                        <span class="stock-min">{{ item.min_stock_level }} ks</span>
+                    </td>
+
+                    <!-- Barevný status zásoby -->
+                    <td style="text-align: center;">
+                        {% if item.status == 'danger' %}
+                            <span class="stock-pill pill-danger">
+                                <span class="status-dot dot-danger"></span> Hoří pod minimem
+                            </span>
+                        {% elif item.status == 'warning' %}
+                            <span class="stock-pill pill-warning">
+                                <span class="status-dot dot-warning"></span> Blízko minima
+                            </span>
+                        {% else %}
+                            <span class="stock-pill pill-ok">
+                                <span class="status-dot dot-ok"></span> V pořádku
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td style="text-align: center;">
+                        <a href="/products/{{ item.product_id }}/edit" class="btn btn-action" title="Upravit produkt">
+                            Upravit
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="table-empty">
+                        <p>Nebyly nalezeny žádné skladové položky splňující zadaná kritéria.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

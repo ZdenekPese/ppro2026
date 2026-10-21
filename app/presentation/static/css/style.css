@@ -884,8 +884,358 @@ body {
 }
 
 /* ==========================================================================
+   DASHBOARD & SKLADOVÉ ZÁSOBY (FÁZE 4)
+   ========================================================================== */
+
+.warehouses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.warehouse-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.35rem 1.5rem;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.warehouse-card:hover {
+  border-color: var(--border-color-hover);
+  transform: translateY(-2px);
+}
+
+.warehouse-card-primary {
+  border-left: 4px solid var(--c-9);
+  background: linear-gradient(135deg, rgba(18, 200, 232, 0.05) 0%, var(--bg-card) 100%);
+}
+
+.warehouse-badge-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.65rem;
+}
+
+.warehouse-code-badge {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #60c5fa;
+  background-color: rgba(69, 152, 203, 0.2);
+  border: 1px solid rgba(69, 152, 203, 0.45);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.warehouse-status-chip {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.chip-primary {
+  background-color: rgba(18, 200, 232, 0.18);
+  color: #4de3fc;
+  border: 1px solid rgba(18, 200, 232, 0.45);
+}
+
+.chip-secondary {
+  background-color: rgba(137, 43, 100, 0.22);
+  color: #e9a3cf;
+  border: 1px solid rgba(137, 43, 100, 0.45);
+}
+
+.warehouse-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.85rem 0;
+}
+
+.warehouse-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-num {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+
+.stat-unit {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.warehouse-meta {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.warehouse-meta strong {
+  color: #fff;
+}
+
+/* Sekce „Co hoří“ */
+.critical-alert-section {
+  background: linear-gradient(135deg, rgba(230, 38, 120, 0.12) 0%, rgba(35, 49, 72, 0.95) 100%);
+  border: 1px solid rgba(230, 38, 120, 0.45);
+  border-radius: var(--radius-md);
+  padding: 1.35rem 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.critical-header {
+  margin-bottom: 1.15rem;
+}
+
+.critical-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.pulse-indicator {
+  width: 10px;
+  height: 10px;
+  background-color: #f43f5e;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #f43f5e;
+  display: inline-block;
+  animation: pulse-danger 1.5s infinite;
+}
+
+@keyframes pulse-danger {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
+.critical-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fda4af;
+  margin: 0;
+}
+
+.critical-subtitle {
+  font-size: 0.82rem;
+  color: #fecdd3;
+  opacity: 0.85;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.critical-items-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.85rem;
+}
+
+.critical-card {
+  background-color: rgba(24, 34, 52, 0.85);
+  border: 1px solid rgba(230, 38, 120, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.critical-card-info {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.critical-prod-name {
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.critical-card-quantities {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(15, 23, 42, 0.6);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+}
+
+.quant-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.quant-label {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+
+.quant-val {
+  font-weight: 700;
+}
+
+.advice-chip {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-sm);
+}
+
+.advice-transfer {
+  background-color: rgba(46, 111, 149, 0.25);
+  border: 1px solid rgba(46, 111, 149, 0.55);
+  color: #7dd3fc;
+}
+
+.advice-produce {
+  background-color: rgba(230, 38, 120, 0.22);
+  border: 1px solid rgba(230, 38, 120, 0.5);
+  color: #fda4af;
+}
+
+/* Skladová matice */
+.stock-quad-badge {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: rgba(15, 23, 42, 0.45);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+}
+
+.quad-phys {
+  color: #fff;
+}
+
+.quad-sep {
+  color: var(--text-dim);
+}
+
+.quad-res {
+  color: #fca5a5;
+}
+
+.quad-avail {
+  font-weight: 700;
+}
+
+.total-avail-chip {
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.row-danger-bg {
+  background-color: rgba(183, 9, 76, 0.08) !important;
+}
+
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+.pill-danger {
+  background-color: rgba(244, 63, 94, 0.16);
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  color: #fca5a5;
+}
+
+.pill-warning {
+  background-color: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fcd34d;
+}
+
+.pill-ok {
+  background-color: rgba(18, 200, 232, 0.14);
+  border: 1px solid rgba(18, 200, 232, 0.4);
+  color: #5eead4;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-danger {
+  background-color: #f43f5e;
+}
+
+.dot-warning {
+  background-color: #f59e0b;
+}
+
+.dot-ok {
+  background-color: #14b8a6;
+}
+
+.dot-danger-pulse {
+  background-color: #f43f5e;
+  box-shadow: 0 0 8px #f43f5e;
+  animation: pulse-danger 1.5s infinite;
+}
+
+.text-danger {
+  color: #fb7185 !important;
+}
+
+.font-bold {
+  font-weight: 700 !important;
+}
+
+.filter-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 0.35rem;
+}
+
+.filter-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-toggle-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--c-1);
+}
+
+/* ==========================================================================
    RESPONSIVITA
    ========================================================================== */
+
 
 @media (max-width: 768px) {
   .navbar-inner {

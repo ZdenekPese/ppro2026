@@ -358,7 +358,8 @@ flowchart TD
 | **Fáze 1** | **Walking Skeleton & Infrastruktura** | Docker Compose (`app` + `db`), PostgreSQL 16, konfigurace SQLAlchemy 2.0 a Alembic migrací. | Běžící skeleton na 1 příkaz, `/docs` a `/health`. |
 | **Fáze 2** | **Pilotní demo – Správa produktů (`Product`)** | Kompletní 3vrstvá vertikála pro dřevěné hračky: ORM, repozitář, service s validací marží/cen, REST API a responzivní web UI. | **Demo pro klienta/vyučujícího na cvičení** pro 1. feedback. |
 | **Fáze 3** | **Kategorie a M:N vazba (`Category`)** *(Dokončeno)* | Zavedení kategorií a vazební tabulky `product_categories` (splnění povinného minima M:N). Filtrování a výběr kategorií v katalogu i formuláři. | Tatáž hračka ve více kategoriích naráz (káča pro batolata i dárky do 500 Kč). |
-| **Fáze 4** | **Sklady a Zásoby (`Warehouse`, `Stock`)** | Evidence 2 skladů (Hradec Králové vs. Garáž Třebechovice). Dvoustupňový model: fyzická vs. rezervovaná zásoba. | Dashboard skladu s indikací „co hoří“ pod minimem. |
+| **Fáze 4** | **Sklady a Zásoby (`Warehouse`, `Stock`)** *(Dokončeno)* | Evidence 2 skladů (Hradec Králové vs. Garáž Třebechovice). Dvoustupňový model: fyzická vs. rezervovaná zásoba. Barevný dashboard na úvodní stránce. | Barevný dashboard „co hoří“ pod minimem a matice skladů. |
+
 | **Fáze 5** | **Pohyby a Auditní stopa (`StockMovement`)** | Vynucení zákazu záporu (`quantity >= 0`). Audit 100 % pohybů (příjem, transfer Hradec-Třebechovice, inventurní vyrovnání). | Zpětná dohledatelnost („kde je ta káča...“). |
 | **Fáze 6** | **Zákazníci a Objednávky (`Customer`, `Order`)** | Rezervace při objednání, neměnnost prodejní ceny v `OrderItem`, fyzický odpis při expedici, zákaz mazání zákazníků. | Kompletní nákupní a expediční proces z e-shopu. |
 | **Fáze 7** | **Reporting a Analytika** | Měsíční obrat po kategoriích, přehled ziskovosti a automatický seznam položek k doobjednání. | Manažerské výkazy pro majitele Petra Doležala. |
@@ -503,6 +504,20 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Ve formuláři `product_form.html` implementován interaktivní výběr více kategorií současně pomocí stylových přepínačů (pill chips).
   - Rozšířen seedovací skript `app/infrastructure/db/seed.py` o 5 reálných kategorií Dřevěnky (*Pro batolata*, *Dárky do 500 Kč*, *Dopravní prostředky*, *Stavebnice a hlavolamy*, *Tradiční hračky*) s přiřazením více kategorií jednotlivým hračkám (Káča splňuje explicitní požadavek zadání na současné zařazení do batolat i dárků do 500 Kč).
   - Přidána sada 7 nových integračních a unit testů v `tests/test_categories.py`. Všech 16 testů v projektu úspěšně prochází.
+- **2026-10-21 (Fáze 4 – Sklady a Skladové zásoby Warehouse, WarehouseStock dokončena):**
+  - Vytvořeny ORM modely `Warehouse` (sklady) a `WarehouseStock` (zásoby s vazbami na produkt a sklad) s integritními omezeními nezápornosti fyzických i rezervovaných kusů (`physical_quantity >= 0`, `reserved_quantity >= 0`, `reserved_quantity <= physical_quantity`) a unikátním párem `(warehouse_id, product_id)`.
+  - Vygenerována a aplikována nová Alembic migrace `72a536a13c64_create_warehouses_and_warehouse_stocks.py`.
+  - Vytvořena doménová a aplikační vrstva: Pydantic schémata (`WarehouseBase`, `WarehouseCreate`, `WarehouseResponse`, `WarehouseStockResponse`, `ProductStockDetail`, `DashboardSummary`), výjimky `WarehouseNotFoundError`, `DuplicateWarehouseCodeError`, `InsufficientStockError`, `NegativeStockError` a byznys služba `WarehouseService`.
+  - Implementován dvoustupňový model zásob: $\text{Disponibilní} = \text{Fyzická} - \text{Rezervovaná}$. Metody pro rezervaci, uvolnění rezervace, fyzický odpis i ruční úpravu zásob.
+  - Vytvořen REST API router `app/presentation/api/warehouse_router.py` pokrývající správu skladů (`/api/warehouses`), inventuru zásob (`/api/warehouses/{id}/stocks/{prod_id}`), rozpad zásob (`/api/stocks`) i dashboard souhrn (`/api/dashboard/summary`).
+  - Vytvořeno webové rozhraní pro dashboard (`/` v `dashboard.html` a `dashboard_web_router.py`):
+    - Přehledové karty skladů: Centrální sklad Hradec Králové (`WH-HK`) a Sezónní garáž Třebechovice pod Orebem (`WH-TREB`).
+    - Barevná sekce „Co hoří“ pro položky s disponibilním množstvím pod minimální zásobou s doporučením převozu z garáže nebo výroby.
+    - Kompletní matice stavu zásob rozpadlá po skladech s barevnými odznaky (červená pod minimem, oranžová blízko limitu, tyrkysová v pořádku) a filtrem `only_critical`.
+    - V katalogu `/products` doplněna indikace disponibilní zásoby přímo u minimální hladiny.
+  - Aktualizován seedovací skript `app/infrastructure/db/seed.py`: inicializovány oba sklady (`WH-HK`, `WH-TREB`) a naplněno 10 stavů zásob pro všech 5 hraček (včetně realistického scénáře, kde vláček a tahací kačer klesly pod minimum a vyžadují pozornost).
+  - Přidána sada 6 nových integračních a unit testů v `tests/test_warehouses.py`. Celkem prochází všech 22 testů projektu v pytest.
+
 
 
 

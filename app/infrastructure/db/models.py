@@ -13,6 +13,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     CheckConstraint,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -157,7 +158,155 @@ class Product(Base):
         back_populates="products",
         lazy="selectin",
     )
+    stocks: Mapped[list["WarehouseStock"]] = relationship(
+        "WarehouseStock",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    @property
+    def total_physical_quantity(self) -> int:
+        """Celková fyzická zásoba napříč všemi sklady."""
+        return sum(s.physical_quantity for s in self.stocks)
+
+    @property
+    def total_reserved_quantity(self) -> int:
+        """Celková rezervovaná zásoba napříč všemi sklady."""
+        return sum(s.reserved_quantity for s in self.stocks)
+
+    @property
+    def total_available_quantity(self) -> int:
+        """Celková volná (disponibilní) zásoba napříč všemi sklady."""
+        return sum(s.available_quantity for s in self.stocks)
 
     def __repr__(self) -> str:
         return f"<Product(code='{self.code}', name='{self.name}', price={self.selling_price})>"
+
+
+class Warehouse(Base):
+    """SQLAlchemy ORM entita reprezentující sklad (např. Centrální sklad HK nebo Garáž Třebechovice)."""
+
+    __tablename__ = "warehouses"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    code: Mapped[str] = mapped_column(
+        String(20),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+    location: Mapped[Optional[str]] = mapped_column(
+        String(255),
+        nullable=True,
+    )
+    is_primary: Mapped[bool] = mapped_column(
+        Boolean,
+        default=False,
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    stocks: Mapped[list["WarehouseStock"]] = relationship(
+        "WarehouseStock",
+        back_populates="warehouse",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
+
+    def __repr__(self) -> str:
+        return f"<Warehouse(code='{self.code}', name='{self.name}', primary={self.is_primary})>"
+
+
+class WarehouseStock(Base):
+    """SQLAlchemy ORM entita skladové zásoby konkrétního produktu na daném skladě."""
+
+    __tablename__ = "warehouse_stocks"
+
+    __table_args__ = (
+        CheckConstraint("physical_quantity >= 0", name="ck_warehouse_stocks_physical_non_negative"),
+        CheckConstraint("reserved_quantity >= 0", name="ck_warehouse_stocks_reserved_non_negative"),
+        CheckConstraint("reserved_quantity <= physical_quantity", name="ck_warehouse_stocks_reserved_le_physical"),
+        UniqueConstraint("warehouse_id", "product_id", name="uq_warehouse_stocks_warehouse_product"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    warehouse_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("warehouses.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    product_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("products.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    physical_quantity: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        nullable=False,
+    )
+    reserved_quantity: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    warehouse: Mapped["Warehouse"] = relationship(
+        "Warehouse",
+        back_populates="stocks",
+        lazy="selectin",
+    )
+    product: Mapped["Product"] = relationship(
+        "Product",
+        back_populates="stocks",
+        lazy="selectin",
+    )
+
+    @property
+    def available_quantity(self) -> int:
+        """Disponibilní zásoba = Fyzická zásoba - Rezervovaná zásoba."""
+        return self.physical_quantity - self.reserved_quantity
+
+    def __repr__(self) -> str:
+        return (
+            f"<WarehouseStock(warehouse_id={self.warehouse_id}, product_id={self.product_id}, "
+            f"phys={self.physical_quantity}, res={self.reserved_quantity})>"
+        )
+
 
