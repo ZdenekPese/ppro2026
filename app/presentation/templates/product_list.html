@@ -1,20 +1,47 @@
 {% extends "base.html" %}
 
 {% block title %}Katalog dřevěných hraček &bull; Dřevěnka s.r.o.{% endblock %}
-{% block page_name %}Katalog produktů{% endblock %}
 
 {% block content %}
-<!-- Hlavička stránky -->
-<div class="page-header">
-    <div>
+<div class="content-header">
+    <div class="header-left">
         <h1 class="page-title">Katalog dřevěných hraček</h1>
         <p class="page-subtitle">
-            Centrální správa produktů, cenotvorby a minimálních skladových limitů pro výrobu a e-shop.
+            Centrální správa produktů, cenotvorby a minimálních skladových limitů pro dílnu i e-shop.
         </p>
+
+        <!-- Přehled metrik pod sebou na levé straně (bez generických kostek) -->
+        <div class="overview-vertical-list">
+            <div class="overview-row">
+                <span class="overview-dot dot-c1"></span>
+                <span class="overview-label">Položky v katalogu:</span>
+                <strong class="overview-value">{{ total_products }}</strong>
+                <span class="overview-note">&bull; všechny zalistované hračky v systému</span>
+            </div>
+            <div class="overview-row">
+                <span class="overview-dot dot-c9"></span>
+                <span class="overview-label">Aktivní v prodeji:</span>
+                <strong class="overview-value text-teal">{{ active_products }}</strong>
+                <span class="overview-note">&bull; položky dostupné pro zákazníky</span>
+            </div>
+            <div class="overview-row">
+                <span class="overview-dot dot-c7"></span>
+                <span class="overview-label">Průměrná prodejní cena:</span>
+                <strong class="overview-value">{{ "%.0f"|format(avg_price) }} Kč</strong>
+                <span class="overview-note">&bull; výchozí hladina pro e-shop</span>
+            </div>
+            <div class="overview-row">
+                <span class="overview-dot dot-c9"></span>
+                <span class="overview-label">Průměrná marže dílny:</span>
+                <strong class="overview-value text-teal">+{{ "%.0f"|format(avg_margin) }} Kč</strong>
+                <span class="overview-note">&bull; hrubý zisk na jednotku</span>
+            </div>
+        </div>
     </div>
-    <div>
+
+    <div class="header-actions">
         <a href="/products/new" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
@@ -23,36 +50,12 @@
     </div>
 </div>
 
-<!-- Metrické KPI karty -->
-<div class="metrics-grid">
-    <div class="metric-card">
-        <span class="metric-label">Položky v katalogu</span>
-        <span class="metric-value">{{ total_products }}</span>
-        <span class="metric-footnote">Zalaborováno v systému</span>
-    </div>
-    <div class="metric-card">
-        <span class="metric-label">Aktivní v prodeji</span>
-        <span class="metric-value">{{ active_products }}</span>
-        <span class="metric-footnote">Dostupné pro objednávky</span>
-    </div>
-    <div class="metric-card">
-        <span class="metric-label">Průměrná cena</span>
-        <span class="metric-value">{{ "%.0f"|format(avg_price) }} <span style="font-size: 1.1rem; font-weight: 600; color: var(--text-muted);">Kč</span></span>
-        <span class="metric-footnote">Výchozí prodejní hladina</span>
-    </div>
-    <div class="metric-card">
-        <span class="metric-label">Průměrná marže</span>
-        <span class="metric-value">{{ "%.0f"|format(avg_margin) }} <span style="font-size: 1.1rem; font-weight: 600; color: var(--text-muted);">Kč</span></span>
-        <span class="metric-footnote">Hrubý zisk na jednotku</span>
-    </div>
-</div>
-
-<!-- Karta s tabulkou a vyhledáváním -->
-<div class="card">
-    <div class="table-toolbar">
-        <form method="get" action="/products" style="margin: 0;">
-            <div class="search-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<!-- Panel filtru a tabulky -->
+<div class="panel-card">
+    <div class="panel-toolbar">
+        <form method="get" action="/products" class="search-form">
+            <div class="search-input-wrapper">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;flex-shrink:0;">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -60,84 +63,78 @@
                     type="text" 
                     name="search" 
                     value="{{ search }}" 
-                    placeholder="Filtrovat kód SKU, název, materiál..."
+                    placeholder="Vyhledat kód SKU, název hračky nebo popis materiálu..."
+                    class="search-field"
                 >
             </div>
+            <button type="submit" class="btn btn-secondary btn-sm">Hledat</button>
+            {% if search %}
+                <a href="/products" class="btn btn-ghost btn-sm">Zrušit filtr ({{ search }})</a>
+            {% endif %}
         </form>
 
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-            {% if search %}
-                <a href="/products" class="btn btn-secondary btn-sm">Zrušit filtr ({{ search }})</a>
-            {% endif %}
-            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">
-                Zobrazeno {{ products|length }} záznamů
-            </span>
+        <div class="records-count">
+            Nalezeno <strong>{{ products|length }}</strong> položek
         </div>
     </div>
 
-    <div class="table-container">
-        <table class="data-table">
+    <div class="table-responsive">
+        <table class="inventory-table">
             <thead>
                 <tr>
-                    <th>Kód (SKU)</th>
+                    <th style="width: 130px;">Kód (SKU)</th>
                     <th>Produkt & Popis</th>
-                    <th style="text-align: right;">Nákupní cena</th>
-                    <th style="text-align: right;">Prodejní cena</th>
-                    <th style="text-align: right;">Marže</th>
-                    <th style="text-align: center;">Min. zásoba</th>
-                    <th style="text-align: center;">Stav</th>
-                    <th style="text-align: center;">Akce</th>
+                    <th style="text-align: right; width: 140px;">Nákupní cena</th>
+                    <th style="text-align: right; width: 140px;">Prodejní cena</th>
+                    <th style="text-align: right; width: 120px;">Marže</th>
+                    <th style="text-align: center; width: 110px;">Min. zásoba</th>
+                    <th style="text-align: center; width: 110px;">Stav</th>
+                    <th style="text-align: center; width: 100px;">Akce</th>
                 </tr>
             </thead>
             <tbody>
                 {% for p in products %}
                 <tr>
                     <td>
-                        <span class="sku-pill">{{ p.code }}</span>
+                        <span class="sku-badge">{{ p.code }}</span>
                     </td>
                     <td>
-                        <div class="product-title">{{ p.name }}</div>
+                        <div class="product-name">{{ p.name }}</div>
                         {% if p.description %}
                             <div class="product-desc">{{ p.description }}</div>
                         {% endif %}
                     </td>
                     <td style="text-align: right;">
-                        <span class="price-cell" style="color: var(--text-muted);">{{ "%.2f"|format(p.purchase_price) }} Kč</span>
+                        <span class="price-dim">{{ "%.2f"|format(p.purchase_price) }} Kč</span>
                     </td>
                     <td style="text-align: right;">
-                        <span class="price-cell price-primary">{{ "%.2f"|format(p.selling_price) }} Kč</span>
+                        <strong class="price-highlight">{{ "%.2f"|format(p.selling_price) }} Kč</strong>
                     </td>
                     <td style="text-align: right;">
                         {% set margin = p.selling_price - p.purchase_price %}
-                        <span class="margin-pill">+{{ "%.2f"|format(margin) }} Kč</span>
+                        <span class="margin-badge">+{{ "%.2f"|format(margin) }} Kč</span>
                     </td>
                     <td style="text-align: center;">
-                        <span style="font-family: var(--font-mono); font-weight: 600; color: var(--text-secondary);">
-                            {{ p.min_stock_level }} ks
-                        </span>
+                        <span class="stock-min">{{ p.min_stock_level }} ks</span>
                     </td>
                     <td style="text-align: center;">
                         {% if p.is_active %}
-                            <span class="badge badge-active">Aktivní</span>
+                            <span class="badge-status status-active">Aktivní</span>
                         {% else %}
-                            <span class="badge badge-inactive">Neaktivní</span>
+                            <span class="badge-status status-inactive">Neaktivní</span>
                         {% endif %}
                     </td>
                     <td style="text-align: center;">
-                        <a href="/products/{{ p.id }}/edit" class="btn btn-secondary btn-sm" title="Upravit parametry">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-                                <path d="m15 5 4 4"></path>
-                            </svg>
-                            <span>Upravit</span>
+                        <a href="/products/{{ p.id }}/edit" class="btn btn-action">
+                            Upravit
                         </a>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" style="padding: 3rem 1.5rem; text-align: center; color: var(--text-muted);">
-                        <p style="font-size: 0.95rem; margin-bottom: 0.75rem;">Nebyly nalezeny žádné produkty odpovídající filtru.</p>
-                        <a href="/products/new" class="btn btn-primary btn-sm">Založit nový produkt</a>
+                    <td colspan="8" class="table-empty">
+                        <p>V katalogu nebyly nalezeny žádné produkty odpovídající filtru.</p>
+                        <a href="/products/new" class="btn btn-primary btn-sm" style="margin-top: 0.75rem;">Založit nový produkt</a>
                     </td>
                 </tr>
                 {% endfor %}

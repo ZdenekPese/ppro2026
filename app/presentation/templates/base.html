@@ -4,130 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sklad Dřevěnka s.r.o.{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Kritická ochrana před přetečením ikon i při mezipaměti prohlížeče -->
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        svg {
+            width: 16px !important;
+            height: 16px !important;
+            max-width: 16px !important;
+            max-height: 16px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            flex-shrink: 0 !important;
+        }
+    </style>
+    
+    <link rel="stylesheet" href="/static/css/style.css?v=20261020_v5">
     {% block head %}{% endblock %}
 </head>
 <body>
-    <div class="app-layout">
-        <!-- Postranní navigace (Sidebar) -->
-        <aside class="app-sidebar">
-            <div class="sidebar-header">
-                <a href="/" class="brand-wrapper">
-                    <div class="brand-logo-mark">
-                        <!-- Čisté geometrické logo skladu dřevěných výrobků -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                        </svg>
-                    </div>
-                    <div class="brand-text-block">
-                        <span class="brand-name">Dřevěnka s.r.o.</span>
-                        <span class="brand-tagline">Skladový systém</span>
-                    </div>
-                </a>
-            </div>
+    <div class="app-wrapper">
+        <!-- Horní navigační lišta -->
+        <header class="navbar">
+            <div class="navbar-inner">
+                <div class="navbar-left">
+                    <a href="/" class="brand-link">
+                        <span class="brand-badge">DŘEVĚNKA</span>
+                        <div class="brand-text">
+                            <span class="brand-title">Dřevěnka s.r.o.</span>
+                            <span class="brand-subtitle">Skladový systém</span>
+                        </div>
+                    </a>
 
-            <nav class="sidebar-nav">
-                <div>
-                    <div class="nav-group-label">Katalog a sklad</div>
-                    <ul class="nav-menu">
-                        <li>
-                            <a href="/products" class="nav-item-link {% if request.url.path.startswith('/products') %}active{% endif %}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m7.5 4.27 9 5.15"></path>
-                                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
-                                    <path d="m3.3 7 8.7 5 8.7-5"></path>
-                                    <path d="M12 22V12"></path>
-                                </svg>
-                                <span>Katalog hraček</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/" class="nav-item-link {% if request.url.path == '/' %}active{% endif %}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect width="7" height="9" x="3" y="3" rx="1"></rect>
-                                    <rect width="7" height="5" x="14" y="3" rx="1"></rect>
-                                    <rect width="7" height="9" x="14" y="12" rx="1"></rect>
-                                    <rect width="7" height="5" x="3" y="16" rx="1"></rect>
-                                </svg>
-                                <span>Přehled skladu</span>
-                            </a>
-                        </li>
-                    </ul>
+                    <nav class="nav-links">
+                        <a href="/products" class="nav-link {% if request.url.path.startswith('/products') %}active{% endif %}">
+                            Katalog hraček
+                        </a>
+                        <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">
+                            Přehled skladu
+                        </a>
+                        <a href="/docs" target="_blank" class="nav-link">
+                            REST API (Swagger)
+                        </a>
+                        <a href="/api/health" target="_blank" class="nav-link">
+                            Healthcheck
+                        </a>
+                    </nav>
                 </div>
 
-                <div>
-                    <div class="nav-group-label">Vývoj & Rozhraní</div>
-                    <ul class="nav-menu">
-                        <li>
-                            <a href="/docs" target="_blank" class="nav-item-link">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
-                                    <path d="M6 6h10"></path>
-                                    <path d="M6 10h10"></path>
-                                </svg>
-                                <span>REST API (Swagger)</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/api/health" target="_blank" class="nav-item-link">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                                </svg>
-                                <span>Healthcheck</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="warehouse-pill">
-                    <div class="warehouse-status">
-                        <span class="status-dot"></span>
-                        <span>Aktivní uzly skladů</span>
-                    </div>
-                    <div class="warehouse-name">Hradec Králové (WH-HK)</div>
-                    <div class="warehouse-meta">Záloha: Garáž Třebechovice</div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Hlavní prostor -->
-        <div class="app-main">
-            <!-- Horní lišta -->
-            <header class="app-topbar">
-                <div class="topbar-breadcrumbs">
-                    <span>Sklad Dřevěnka</span>
-                    <span>/</span>
-                    <span class="current">{% block page_name %}Katalog produktů{% endblock %}</span>
-                </div>
-                <div class="topbar-actions">
-                    <span class="env-tag">PPRO 2026 &bull; FIM UHK</span>
-                </div>
-            </header>
-
-            <!-- Tělo obsahu -->
-            <main class="content-body">
-                {% block content %}
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Skladový systém Dřevěnka s.r.o.</h2>
-                    </div>
-                    <div class="card-body">
-                        <p style="color: var(--text-secondary); margin-bottom: 1.5rem; max-width: 650px;">
-                            Centrální evidence pro výrobu a distribuci tradičních dřevěných hraček. Správa fyzických a disponibilních zásob pro hlavní sklad v Hradci Králové a sezónní sklad v Třebechovicích.
-                        </p>
-                        <div style="display: flex; gap: 0.85rem; flex-wrap: wrap;">
-                            <a href="/products" class="btn btn-primary">Otevřít katalog hraček</a>
-                            <a href="/docs" target="_blank" class="btn btn-secondary">Prohlédnout API specifikaci</a>
+                <div class="navbar-right">
+                    <div class="warehouse-nodes">
+                        <div class="node-pill" title="Centrální sklad pro běžnou expedici">
+                            <span class="node-dot dot-primary"></span>
+                            <span class="node-name">Hradec Králové</span>
+                        </div>
+                        <div class="node-pill" title="Sezónní sklad a nadnormativní zásoby">
+                            <span class="node-dot dot-secondary"></span>
+                            <span class="node-name">Garáž Třebechovice</span>
                         </div>
                     </div>
+                    <span class="tag-academic">PPRO 2026</span>
                 </div>
-                {% endblock %}
-            </main>
-        </div>
+            </div>
+        </header>
+
+        <!-- Hlavní pracovní plocha -->
+        <main class="main-container">
+            {% block content %}
+            <div class="welcome-card">
+                <div class="welcome-header">
+                    <h2>Skladový systém Dřevěnka s.r.o.</h2>
+                    <p class="welcome-desc">
+                        Centrální evidence skladových zásob tradičních dřevěných hraček pro hlavní sklad v Hradci Králové a sezónní sklad v Třebechovicích pod Orebem.
+                    </p>
+                </div>
+                <div class="welcome-actions">
+                    <a href="/products" class="btn btn-primary">Přejít do katalogu hraček</a>
+                    <a href="/docs" target="_blank" class="btn btn-secondary">Prohlédnout API specifikaci</a>
+                </div>
+            </div>
+            {% endblock %}
+        </main>
+
+        <!-- Patička -->
+        <footer class="app-footer">
+            <div class="footer-inner">
+                <span>Dřevěnka s.r.o. &bull; Zadání B: Sklad pro malý e-shop</span>
+                <span>FIM UHK &bull; Pokročilé programování 2026/2027</span>
+            </div>
+        </footer>
     </div>
 </body>
 </html>

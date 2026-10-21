@@ -34,3 +34,6 @@ venv/
 
 # Docker logs
 *.log
+
+# UV lockfile
+uv.lock

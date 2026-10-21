@@ -47,16 +47,24 @@ class ProductRepository:
 
     def create(self, product: Product) -> Product:
         """Vložení nového produktu do databáze."""
-        self.db.add(product)
-        self.db.commit()
-        self.db.refresh(product)
-        return product
+        try:
+            self.db.add(product)
+            self.db.commit()
+            self.db.refresh(product)
+            return product
+        except Exception:
+            self.db.rollback()
+            raise
 
     def update(self, product: Product) -> Product:
         """Uložení změn existujícího produktu."""
-        self.db.commit()
-        self.db.refresh(product)
-        return product
+        try:
+            self.db.commit()
+            self.db.refresh(product)
+            return product
+        except Exception:
+            self.db.rollback()
+            raise
 
     def delete(self, product: Product) -> None:
         """Fyzické smazání produktu (pokud na něj nejsou vázány zásoby)."""

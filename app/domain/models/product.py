@@ -5,6 +5,9 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
+MAX_PRICE = Decimal("99999999.99")
+
+
 class ProductBase(BaseModel):
     """Základní atributy dřevěné hračky."""
     code: str = Field(
@@ -25,17 +28,20 @@ class ProductBase(BaseModel):
     )
     purchase_price: Decimal = Field(
         ...,
-        ge=0,
-        description="Nákupní / výrobní cena bez DPH v Kč (nesmí být záporná)",
+        ge=Decimal(0),
+        le=MAX_PRICE,
+        description="Nákupní / výrobní cena bez DPH v Kč (nesmí být záporná, max. 99 999 999,99 Kč)",
     )
     selling_price: Decimal = Field(
         ...,
-        ge=0,
-        description="Výchozí prodejní cena v Kč (nesmí být záporná)",
+        ge=Decimal(0),
+        le=MAX_PRICE,
+        description="Výchozí prodejní cena v Kč (nesmí být záporná, max. 99 999 999,99 Kč)",
     )
     min_stock_level: int = Field(
         default=5,
         ge=0,
+        le=1_000_000,
         description="Minimální doporučená skladová zásoba",
     )
     is_active: bool = Field(
@@ -69,9 +75,9 @@ class ProductUpdate(BaseModel):
     """Schéma pro úpravu existujícího produktu."""
     name: Optional[str] = Field(None, min_length=2, max_length=255)
     description: Optional[str] = None
-    purchase_price: Optional[Decimal] = Field(None, ge=0)
-    selling_price: Optional[Decimal] = Field(None, ge=0)
-    min_stock_level: Optional[int] = Field(None, ge=0)
+    purchase_price: Optional[Decimal] = Field(None, ge=Decimal(0), le=MAX_PRICE)
+    selling_price: Optional[Decimal] = Field(None, ge=Decimal(0), le=MAX_PRICE)
+    min_stock_level: Optional[int] = Field(None, ge=0, le=1_000_000)
     is_active: Optional[bool] = None
 
 

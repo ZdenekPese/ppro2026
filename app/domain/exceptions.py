@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class DomainException(Exception):
     """Základní bázová třída pro doménové výjimky."""
     pass
@@ -17,5 +20,6 @@ class DuplicateProductCodeError(DomainException):
 
 class InvalidPriceError(DomainException):
     """Výjimka vyvolaná při neplatné hodnotě nákupní nebo prodejní ceny."""
-    def __init__(self, message: str):
+    def __init__(self, message: str, field: Optional[str] = None):
         super().__init__(message)
+        self.field = field

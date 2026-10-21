@@ -1,55 +1,37 @@
 {% extends "base.html" %}
 
 {% block title %}{{ title }} &bull; Dřevěnka s.r.o.{% endblock %}
-{% block page_name %}
-    {% if product and product.id %}Úprava produktu{% else %}Nový produkt{% endif %}
-{% endblock %}
 
 {% block content %}
-<div class="page-header">
-    <div>
+<div class="content-header">
+    <div class="header-titles">
         <h1 class="page-title">
             {% if product and product.id %}Úprava dřevěné hračky{% else %}Založení nové hračky{% endif %}
         </h1>
         <p class="page-subtitle">
             {% if product and product.id %}
-                Změna prodejní ceny, minimální zásoby a stavu dostupnosti produktu {{ product.code }}.
+                Úprava parametrů, prodejní ceny a minimálního skladového limitu pro položku {{ product.code }}.
             {% else %}
-                Zadejte identifikátor SKU, kalkulované nákupní a prodejní ceny a minimální limit skladu.
+                Vyplňte identifikační kód SKU, výrobní a prodejní cenu a minimální limit skladu.
             {% endif %}
         </p>
     </div>
-    <div>
+    <div class="header-actions">
         <a href="/products" class="btn btn-secondary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
-            <span>Zpět do katalogu</span>
+            &larr; Zpět do katalogu
         </a>
     </div>
 </div>
 
-<div class="card" style="max-width: 760px;">
-    <div class="card-header">
-        <h2 class="card-title">Parametry produktu</h2>
+<div class="form-container">
+    {% if error %}
+    <div class="alert-box">
+        <strong>Chyba při ukládání:</strong> {{ error }}
     </div>
+    {% endif %}
 
-    <div class="card-body">
-        {% if error %}
-        <div class="alert-error">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <div>
-                <strong>Chyba validace:</strong> {{ error }}
-            </div>
-        </div>
-        {% endif %}
-
-        <form method="post" action="{% if product and product.id %}/products/{{ product.id }}/edit{% else %}/products/new{% endif %}" class="form-grid">
+    <div class="panel-card form-card">
+        <form method="post" action="{% if product and product.id %}/products/{{ product.id }}/edit{% else %}/products/new{% endif %}" class="product-form">
             
             <div class="form-group">
                 <label class="form-label" for="code">Skladový kód (SKU)</label>
@@ -57,27 +39,32 @@
                     type="text" 
                     id="code"
                     name="code" 
-                    class="form-input"
+                    class="form-control font-mono {% if errors and errors.code %}input-error{% endif %}"
                     value="{{ product.code if product else '' }}" 
                     placeholder="Např. KAC-001" 
                     required
-                    {% if product and product.id %}readonly{% endif %}
-                    style="font-family: var(--font-mono); text-transform: uppercase;"
+                    {% if product and product.id %}readonly style="opacity: 0.7; cursor: not-allowed;"{% endif %}
                 >
-                <span class="form-hint">Jedinečný identifikátor pro skladníky a import z e-shopu.</span>
+                {% if errors and errors.code %}
+                    <span class="field-error">{{ errors.code }}</span>
+                {% endif %}
+                <span class="field-hint">Unikátní identifikátor položky pro skladníky a e-shop.</span>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="name">Název hračky</label>
+                <label class="form-label" for="name">Název dřevěné hračky</label>
                 <input 
                     type="text" 
                     id="name"
                     name="name" 
-                    class="form-input"
+                    class="form-control {% if errors and errors.name %}input-error{% endif %}"
                     value="{{ product.name if product else '' }}" 
-                    placeholder="Např. Dřevěná káča buková" 
+                    placeholder="Např. Dřevěná buková káča" 
                     required
                 >
+                {% if errors and errors.name %}
+                    <span class="field-error">{{ errors.name }}</span>
+                {% endif %}
             </div>
 
             <div class="form-group">
@@ -85,45 +72,51 @@
                 <textarea 
                     id="description"
                     name="description" 
-                    class="form-textarea"
+                    class="form-control"
                     rows="3" 
-                    placeholder="Např. Výběrové bukové dřevo, ošetřeno přírodním voskem, rozměr 8x6 cm..."
+                    placeholder="Výběrové bukové dřevo, lakováno certifikovaným dětským lakem..."
                 >{{ product.description if product and product.description else '' }}</textarea>
             </div>
 
             <div class="form-row">
-                <div class="form-group">
+                <div class="form-col">
                     <label class="form-label" for="purchase_price">Nákupní / výrobní cena (Kč)</label>
                     <input 
                         type="number" 
                         id="purchase_price"
                         step="0.01" 
                         min="0" 
+                        max="99999999.99"
                         name="purchase_price" 
-                        class="form-input"
+                        class="form-control font-mono {% if errors and errors.purchase_price %}input-error{% endif %}"
                         value="{{ product.purchase_price if product else '' }}" 
                         placeholder="0.00"
                         required
-                        style="font-family: var(--font-mono);"
                     >
-                    <span class="form-hint">Nákladová cena truhlářské dílny bez DPH.</span>
+                    {% if errors and errors.purchase_price %}
+                        <span class="field-error">{{ errors.purchase_price }}</span>
+                    {% endif %}
+                    <span class="field-hint">Náklady truhlářské dílny bez DPH (max. 99 999 999,99 Kč).</span>
                 </div>
 
-                <div class="form-group">
+                <div class="form-col">
                     <label class="form-label" for="selling_price">Prodejní cena (Kč)</label>
                     <input 
                         type="number" 
                         id="selling_price"
                         step="0.01" 
                         min="0" 
+                        max="99999999.99"
                         name="selling_price" 
-                        class="form-input"
+                        class="form-control font-mono {% if errors and errors.selling_price %}input-error{% endif %}"
                         value="{{ product.selling_price if product else '' }}" 
                         placeholder="0.00"
                         required
-                        style="font-family: var(--font-mono);"
                     >
-                    <span class="form-hint">Koncová ceníková cena pro e-shop.</span>
+                    {% if errors and errors.selling_price %}
+                        <span class="field-error">{{ errors.selling_price }}</span>
+                    {% endif %}
+                    <span class="field-hint">Koncová cena pro e-shop (max. 99 999 999,99 Kč).</span>
                 </div>
             </div>
 
@@ -133,44 +126,39 @@
                     type="number" 
                     id="min_stock_level"
                     min="0" 
+                    max="1000000"
                     name="min_stock_level" 
-                    class="form-input"
+                    class="form-control font-mono {% if errors and errors.min_stock_level %}input-error{% endif %}"
                     value="{{ product.min_stock_level if product else '5' }}" 
                     required
-                    style="font-family: var(--font-mono); max-width: 200px;"
+                    style="max-width: 180px;"
                 >
-                <span class="form-hint">Kritická mez. Při poklesu pod tuto hladinu systém položku indikuje k výrobě.</span>
+                {% if errors and errors.min_stock_level %}
+                    <span class="field-error">{{ errors.min_stock_level }}</span>
+                {% endif %}
+                <span class="field-hint">Kritická mez. Při poklesu pod tuto hladinu systém doporučí doobjednání/výrobu.</span>
             </div>
 
             {% if product and product.id %}
             <div class="form-group">
-                <label class="checkbox-group" for="is_active">
+                <label class="checkbox-container">
                     <input 
                         type="checkbox" 
                         name="is_active" 
-                        id="is_active" 
-                        class="checkbox-custom"
                         value="true" 
                         {% if product.is_active %}checked{% endif %}
                     >
-                    <span style="font-size: 0.88rem; font-weight: 600; color: var(--text-primary);">
-                        Položka je aktivní v katalogu
-                    </span>
+                    <span>Položka je aktivní v prodeji</span>
                 </label>
-                <span class="form-hint">Neaktivní položky se nezobrazují v nabídce pro nové objednávky.</span>
+                <span class="field-hint">Neaktivní položky jsou skryty před vytvářením nových objednávek.</span>
             </div>
             {% endif %}
 
-            <div style="display: flex; justify-content: flex-end; gap: 0.85rem; margin-top: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
-                <a href="/products" class="btn btn-secondary">Zrušit</a>
+            <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                        <polyline points="7 3 7 8 15 8"></polyline>
-                    </svg>
-                    <span>{% if product and product.id %}Uložit změny{% else %}Vytvořit produkt{% endif %}</span>
+                    {% if product and product.id %}Uložit změny{% else %}Založit produkt{% endif %}
                 </button>
+                <a href="/products" class="btn btn-secondary">Zrušit</a>
             </div>
         </form>
     </div>

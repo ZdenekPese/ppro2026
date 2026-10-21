@@ -474,8 +474,23 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - Využita závazná devítiúrovňová barevná paleta: `["#b7094c", "#a01a58", "#892b64", "#723c70", "#5c4d7d", "#455e89", "#2e6f95", "#1780a1", "#0091ad"]`.
   - Striktně odstraněny veškeré emoji a AI klišé prvky; implementována čistá vektorová inline SVG grafika pro všechny navigační i akční prvky.
   - Nasazena moderní čitelná typografie (Google Fonts *Plus Jakarta Sans* a *JetBrains Mono* pro SKU kódy a číselné hodnoty).
-  - Implementován moderní ERP shell: postranní panel (sidebar) s live indikátory stavu obou skladů (*Hradec Králové* a *Třebechovice pod Orebem*), kontextový topbar s drobečkovou navigací a kontrolou stavu DB.
-  - V `product_list.html` zavedeny 4 souhrnné KPI karty (*Celkem položek*, *Aktivní v prodeji*, *Průměrná prodejní cena*, *Průměrná marže*) počítané v reálném čase v `product_web_router.py`.
+  - V `product_list.html` nahrazeny generické 4 karty kompaktním a přehledným vertikálním seznamem metrik pod sebou na levé straně (*Položky v katalogu*, *Aktivní v prodeji*, *Průměrná prodejní cena*, *Průměrná marže dílny*) s barevnými indikátory z palety.
   - Přepracován editační formulář `product_form.html` na čisté dvou-sloupcové rozvržení se strukturovanými poli pro marži, nákupní a prodejní cenu.
+  - Vyřešeno nežádoucí nafukování SVG ikon způsobené mezipamětí prohlížeče přidáním striktních rozměrových atributů `width="16" height="16"`, inline stylu a globální CSS pojistky.
+  - Přepracováno rozvržení na přehledný a vzdušný Top Navigation Bar s live indikátory skladů (Hradec Králové vs. Třebechovice) a maximální šířkou kontejneru 1320px pro přehlednou práci u regálu.
   - Všech 6 automatizovaných testů v `pytest` úspěšně prochází.
+- **2026-10-20 (Oprava typových chyb Pydantic a zesvětlení rozhraní):**
+  - Opravena neshoda typů u validačních pravidel `ge=0` v Pydantic schématech `purchase_price` a `selling_price` v `app/domain/models/product.py` na `ge=Decimal(0)`.
+  - Zesvětleny podkladové plochy rozhraní z příliš tmavé černé na příjemnou, svěží břidlici (`--bg-body: #182234`, `--bg-card: #233148`) s vyšším kontrastem a jasnější typografií.
+  - Ponechány tóny všech 9 barev ze zadané palety, přičemž byly znatelně zesvětleny a rozzářeny pro maximální čitelnost prvků, marží a tlačítek.
+  - Přidán `uv.lock` do `.gitignore`. Všech 6 testů `pytest` úspěšně prochází.
+- **2026-10-20 (Ošetření maximální ceny a chybové hlášky u inputu):**
+  - Identifikována příčina `500 Internal Server Error`: databázový sloupec `Numeric(10, 2)` povoluje maximální částku `99 999 999.99 Kč`. Při zadání vyšší částky docházelo k nevrácení výjimky z databáze (`DataError: numeric field overflow`).
+  - Zavedeno validační pravidlo `le=MAX_PRICE` (`Decimal("99999999.99")`) na úrovni Pydantic schémat i doménové služby `ProductService`.
+  - Do webového formuláře `product_form.html` přidány atributy `max="99999999.99"` a inline vizualizace chyb u konkrétních polí (`.input-error`, `.field-error`).
+  - Router `product_web_router.py` a repozitář byly zabezpečeny: chyby `DataError` a `SQLAlchemyError` jsou bezpečně zachyceny s rollbackem transakce a vráceny jako HTTP 422 s chybovou hláškou přímo u inputu ceny.
+  - Rozšířena sada automatizovaných testů v `tests/test_products.py` na celkových 9 testů (pokrývající limit cen v API, při zakládání i editaci produktu). Všech 9 testů prochází.
+
+
+
 

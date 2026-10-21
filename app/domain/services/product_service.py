@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
@@ -40,9 +41,16 @@ class ProductService:
         if existing:
             raise DuplicateProductCodeError(dto.code)
 
-        # 2. Kontrola nezápornosti cen
-        if dto.purchase_price < 0 or dto.selling_price < 0:
-            raise InvalidPriceError("Ceny nesmí být záporné.")
+        # 2. Kontrola platnosti a limitů cen
+        MAX_PRICE = Decimal("99999999.99")
+        if dto.purchase_price < 0:
+            raise InvalidPriceError("Nákupní cena nesmí být záporná.", field="purchase_price")
+        if dto.purchase_price > MAX_PRICE:
+            raise InvalidPriceError("Nákupní cena nesmí překročit 99 999 999,99 Kč.", field="purchase_price")
+        if dto.selling_price < 0:
+            raise InvalidPriceError("Prodejní cena nesmí být záporná.", field="selling_price")
+        if dto.selling_price > MAX_PRICE:
+            raise InvalidPriceError("Prodejní cena nesmí překročit 99 999 999,99 Kč.", field="selling_price")
 
         # 3. Vytvoření ORM entity
         product = Product(
@@ -61,10 +69,17 @@ class ProductService:
         product = self.get_product(product_id)
 
         # Validace cen, pokud se mění
-        if dto.purchase_price is not None and dto.purchase_price < 0:
-            raise InvalidPriceError("Nákupní cena nesmí být záporná.")
-        if dto.selling_price is not None and dto.selling_price < 0:
-            raise InvalidPriceError("Prodejní cena nesmí být záporná.")
+        MAX_PRICE = Decimal("99999999.99")
+        if dto.purchase_price is not None:
+            if dto.purchase_price < 0:
+                raise InvalidPriceError("Nákupní cena nesmí být záporná.", field="purchase_price")
+            if dto.purchase_price > MAX_PRICE:
+                raise InvalidPriceError("Nákupní cena nesmí překročit 99 999 999,99 Kč.", field="purchase_price")
+        if dto.selling_price is not None:
+            if dto.selling_price < 0:
+                raise InvalidPriceError("Prodejní cena nesmí být záporná.", field="selling_price")
+            if dto.selling_price > MAX_PRICE:
+                raise InvalidPriceError("Prodejní cena nesmí překročit 99 999 999,99 Kč.", field="selling_price")
 
         if dto.name is not None:
             product.name = dto.name
