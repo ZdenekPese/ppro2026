@@ -1,5 +1,6 @@
 from decimal import Decimal
 from datetime import datetime
+from typing import Dict, List, TypedDict
 from app.core.database import SessionLocal
 from app.infrastructure.db.models import (
     Product,
@@ -13,7 +14,36 @@ from app.infrastructure.db.models import (
     product_categories,
 )
 
-SAMPLE_CATEGORIES = [
+
+class StockQuant(TypedDict):
+    physical: int
+    reserved: int
+
+
+class SampleProductDict(TypedDict):
+    code: str
+    name: str
+    description: str
+    purchase_price: Decimal
+    selling_price: Decimal
+    min_stock_level: int
+    categories: List[str]
+    stocks: Dict[str, StockQuant]
+
+
+class SampleCategoryDict(TypedDict):
+    name: str
+    description: str
+
+
+class SampleWarehouseDict(TypedDict):
+    code: str
+    name: str
+    location: str
+    is_primary: bool
+
+
+SAMPLE_CATEGORIES: List[SampleCategoryDict] = [
     {
         "name": "Pro batolata",
         "description": "Bezpečné hračky pro nejmenší děti se zaoblenými hranami a netoxickými povrchy.",
@@ -36,7 +66,7 @@ SAMPLE_CATEGORIES = [
     },
 ]
 
-SAMPLE_WAREHOUSES = [
+SAMPLE_WAREHOUSES: List[SampleWarehouseDict] = [
     {
         "code": "WH-HK",
         "name": "Centrální sklad Hradec Králové",
@@ -52,7 +82,7 @@ SAMPLE_WAREHOUSES = [
 ]
 
 # Přesně 25 pečlivě vybraných, reálných a tradičních dřevěných hraček Dřevěnky s.r.o.
-SAMPLE_PRODUCTS = [
+SAMPLE_PRODUCTS: List[SampleProductDict] = [
     # 1. Káči a tahací hračky
     {
         "code": "KAC-001",
@@ -479,7 +509,7 @@ def seed_database() -> None:
         stocks_seeded = 0
         for item in SAMPLE_PRODUCTS:
             product = products_by_code[item["code"]]
-            for wh_code, quant_data in item.get("stocks", {}).items():
+            for wh_code, quant_data in item["stocks"].items():
                 warehouse = warehouses_by_code.get(wh_code)
                 if not warehouse:
                     continue

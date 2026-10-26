@@ -603,6 +603,7 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - **Kurátorování katalogu na 25 reprezentativních dřevěných hraček:**
     - Odstraněny všechny nadbytečné a dočasné testovací položky z databáze.
     - Rozšířen seedovací skript `app/infrastructure/db/seed.py` na přesně 25 unikátních tradičních dřevěných hraček (*Dřevěnka s.r.o.*) pokrývajících všech 5 kategorií s reálnými popisy, cenami a skladovými stavy.
+    - Zavedeny striktní `TypedDict` struktury (`SampleProductDict`, `StockQuant`, `SampleCategoryDict`, `SampleWarehouseDict`) pro 100% statickou typovou kontrolu bez varování type checkera.
     - Doplněna session fixture do `tests/conftest.py` garantující zachování čistého katalogu i po běhu testovací sady.
 
 
