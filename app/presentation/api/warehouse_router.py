@@ -36,7 +36,7 @@ def get_warehouse_service(db: Session = Depends(get_db)) -> WarehouseService:
 def list_warehouses(
     service: WarehouseService = Depends(get_warehouse_service),
 ):
-    """Získání seznamu všech skladů (Hradec Králové, Třebechovice)."""
+    """Získání seznamu všech skladů (Hradec Králové, Třebechovice, dílna)."""
     return service.list_warehouses()
 
 
@@ -74,6 +74,18 @@ def update_warehouse(
     """Úprava parametrů skladu."""
     try:
         return service.update_warehouse(warehouse_id, dto)
+    except WarehouseNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.delete("/warehouses/{warehouse_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_warehouse(
+    warehouse_id: UUID,
+    service: WarehouseService = Depends(get_warehouse_service),
+):
+    """Smazání skladu."""
+    try:
+        service.delete_warehouse(warehouse_id)
     except WarehouseNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 

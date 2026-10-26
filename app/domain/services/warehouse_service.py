@@ -78,6 +78,11 @@ class WarehouseService:
         saved = self.warehouse_repo.update(warehouse)
         return WarehouseResponse.model_validate(saved)
 
+    def delete_warehouse(self, warehouse_id: UUID) -> None:
+        """Smaže sklad z databáze."""
+        warehouse = self.get_warehouse(warehouse_id)
+        self.warehouse_repo.delete(warehouse)
+
     # ==================== Skladové zásoby ====================
 
     def get_stock(self, warehouse_id: UUID, product_id: UUID) -> WarehouseStock:

@@ -79,6 +79,12 @@ SAMPLE_WAREHOUSES: List[SampleWarehouseDict] = [
         "location": "Palackého 12, 503 46 Třebechovice pod Orebem",
         "is_primary": False,
     },
+    {
+        "code": "WH-DILNA",
+        "name": "Truhlářská dílna a mezisklad výroby",
+        "location": "V Domkách 88, 500 09 Hradec Králové",
+        "is_primary": False,
+    },
 ]
 
 # Přesně 25 pečlivě vybraných, reálných a tradičních dřevěných hraček Dřevěnky s.r.o.
@@ -425,7 +431,24 @@ def seed_database() -> None:
     """Naplnění databáze vzorovými sklady, kategoriemi a přesně 25 hračkami Dřevěnky s.r.o."""
     db = SessionLocal()
     try:
-        # 1. Seed skladů (Hradec Králové + Třebechovice)
+        # 1. Odstranění zkušebních skladů mimo povolené (udržení max 5 skladů celkem dle zadání B)
+        valid_wh_codes = set(w["code"] for w in SAMPLE_WAREHOUSES)
+        extra_warehouses = db.query(Warehouse).filter(~Warehouse.code.in_(valid_wh_codes)).all()
+        if extra_warehouses:
+            extra_wh_ids = [w.id for w in extra_warehouses]
+            # Smazat zásoby a testovací objednávky na tyto zkušební sklady
+            db.query(OrderItem).filter(OrderItem.order_id.in_(
+                db.query(Order.id).filter(Order.warehouse_id.in_(extra_wh_ids))
+            )).delete(synchronize_session=False)
+            db.query(Order).filter(Order.warehouse_id.in_(extra_wh_ids)).delete(synchronize_session=False)
+            db.query(WarehouseStock).filter(WarehouseStock.warehouse_id.in_(extra_wh_ids)).delete(synchronize_session=False)
+            db.commit()
+            for ew in extra_warehouses:
+                db.delete(ew)
+            db.commit()
+            print(f"[SEED] Úspěšně odstraněno {len(extra_warehouses)} zkušebních skladů.")
+
+        # Seed skladů (Hradec Králové, Třebechovice, dílna - max 5)
         warehouses_by_code = {}
         for wh_data in SAMPLE_WAREHOUSES:
             wh = db.query(Warehouse).filter(Warehouse.code == wh_data["code"]).first()
@@ -438,6 +461,10 @@ def seed_database() -> None:
                 )
                 db.add(wh)
                 db.flush()
+            else:
+                wh.name = wh_data["name"]
+                wh.location = wh_data["location"]
+                wh.is_primary = wh_data["is_primary"]
             warehouses_by_code[wh.code] = wh
 
         # 2. Seed kategorií

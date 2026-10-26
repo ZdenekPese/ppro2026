@@ -49,6 +49,7 @@ class DuplicateWarehouseCodeError(DomainException):
         super().__init__(f"Sklad s kódem '{code}' již existuje.")
 
 
+
 class StockNotFoundError(DomainException):
     """Výjimka vyvolaná, pokud skladová zásoba nebyla nalezena."""
     def __init__(self, warehouse_id: str, product_id: str):

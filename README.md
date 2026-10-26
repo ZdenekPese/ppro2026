@@ -605,6 +605,16 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Rozšířen seedovací skript `app/infrastructure/db/seed.py` na přesně 25 unikátních tradičních dřevěných hraček (*Dřevěnka s.r.o.*) pokrývajících všech 5 kategorií s reálnými popisy, cenami a skladovými stavy.
     - Zavedeny striktní `TypedDict` struktury (`SampleProductDict`, `StockQuant`, `SampleCategoryDict`, `SampleWarehouseDict`) pro 100% statickou typovou kontrolu bez varování type checkera.
     - Doplněna session fixture do `tests/conftest.py` garantující zachování čistého katalogu i po běhu testovací sady.
+  - **Optimalizace a zpřehlednění skladů (Seed & Správa skladů):**
+    - Identifikována příčina dřívějšího nárůstu skladů v DB: integrační testy dříve vytvářely náhodné testovací sklady `W-XXXXXX` bez následného úklidu.
+    - Zaveden automatický úklid (`finally: client.delete(...)`) v integračních testech skladů a přidán REST endpoint `DELETE /warehouses/{id}` do `WarehouseService` a `warehouse_router.py`.
+    - Vyčištěna databáze od dočasných testovacích skladů.
+    - V seedu nastaveno přesně 3 výchozí reprezentativní sklady (max. do 5, dle zadání a požadavků klienta):
+      1. `WH-HK`: Centrální sklad Hradec Králové (expedice, primární sklad).
+      2. `WH-TREB`: Skladová garáž Třebechovice pod Orebem (sezónní odkladiště).
+      3. `WH-DILNA`: Truhlářská dílna a mezisklad výroby.
+    - Potvrzena volnost pro uživatele: v aplikaci není žádné umělé omezení – uživatel může přes rozhraní či API zakládat i mazat libovolné množství skladů dle svých potřeb.
+
 
 
 

@@ -24,10 +24,41 @@ def test_create_warehouse_duplicate_code_fails(client):
     }
     res1 = client.post("/api/warehouses", json=payload)
     assert res1.status_code == 201
+    created_id = res1.json()["id"]
 
-    res2 = client.post("/api/warehouses", json=payload)
-    assert res2.status_code == 409
-    assert "již existuje" in res2.json()["detail"]
+    try:
+        res2 = client.post("/api/warehouses", json=payload)
+        assert res2.status_code == 409
+        assert "již existuje" in res2.json()["detail"]
+    finally:
+        # Úklid, aby se nehromadily testovací sklady
+        client.delete(f"/api/warehouses/{created_id}")
+
+
+def test_create_and_delete_warehouse(client):
+    """Ověření, že uživatel může volně zakládat i mazat sklady dle libosti."""
+    code = f"WL-{uuid.uuid4().hex[:4].upper()}"
+    res = client.post("/api/warehouses", json={
+        "code": code,
+        "name": f"Nový uživatelský sklad {code}",
+        "location": "Pobočka Liberec",
+        "is_primary": False,
+    })
+    assert res.status_code == 201
+    wh_id = res.json()["id"]
+
+    # Ověříme, že sklad existuje v seznamu
+    list_res = client.get("/api/warehouses")
+    assert any(w["id"] == wh_id for w in list_res.json())
+
+    # Smažeme sklad
+    del_res = client.delete(f"/api/warehouses/{wh_id}")
+    assert del_res.status_code == 204
+
+    # Ověříme, že už neexistuje
+    get_res = client.get(f"/api/warehouses/{wh_id}")
+    assert get_res.status_code == 404
+
 
 
 def test_warehouse_stock_calculations_and_constraints(client):
