@@ -362,7 +362,7 @@ flowchart TD
 
 | **Fáze 5** | **Pohyby a Auditní stopa (`StockMovement`)** *(Dokončeno)* | Vynucení zákazu záporu (`quantity >= 0`). Audit 100 % pohybů (příjem, transfer Hradec-Třebechovice, inventurní vyrovnání). | Zpětná dohledatelnost („kde je ta káča...“) a správa převozů a inventury. |
 | **Fáze 6** | **Zákazníci a Objednávky (`Customer`, `Order`)** *(Dokončeno)* | Rezervace při objednání, neměnnost prodejní ceny v `OrderItem`, fyzický odpis při expedici, zákaz mazání zákazníků. | Kompletní nákupní a expediční proces z e-shopu s ochranou před přeprodejem. |
-| **Fáze 7** | **Reporting a Analytika** | Měsíční obrat po kategoriích, přehled ziskovosti a automatický seznam položek k doobjednání. | Manažerské výkazy pro majitele Petra Doležala. |
+| **Fáze 7** | **Reporting a Analytika** *(Dokončeno)* | Měsíční obrat po kategoriích, přehled ziskovosti sortimentu dřevěných hraček a automatický plán doobjednání a meziskladových převozů (ADR 1). | Manažerský reporting, analytické výkazy a akční plán doplňování zásob pro Petra Doležala. |
 | **Fáze 8** | **Testy, optimalizace a Obhajoba** | Komplexní sada unit/integračních testů v `pytest`, revize SSOT dokumentace, finální verifikace před odevzdáním. | Projekt připravený k bezchybné obhajobě. |
 
 ---
@@ -563,6 +563,44 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Doplněna navigace v `base.html` o odkazy *„Objednávky“* a *„Zákazníci“*, rozšířen `style.css` o styly objednávkových záložek a odznáčků.
   - Rozšířen seedovací skript `app/infrastructure/db/seed.py` o 3 demo zákazníky a 3 reálné objednávky (odeslanou i rezervované).
   - Vytvořena testovací sada `tests/test_orders.py` se 7 unit a integračními testy. Všech 37 testů v projektu úspěšně prochází.
+- **2026-10-26 (Fáze 7 – Reporting a Analytika dokončena):**
+  - **Měsíční obrat po kategoriích (Turnover by Category):**
+    - Implementována doménová logika v `ReportService.get_monthly_category_turnover` vyhodnocující tržby a nákupní náklady za vybraný měsíc a rok.
+    - Zohledněna M:N vazba mezi hračkami a kategoriemi přes `product_categories`: pokud daná hračka patří do více kategorií současně (např. *Buková káča* do *Pro batolata*, *Dárky do 500 Kč* a *Tradiční hračky*), její tržby se plnohodnotně započítávají do každé z těchto kategorií pro vyhodnocení poptávky.
+    - Každá kategorie uvádí: počet prodaných kusů, počet unikátních objednávek, celkové tržby (Kč) spočtené z fixovaných cen `OrderItem`, nákupní náklady dílny, hrubý zisk (Kč), procentuální marži (%) a podíl kategorie na celkových tržbách s vizuálním progress barem.
+  - **Dvourežimový finanční přehled (Ziskovost sortimentu):**
+    - `ReportService.get_financial_summary`: souhrnná bilance e-shopu na celofiremní úrovni bez duplicitního započtení M:N kategorií.
+    - Zahrnuje celkový obrat, nákupní náklady, hrubý zisk, průměrnou marži dílny (v %), celkový počet vyřízených objednávek a průměrnou hodnotu nákupního košíku.
+    - Podporuje přepínání mezi čistě realizovanými tržbami (`DISPATCHED`) a rozšířeným manažerským režimem včetně rozpracovaných otevřených rezervací (`RESERVED`).
+  - **Automatický plán doobjednání a plánování výroby (ADR 1 & Zadání B):**
+    - `ReportService.get_restock_recommendations`: inteligentní vyhodnocení stavu zásob pro centrálu Hradec Králové (`WH-HK`) i sezónní garáž v Třebechovicích pod Orebem (`WH-TREB`).
+    - Automaticky rozlišuje tři logistické scénáře:
+      1. `TRANSFER_FROM_GARAGE`: V Hradci Králové zásoba klesla pod minimum, ale v garáži v Třebechovicích je dostatek volných kusů $\rightarrow$ doporučen vnitroskladový převoz (ADR 1) šetřící poštovné se sestaveným přímým odkazem na formulář převodu (`/movements/new?movement_type=transfer&source_warehouse_id=...&destination_warehouse_id=...&quantity=...`).
+      2. `PRODUCE_IN_WORKSHOP`: Zásoby jsou vyčerpány i v garáži $\rightarrow$ doporučeno zadat do výrobního plánu truhlárny doporučenou dávku kusů s přímým odkazem na formulář příjmu z výroby (`/movements/new?movement_type=receipt...`).
+      3. `TRANSFER_AND_PRODUCE`: Kombinovaná operace (převézt vše z garáže a zbytek dovyrobit).
+    - Stanovení naléhavosti (Urgency): `CRITICAL` (vyprodáno na nulu), `HIGH` (pod 50 % minima), `MEDIUM`.
+  - **TOP nejprodávanější dřevěné hračky:**
+    - `ReportService.get_top_selling_products`: žebříček nejžádanějších výrobků seřazený podle prodaných kusů a realizovaného obratu s odznáčky pořadí `#1`, `#2`, `#3`, SKU kódem, kategoriemi a marží.
+  - **Prezentační vrstva (REST API & Web UI):**
+    - Vytvořen REST API router `app/presentation/api/report_router.py` pokrývající endpointy `GET /api/reports/category-turnover`, `GET /api/reports/financial-summary`, `GET /api/reports/top-products`, `GET /api/reports/restock-recommendations`, `GET /api/reports/comprehensive` a integrován do `app/main.py`.
+    - Vytvořen webový router `app/presentation/web/report_web_router.py` a responzivní šablona `reports.html`:
+      - Interaktivní filtrace podle měsíce a roku s možností zobrazení celého roku.
+      - 5 metrických KPI karet s vektorovými SVG ikonami a indikátory.
+      - Tabulka obratu kategorií s dvoubarevnými progress bary.
+      - Karty plánu doobjednání s maticí skladů (HK vs. Garáž) a přímými akčními tlačítky.
+      - Tabulka TOP produktů.
+      - Funkce tisku / uložení do PDF (`window.print()`).
+    - Doplněn odkaz na *„Reporty & Analytika“* do globální navigace (`base.html`) s aktivním stavem a zvýšena verze CSS na `20261026_v10`.
+    - Doplněny kompletní vizuální styly v `app/presentation/static/css/style.css` respektující závaznou 9-barevnou paletu, tmavě břidlicový podklad, rádiusy i typografii Plus Jakarta Sans / JetBrains Mono.
+  - **Automatizované testy:**
+    - Vytvořen nový testovací modul `tests/test_reports.py` obsahující 5 integračních testů:
+      1. `test_category_turnover_with_mn_relationship`: ověření výpočtu obratu hračky přiřazené do více kategorií.
+      2. `test_financial_summary_and_modes`: kontrola nedublování tržeb a přepínání rezervací.
+      3. `test_top_selling_products`: ověření řazení žebříčku.
+      4. `test_restock_recommendation_logic`: ověření logiky transferu z garáže vs. výroby v dílně.
+      5. `test_web_reports_dashboard_view`: ověření HTTP 200 a správného vykreslení webového rozhraní.
+    - Všech 42 testů v projektu úspěšně prochází (`pytest`).
+
 
 
 

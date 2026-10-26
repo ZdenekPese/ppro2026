@@ -19,7 +19,7 @@
         }
     </style>
     
-    <link rel="stylesheet" href="/static/css/style.css?v=20261021_v9">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261026_v10">
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -51,6 +51,9 @@
                         </a>
                         <a href="/customers" class="nav-link {% if request.url.path.startswith('/customers') %}active{% endif %}">
                             Zákazníci
+                        </a>
+                        <a href="/reports" class="nav-link {% if request.url.path.startswith('/reports') %}active{% endif %}">
+                            Reporty &amp; Analytika
                         </a>
                         <a href="/docs" target="_blank" class="nav-link">
                             REST API (Swagger)

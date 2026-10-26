@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}Reporty & Analytika &bull; Dřevěnka s.r.o.{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-left">
+        <h1 class="page-title">Manažerský reporting &amp; Analytika prodeje</h1>
+        <p class="page-subtitle">
+            Přehled měsíčního obratu po kategoriích, ziskovosti sortimentu dřevěných hraček a automatický plán doobjednání a převozů (ADR 1).
+        </p>
+
+        <!-- Filtrační formulář období -->
+        <form method="get" action="/reports" class="reports-filter-form">
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="filter-month" class="filter-label">Měsíc:</label>
+                    <select id="filter-month" name="month" class="form-select filter-select">
+                        <option value="0" {% if not selected_month %}selected{% endif %}>Celý rok (všechny měsíce)</option>
+                        {% for opt in months_options %}
+                            <option value="{{ opt.value }}" {% if selected_month == opt.value %}selected{% endif %}>
+                                {{ opt.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-year" class="filter-label">Rok:</label>
+                    <select id="filter-year" name="year" class="form-select filter-select">
+                        {% for y in available_years %}
+                            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group-checkbox">
+                    <label class="checkbox-label" title="Zahrnout i objednávky se stavem RESERVED (přijaté z e-shopu, čekající na zabalení)">
+                        <input type="checkbox" name="include_reserved" value="true" {% if include_reserved %}checked{% endif %}>
+                        <span>Zahrnout i rezervace (otevřené objednávky)</span>
+                    </label>
+                </div>
+
+                <div class="filter-group-actions">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        <span>Filtrovat</span>
+                    </button>
+                    <a href="/reports" class="btn btn-secondary btn-sm" title="Resetovat na výchozí období">Reset</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="header-actions">
+        <button onclick="window.print()" class="btn btn-secondary" title="Vytisknout nebo uložit jako PDF výkaz">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Tisk výkazu</span>
+        </button>
+        <a href="#restock-section" class="btn btn-accent" title="Přejít na doporučení k doobjednání">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>Plán doobjednání ({{ restock_recommendations|length }})</span>
+        </a>
+    </div>
+</div>
+
+<!-- Období badge -->
+<div class="report-period-banner">
+    <div class="period-badge">
+        <span class="period-dot"></span>
+        <span class="period-text">Vyhodnocované období: <strong>{{ summary.period_label }}</strong></span>
+    </div>
+    {% if include_reserved %}
+        <span class="badge-soft badge-reserved-soft">Režim: Včetně otevřených rezervací</span>
+    {% else %}
+        <span class="badge-soft badge-dispatched-soft">Režim: Pouze realizované tržby (odeslané balíky)</span>
+    {% endif %}
+</div>
+
+<!-- 5 KPI karet: Finanční souhrn za období -->
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <div class="kpi-icon icon-revenue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+        </div>
+        <div class="kpi-content">
+            <span class="kpi-label">Celkový obrat (Tržby)</span>
+            <span class="kpi-value text-accent">{{ "%.2f"|format(summary.total_revenue) }} Kč</span>
+            <span class="kpi-subtext">z fixovaných cen položek objednávek</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon icon-cost">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+        </div>
+        <div class="kpi-content">
+            <span class="kpi-label">Nákupní náklady dílny</span>
+            <span class="kpi-value text-dim">{{ "%.2f"|format(summary.total_cost) }} Kč</span>
+            <span class="kpi-subtext">hodnota materiálu a výroby prodaných kusů</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon icon-profit">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+        </div>
+        <div class="kpi-content">
+            <span class="kpi-label">Hrubý zisk sortimentu</span>
+            <span class="kpi-value text-teal">{{ "%.2f"|format(summary.total_gross_profit) }} Kč</span>
+            <span class="kpi-subtext">tržby mínus nákupní náklady</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon icon-margin">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+            </svg>
+        </div>
+        <div class="kpi-content">
+            <span class="kpi-label">Průměrná marže truhlárny</span>
+            <span class="kpi-value text-cyan">{{ summary.average_margin_percentage }} %</span>
+            <span class="kpi-subtext">průměrná ziskovost prodaného sortimentu</span>
+        </div>
+    </div>
+
+    <div class="kpi-card">
+        <div class="kpi-icon icon-orders">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+        </div>
+        <div class="kpi-content">
+            <span class="kpi-label">Objednávky &amp; Prodané kusy</span>
+            <span class="kpi-value">{{ summary.total_dispatched_orders }} obj. / {{ summary.total_items_sold }} ks</span>
+            <span class="kpi-subtext">průměrná hodnota objednávky: {{ "%.0f"|format(summary.average_order_value) }} Kč</span>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SEKCE 1: MĚSÍČNÍ OBRAT PO KATEGORIÍCH ==================== -->
+<div class="card report-section-card">
+    <div class="card-header-flex">
+        <div>
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;vertical-align:-3px;margin-right:6px;">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                Obrat a ziskovost po kategoriích hraček
+            </h2>
+            <p class="section-subtitle">
+                Tržby rozdělené podle kategorií pro vyhodnocení úspěšnosti sortimentu.
+                Vzhledem k M:N vazbě započítává každá kategorie tržby produktů, které do ní náleží.
+            </p>
+        </div>
+        <span class="badge-neutral">{{ categories|length }} sledovaných kategorií</span>
+    </div>
+
+    {% if categories %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 25%;">Kategorie hraček</th>
+                    <th style="width: 12%; text-align: right;">Prodané kusy</th>
+                    <th style="width: 12%; text-align: right;">Objednávek</th>
+                    <th style="width: 14%; text-align: right;">Obrat (Tržby)</th>
+                    <th style="width: 13%; text-align: right;">Nákupní náklady</th>
+                    <th style="width: 12%; text-align: right;">Hrubý zisk</th>
+                    <th style="width: 12%; text-align: right;">Marže dílny</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td>
+                        <div class="category-name-cell">
+                            <span class="category-title">{{ cat.category_name }}</span>
+                            <!-- Progress bar podílu na tržbách -->
+                            <div class="share-bar-container" title="Podíl kategorie na tržbách: {{ cat.revenue_share_percentage }} %">
+                                <div class="share-bar-fill" style="width: {{ cat.revenue_share_percentage }}%;"></div>
+                                <span class="share-bar-label">{{ cat.revenue_share_percentage }} % podíl</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-right">
+                        <span class="font-mono font-bold">{{ cat.items_sold_count }} ks</span>
+                    </td>
+                    <td class="text-right font-mono">{{ cat.orders_count }}</td>
+                    <td class="text-right">
+                        <strong class="font-mono text-accent">{{ "%.2f"|format(cat.total_revenue) }} Kč</strong>
+                    </td>
+                    <td class="text-right font-mono text-dim">{{ "%.2f"|format(cat.total_cost) }} Kč</td>
+                    <td class="text-right font-mono text-teal">{{ "%.2f"|format(cat.gross_profit) }} Kč</td>
+                    <td class="text-right">
+                        <span class="badge-margin">{{ cat.margin_percentage }} %</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>V tomto období nebyly zaznamenány žádné prodeje v kategoriích.</p>
+    </div>
+    {% endif %}
+
+    <div class="report-info-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <div class="info-box-text">
+            <strong>Metodika manažerského výpočtu pro M:N vazbu:</strong>
+            Pokud tatáž hračka (např. <em>Buková káča</em>) patří do více kategorií současně (<em>Pro batolata</em> i <em>Dárky do 500 Kč</em>), její tržby se plně připisují do každé z těchto kategorií pro vyhodnocení jejich atraktivity. V souhrnné kartě nahoře jsou tržby a zisk sečteny bez duplicit podle čistého účetnictví e-shopu.
+        </div>
+    </div>
+</div>
+
+<!-- ==================== SEKCE 2: AUTOMATICKÝ SEZNAM K DOOBJEDNÁNÍ A VÝROBĚ (ADR 1) ==================== -->
+<div id="restock-section" class="card report-section-card">
+    <div class="card-header-flex">
+        <div>
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;vertical-align:-3px;margin-right:6px;">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                Doporučení k doobjednání &amp; Plánování výroby (Zadání B &amp; ADR 1)
+            </h2>
+            <p class="section-subtitle">
+                Inteligentní detekce chybějících zásob. Systém automaticky rozlišuje, zda položku převézt ze sezónní Garáže v Třebechovicích (ADR 1), nebo zadat novou várku do truhlárny.
+            </p>
+        </div>
+        <div class="restock-badges-wrap">
+            {% if critical_restock_count > 0 %}
+                <span class="badge-critical">{{ critical_restock_count }} kritických (0 ks)</span>
+            {% endif %}
+            {% if transfer_count > 0 %}
+                <span class="badge-transfer">{{ transfer_count }} možných převozů z garáže</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if restock_recommendations %}
+    <div class="restock-cards-grid">
+        {% for rec in restock_recommendations %}
+        <div class="restock-card urgency-{{ rec.urgency|lower }}">
+            <div class="restock-card-top">
+                <div class="restock-product-header">
+                    <span class="sku-badge">{{ rec.product_code }}</span>
+                    <h3 class="restock-product-name">{{ rec.product_name }}</h3>
+                </div>
+                <div class="restock-urgency-wrap">
+                    {% if rec.urgency == 'CRITICAL' %}
+                        <span class="pill-urgency pill-critical">Kritické (vyprodáno)</span>
+                    {% elif rec.urgency == 'HIGH' %}
+                        <span class="pill-urgency pill-high">Vysoká priorita</span>
+                    {% else %}
+                        <span class="pill-urgency pill-medium">Pod minimem</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Porovnání skladů: Centrála HK vs Garáž Třebechovice -->
+            <div class="restock-stock-matrix">
+                <div class="matrix-item">
+                    <span class="matrix-label">Centrála HK (volné):</span>
+                    <strong class="matrix-val {% if rec.hk_available <= 0 %}text-danger font-bold{% elif rec.hk_available < rec.min_stock_level %}text-accent{% else %}text-teal{% endif %}">
+                        {{ rec.hk_available }} ks
+                    </strong>
+                </div>
+                <div class="matrix-item">
+                    <span class="matrix-label">Garáž Třebechovice:</span>
+                    <strong class="matrix-val text-cyan">{{ rec.treb_available }} ks</strong>
+                </div>
+                <div class="matrix-item">
+                    <span class="matrix-label">Minimální hladina:</span>
+                    <strong class="matrix-val font-mono">{{ rec.min_stock_level }} ks</strong>
+                </div>
+                <div class="matrix-item">
+                    <span class="matrix-label">Celkem volných:</span>
+                    <strong class="matrix-val font-bold {% if rec.total_available < rec.min_stock_level %}text-danger{% else %}text-teal{% endif %}">
+                        {{ rec.total_available }} ks
+                    </strong>
+                </div>
+            </div>
+
+            <!-- Doporučená akce a zdůvodnění -->
+            <div class="restock-action-box action-box-{{ rec.action_type|lower }}">
+                <div class="action-type-pill">
+                    {% if rec.action_type == 'TRANSFER_FROM_GARAGE' %}
+                        <span class="chip-action chip-transfer">Převoz z garáže (ADR 1)</span>
+                    {% elif rec.action_type == 'PRODUCE_IN_WORKSHOP' %}
+                        <span class="chip-action chip-workshop">Zadání výroby v truhlárně</span>
+                    {% else %}
+                        <span class="chip-action chip-combined">Kombinace: Převoz + Výroba</span>
+                    {% endif %}
+                </div>
+                <h4 class="action-title">{{ rec.action_title }}</h4>
+                <p class="action-desc">{{ rec.action_description }}</p>
+
+                <div class="action-footer">
+                    <a href="{{ rec.direct_action_url }}" class="btn btn-sm btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                        <span>
+                            {% if rec.action_type == 'TRANSFER_FROM_GARAGE' %}
+                                Převést {{ rec.recommended_quantity }} ks do HK
+                            {% elif rec.action_type == 'PRODUCE_IN_WORKSHOP' %}
+                                Zaevidovat příjem {{ rec.recommended_quantity }} ks z výroby
+                            {% else %}
+                                Zahájit převoz z garáže
+                            {% endif %}
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state state-success">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;margin-bottom:10px;color:var(--c-9);">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <h3>Všechny zásoby jsou v normě</h3>
+        <p>Žádný produkt v nabídce nevyžaduje převoz z garáže ani mimořádnou výrobu v truhlárně.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ==================== SEKCE 3: TOP NEJPRODÁVANĚJŠÍ DŘEVĚNÉ HRAČKY ==================== -->
+<div class="card report-section-card">
+    <div class="card-header-flex">
+        <div>
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;vertical-align:-3px;margin-right:6px;">
+                    <circle cx="12" cy="8" r="7"></circle>
+                    <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                </svg>
+                TOP nejprodávanější dřevěné hračky
+            </h2>
+            <p class="section-subtitle">
+                Žebříček nejžádanějších výrobků truhlárny seřazený podle prodaných kusů a generovaných tržeb.
+            </p>
+        </div>
+        <span class="badge-neutral">TOP {{ top_products|length }} produktů</span>
+    </div>
+
+    {% if top_products %}
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 8%;">Pořadí</th>
+                    <th style="width: 15%;">Kód (SKU)</th>
+                    <th style="width: 27%;">Název dřevěné hračky</th>
+                    <th style="width: 20%;">Kategorie</th>
+                    <th style="width: 10%; text-align: right;">Prodané kusy</th>
+                    <th style="width: 10%; text-align: right;">Tržby</th>
+                    <th style="width: 10%; text-align: right;">Marže dílny</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in top_products %}
+                <tr>
+                    <td>
+                        <span class="rank-badge rank-{{ loop.index }}">#{{ loop.index }}</span>
+                    </td>
+                    <td>
+                        <span class="sku-badge">{{ prod.product_code }}</span>
+                    </td>
+                    <td>
+                        <strong class="product-title">{{ prod.product_name }}</strong>
+                    </td>
+                    <td>
+                        <div class="tags-list">
+                            {% for c_name in prod.category_names %}
+                                <span class="tag-category">{{ c_name }}</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td class="text-right">
+                        <strong class="font-mono">{{ prod.units_sold }} ks</strong>
+                    </td>
+                    <td class="text-right">
+                        <strong class="font-mono text-accent">{{ "%.2f"|format(prod.total_revenue) }} Kč</strong>
+                    </td>
+                    <td class="text-right">
+                        <span class="badge-margin">{{ prod.margin_percentage }} %</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>Za vybrané období nebyly realizovány žádné prodeje konkrétních hraček.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
