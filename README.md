@@ -600,6 +600,10 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
       4. `test_restock_recommendation_logic`: ověření logiky transferu z garáže vs. výroby v dílně.
       5. `test_web_reports_dashboard_view`: ověření HTTP 200 a správného vykreslení webového rozhraní.
     - Všech 42 testů v projektu úspěšně prochází (`pytest`).
+  - **Kurátorování katalogu na 25 reprezentativních dřevěných hraček:**
+    - Odstraněny všechny nadbytečné a dočasné testovací položky z databáze.
+    - Rozšířen seedovací skript `app/infrastructure/db/seed.py` na přesně 25 unikátních tradičních dřevěných hraček (*Dřevěnka s.r.o.*) pokrývajících všech 5 kategorií s reálnými popisy, cenami a skladovými stavy.
+    - Doplněna session fixture do `tests/conftest.py` garantující zachování čistého katalogu i po běhu testovací sady.
 
 
 

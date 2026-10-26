@@ -10,6 +10,7 @@ from app.infrastructure.db.models import (
     Customer,
     Order,
     OrderItem,
+    product_categories,
 )
 
 SAMPLE_CATEGORIES = [
@@ -50,31 +51,20 @@ SAMPLE_WAREHOUSES = [
     },
 ]
 
+# Přesně 25 pečlivě vybraných, reálných a tradičních dřevěných hraček Dřevěnky s.r.o.
 SAMPLE_PRODUCTS = [
+    # 1. Káči a tahací hračky
     {
         "code": "KAC-001",
         "name": "Dřevěná káča buková",
-        "description": "Tradiční ručně soustružená buková káča s precizním vyvážením a hladkou povrchovou úpravou voskem.",
+        "description": "Tradiční ručně soustružená buková káča s precizním vyvážením a hladkou voskovou úpravou.",
         "purchase_price": Decimal("45.00"),
         "selling_price": Decimal("120.00"),
         "min_stock_level": 10,
         "categories": ["Pro batolata", "Dárky do 500 Kč", "Tradiční hračky"],
         "stocks": {
             "WH-HK": {"physical": 4, "reserved": 1},      # 3 volné
-            "WH-TREB": {"physical": 12, "reserved": 0},  # 12 volných => celkem 15 >= 10 (OK)
-        },
-    },
-    {
-        "code": "VLK-001",
-        "name": "Dřevěný vláček se zvířátky",
-        "description": "Barevný vláček s lokomotivou a třemi odpojitelnými vagónky vezoucími dřevěné figurky zvířátek.",
-        "purchase_price": Decimal("180.00"),
-        "selling_price": Decimal("450.00"),
-        "min_stock_level": 5,
-        "categories": ["Pro batolata", "Dopravní prostředky", "Dárky do 500 Kč"],
-        "stocks": {
-            "WH-HK": {"physical": 2, "reserved": 0},      # 2 volné
-            "WH-TREB": {"physical": 1, "reserved": 0},    # 1 volný => celkem 3 < 5 (DANGER - HOŘÍ)
+            "WH-TREB": {"physical": 12, "reserved": 0},  # 12 volných (převoz z garáže)
         },
     },
     {
@@ -87,9 +77,37 @@ SAMPLE_PRODUCTS = [
         "categories": ["Pro batolata", "Dárky do 500 Kč", "Tradiční hračky"],
         "stocks": {
             "WH-HK": {"physical": 5, "reserved": 1},      # 4 volné
-            "WH-TREB": {"physical": 2, "reserved": 0},    # 2 volné => celkem 6 < 8 (DANGER - HOŘÍ)
+            "WH-TREB": {"physical": 2, "reserved": 0},    # 2 volné => celkem 6 < 8 (výroba)
         },
     },
+    # 2. Vláčky a lokomotivy
+    {
+        "code": "VLK-001",
+        "name": "Dřevěný vláček se zvířátky",
+        "description": "Barevný vláček s lokomotivou a třemi odpojitelnými vagónky vezoucími dřevěné figurky zvířátek.",
+        "purchase_price": Decimal("180.00"),
+        "selling_price": Decimal("450.00"),
+        "min_stock_level": 5,
+        "categories": ["Pro batolata", "Dopravní prostředky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 2, "reserved": 0},      # 2 volné
+            "WH-TREB": {"physical": 1, "reserved": 0},    # 1 volný => celkem 3 < 5
+        },
+    },
+    {
+        "code": "VLK-002",
+        "name": "Parní lokomotiva Masiv",
+        "description": "Detailně vypracovaná velká dřevěná lokomotiva z bukového dřeva s točícími se koly.",
+        "purchase_price": Decimal("240.00"),
+        "selling_price": Decimal("590.00"),
+        "min_stock_level": 4,
+        "categories": ["Dopravní prostředky", "Tradiční hračky"],
+        "stocks": {
+            "WH-HK": {"physical": 3, "reserved": 0},
+            "WH-TREB": {"physical": 3, "reserved": 0},
+        },
+    },
+    # 3. Koníci
     {
         "code": "KON-001",
         "name": "Houpací koník Masiv",
@@ -99,10 +117,24 @@ SAMPLE_PRODUCTS = [
         "min_stock_level": 3,
         "categories": ["Pro batolata", "Tradiční hračky"],
         "stocks": {
-            "WH-HK": {"physical": 4, "reserved": 0},      # 4 volné
-            "WH-TREB": {"physical": 0, "reserved": 0},    # 0 volných => celkem 4 >= 3 (OK)
+            "WH-HK": {"physical": 4, "reserved": 0},
+            "WH-TREB": {"physical": 0, "reserved": 0},
         },
     },
+    {
+        "code": "KON-002",
+        "name": "Malý koník na kolečkách",
+        "description": "Tradiční jezdící koník se zaoblenými tvary ideální pro první krůčky batolat.",
+        "purchase_price": Decimal("110.00"),
+        "selling_price": Decimal("280.00"),
+        "min_stock_level": 6,
+        "categories": ["Pro batolata", "Dárky do 500 Kč", "Tradiční hračky"],
+        "stocks": {
+            "WH-HK": {"physical": 6, "reserved": 0},
+            "WH-TREB": {"physical": 4, "reserved": 0},
+        },
+    },
+    # 4. Kostky a stavebnice
     {
         "code": "KOS-001",
         "name": "Sada dřevěných kostek (50 ks)",
@@ -112,15 +144,255 @@ SAMPLE_PRODUCTS = [
         "min_stock_level": 12,
         "categories": ["Stavebnice a hlavolamy", "Dárky do 500 Kč", "Pro batolata"],
         "stocks": {
-            "WH-HK": {"physical": 8, "reserved": 0},      # 8 volných
-            "WH-TREB": {"physical": 10, "reserved": 0},   # 10 volných => celkem 18 >= 12 (OK)
+            "WH-HK": {"physical": 8, "reserved": 0},
+            "WH-TREB": {"physical": 10, "reserved": 0},
+        },
+    },
+    {
+        "code": "KOS-002",
+        "name": "Velká stavitelská sada (100 ks)",
+        "description": "Komplexní sada přírodních a barevných dřevěných dílů pro stavbu hradů a domečků.",
+        "purchase_price": Decimal("260.00"),
+        "selling_price": Decimal("650.00"),
+        "min_stock_level": 5,
+        "categories": ["Stavebnice a hlavolamy"],
+        "stocks": {
+            "WH-HK": {"physical": 3, "reserved": 0},
+            "WH-TREB": {"physical": 4, "reserved": 0},
+        },
+    },
+    # 5. Autíčka a vozidla
+    {
+        "code": "AUT-001",
+        "name": "Dřevěné autíčko Retro Brouk",
+        "description": "Stylové dřevěné autíčko se zaoblenou karoserií a tichými dřevěnými koly.",
+        "purchase_price": Decimal("85.00"),
+        "selling_price": Decimal("220.00"),
+        "min_stock_level": 8,
+        "categories": ["Dopravní prostředky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 7, "reserved": 0},
+            "WH-TREB": {"physical": 5, "reserved": 0},
+        },
+    },
+    {
+        "code": "AUT-002",
+        "name": "Nákladní automobil s korbou",
+        "description": "Masivní dřevěný náklaďák se sklápěcí korbou pro převoz kostek a drobností.",
+        "purchase_price": Decimal("160.00"),
+        "selling_price": Decimal("390.00"),
+        "min_stock_level": 6,
+        "categories": ["Dopravní prostředky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 4, "reserved": 0},
+            "WH-TREB": {"physical": 6, "reserved": 0},
+        },
+    },
+    {
+        "code": "AUT-003",
+        "name": "Hasičský vůz s žebříkem",
+        "description": "Červený dřevěný hasičský vůz s otočným a výsuvným žebříkem.",
+        "purchase_price": Decimal("210.00"),
+        "selling_price": Decimal("520.00"),
+        "min_stock_level": 4,
+        "categories": ["Dopravní prostředky"],
+        "stocks": {
+            "WH-HK": {"physical": 2, "reserved": 0},
+            "WH-TREB": {"physical": 3, "reserved": 0},
+        },
+    },
+    {
+        "code": "AUT-004",
+        "name": "Policejní hlídkové autíčko",
+        "description": "Kompaktní dřevěné auto s majáčkem z přírodního lakovaného jasanu.",
+        "purchase_price": Decimal("90.00"),
+        "selling_price": Decimal("230.00"),
+        "min_stock_level": 7,
+        "categories": ["Dopravní prostředky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 5, "reserved": 0},
+            "WH-TREB": {"physical": 5, "reserved": 0},
+        },
+    },
+    # 6. Hlavolamy a logické hračky
+    {
+        "code": "HLV-001",
+        "name": "Dřevěný Ježek v kleci",
+        "description": "Legendární český hlavolam z bukového dřeva s vytahovacím ježkem s ostny.",
+        "purchase_price": Decimal("120.00"),
+        "selling_price": Decimal("290.00"),
+        "min_stock_level": 10,
+        "categories": ["Stavebnice a hlavolamy", "Dárky do 500 Kč", "Tradiční hračky"],
+        "stocks": {
+            "WH-HK": {"physical": 8, "reserved": 0},
+            "WH-TREB": {"physical": 8, "reserved": 0},
+        },
+    },
+    {
+        "code": "HLV-002",
+        "name": "Skládací věž s kroužky",
+        "description": "Barevná dřevěná pyramidová věž s navlékacími kroužky různých průměrů.",
+        "purchase_price": Decimal("95.00"),
+        "selling_price": Decimal("240.00"),
+        "min_stock_level": 8,
+        "categories": ["Pro batolata", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 6, "reserved": 0},
+            "WH-TREB": {"physical": 6, "reserved": 0},
+        },
+    },
+    {
+        "code": "HLV-003",
+        "name": "Provlékací sýr s myškou",
+        "description": "Dřevěný žlutý sýr s otvory a dřevěnou myškou na šňůrce pro trénink zručnosti.",
+        "purchase_price": Decimal("75.00"),
+        "selling_price": Decimal("190.00"),
+        "min_stock_level": 8,
+        "categories": ["Pro batolata", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 5, "reserved": 0},
+            "WH-TREB": {"physical": 7, "reserved": 0},
+        },
+    },
+    # 7. Stolní hry a puzzle
+    {
+        "code": "DOM-001",
+        "name": "Obrázkové dřevěné domino",
+        "description": "Klasické domino z bukových destiček s vypalovanými motivy lesních zvířátek.",
+        "purchase_price": Decimal("110.00"),
+        "selling_price": Decimal("260.00"),
+        "min_stock_level": 6,
+        "categories": ["Stavebnice a hlavolamy", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 4, "reserved": 0},
+            "WH-TREB": {"physical": 4, "reserved": 0},
+        },
+    },
+    {
+        "code": "PUZ-001",
+        "name": "Vkládací puzzle Farma",
+        "description": "Dřevěná vkládačka s úchyty pro snadné uchopení malou dětskou ručičkou.",
+        "purchase_price": Decimal("105.00"),
+        "selling_price": Decimal("250.00"),
+        "min_stock_level": 7,
+        "categories": ["Pro batolata", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 5, "reserved": 0},
+            "WH-TREB": {"physical": 5, "reserved": 0},
+        },
+    },
+    {
+        "code": "PUZ-002",
+        "name": "Dřevěný tangram v krabičce",
+        "description": "Staročínský geometrický hlavolam z mořeného dřeva v praktické dřevěné kazetě.",
+        "purchase_price": Decimal("80.00"),
+        "selling_price": Decimal("195.00"),
+        "min_stock_level": 6,
+        "categories": ["Stavebnice a hlavolamy", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 6, "reserved": 0},
+            "WH-TREB": {"physical": 4, "reserved": 0},
+        },
+    },
+    # 8. Letadla a lodě
+    {
+        "code": "LET-001",
+        "name": "Dřevěný dvouplošník",
+        "description": "Klasické letadélko s točící se vrtulí a koly pro malé i velké piloty.",
+        "purchase_price": Decimal("140.00"),
+        "selling_price": Decimal("340.00"),
+        "min_stock_level": 5,
+        "categories": ["Dopravní prostředky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 3, "reserved": 0},
+            "WH-TREB": {"physical": 4, "reserved": 0},
+        },
+    },
+    {
+        "code": "LOD-001",
+        "name": "Dřevěná plachetnice",
+        "description": "Plachetnice s látkovými plachtami z bavlněného plátna a hladkým trupem.",
+        "purchase_price": Decimal("125.00"),
+        "selling_price": Decimal("290.00"),
+        "min_stock_level": 5,
+        "categories": ["Dopravní prostředky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 4, "reserved": 0},
+            "WH-TREB": {"physical": 3, "reserved": 0},
+        },
+    },
+    # 9. Mechanické a tradiční hračky
+    {
+        "code": "MECH-001",
+        "name": "Klapající datel na tyči",
+        "description": "Klasická gravitační hračka. Datel kmitá a sjíždí po kovové tyčce dolů za klapavého zvuku.",
+        "purchase_price": Decimal("70.00"),
+        "selling_price": Decimal("175.00"),
+        "min_stock_level": 8,
+        "categories": ["Tradiční hračky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 6, "reserved": 0},
+            "WH-TREB": {"physical": 6, "reserved": 0},
+        },
+    },
+    {
+        "code": "MECH-002",
+        "name": "Zobající slepičky na podložce",
+        "description": "Dřevěná deska se slepičkami, které kmitáním závaží na šňůrkách zobají zrní.",
+        "purchase_price": Decimal("90.00"),
+        "selling_price": Decimal("225.00"),
+        "min_stock_level": 7,
+        "categories": ["Tradiční hračky", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 5, "reserved": 0},
+            "WH-TREB": {"physical": 5, "reserved": 0},
+        },
+    },
+    # 10. Hudební hračky a loutky
+    {
+        "code": "HUD-001",
+        "name": "Dřevěný dětský xylofon",
+        "description": "Laděný dřevěný xylofon s osmi tóny z javorového dřeva a dvěma paličkami.",
+        "purchase_price": Decimal("150.00"),
+        "selling_price": Decimal("380.00"),
+        "min_stock_level": 6,
+        "categories": ["Pro batolata", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 4, "reserved": 0},
+            "WH-TREB": {"physical": 5, "reserved": 0},
+        },
+    },
+    {
+        "code": "HUD-002",
+        "name": "Dřevěné rumba koule (pár)",
+        "description": "Přírodní chrastítka pro batolata s jemným příjemným zvukem dřevěných kuliček.",
+        "purchase_price": Decimal("60.00"),
+        "selling_price": Decimal("150.00"),
+        "min_stock_level": 10,
+        "categories": ["Pro batolata", "Dárky do 500 Kč"],
+        "stocks": {
+            "WH-HK": {"physical": 7, "reserved": 0},
+            "WH-TREB": {"physical": 8, "reserved": 0},
+        },
+    },
+    {
+        "code": "LOU-001",
+        "name": "Dřevěné loutkové divadélko",
+        "description": "Stolní divadélko s malovanou oponou, kulisami lesa a loutkami Kašpárka a krále.",
+        "purchase_price": Decimal("480.00"),
+        "selling_price": Decimal("1190.00"),
+        "min_stock_level": 3,
+        "categories": ["Tradiční hračky"],
+        "stocks": {
+            "WH-HK": {"physical": 2, "reserved": 0},
+            "WH-TREB": {"physical": 2, "reserved": 0},
         },
     },
 ]
 
 
 def seed_database() -> None:
-    """Naplnění databáze vzorovými sklady, kategoriemi, produkty a zásobami."""
+    """Naplnění databáze vzorovými sklady, kategoriemi a přesně 25 hračkami Dřevěnky s.r.o."""
     db = SessionLocal()
     try:
         # 1. Seed skladů (Hradec Králové + Třebechovice)
@@ -151,7 +423,26 @@ def seed_database() -> None:
                 db.flush()
             categories_by_name[cat.name] = cat
 
-        # 3. Seed produktů a přiřazení kategorií (M:N)
+        # 3. Odstranění nadbytečných / testovacích produktů mimo 25 oficiálních
+        valid_codes = set(item["code"] for item in SAMPLE_PRODUCTS)
+        extra_products = db.query(Product).filter(~Product.code.in_(valid_codes)).all()
+        if extra_products:
+            extra_ids = [p.id for p in extra_products]
+            # Smazat položky objednávek, které mají ForeignKey RESTRICT
+            db.query(OrderItem).filter(OrderItem.product_id.in_(extra_ids)).delete(synchronize_session=False)
+            db.commit()
+            for p in extra_products:
+                db.delete(p)
+            db.commit()
+            print(f"[SEED] Úspěšně odstraněno {len(extra_products)} nadbytečných/testovacích produktů.")
+
+        # Vyčištění případných prázdných objednávek po smazání testovacích položek
+        empty_orders = db.query(Order).filter(~Order.items.any()).all()
+        for eo in empty_orders:
+            db.delete(eo)
+        db.commit()
+
+        # 4. Seed 25 oficiálních produktů a přiřazení kategorií (M:N)
         products_by_code = {}
         inserted_count = 0
         updated_count = 0
@@ -174,12 +465,17 @@ def seed_database() -> None:
                 db.flush()
                 inserted_count += 1
             else:
-                if not product.categories:
-                    product.categories = cat_objs
-                    updated_count += 1
+                product.name = item["name"]
+                product.description = item["description"]
+                product.purchase_price = item["purchase_price"]
+                product.selling_price = item["selling_price"]
+                product.min_stock_level = item["min_stock_level"]
+                product.is_active = True
+                product.categories = cat_objs
+                updated_count += 1
             products_by_code[product.code] = product
 
-        # 4. Seed skladových zásob (WarehouseStock)
+        # 5. Seed skladových zásob (WarehouseStock) pro 25 produktů
         stocks_seeded = 0
         for item in SAMPLE_PRODUCTS:
             product = products_by_code[item["code"]]
@@ -206,13 +502,12 @@ def seed_database() -> None:
                     db.add(stock)
                     stocks_seeded += 1
                 else:
-                    # Aktualizace stávajícího
                     stock.physical_quantity = quant_data["physical"]
                     stock.reserved_quantity = quant_data["reserved"]
 
         db.commit()
 
-        # Seed ukázkových skladových pohybů pro auditní deník (Fáze 5)
+        # 6. Seed ukázkových skladových pohybů pro auditní deník (Fáze 5)
         movements_count = db.query(StockMovement).count()
         if movements_count == 0:
             hk_wh = db.query(Warehouse).filter(Warehouse.code == "WH-HK").first()
@@ -289,10 +584,11 @@ def seed_database() -> None:
 
         print(
             f"[SEED] Úspěšně vloženo {inserted_count} hraček, "
-            f"aktualizováno {updated_count} hraček, zkontrolováno {stocks_seeded} zásob."
+            f"aktualizováno {updated_count} hraček, zkontrolováno {stocks_seeded} zásob. "
+            f"Celkový katalog: přesně 25 dřevěných hraček Dřevěnka s.r.o."
         )
 
-        # Seed zákazníků a objednávek (Fáze 6)
+        # 7. Seed zákazníků a objednávek (Fáze 6)
         if db.query(Customer).count() == 0:
             cust_marie = Customer(
                 first_name="Marie",
@@ -328,7 +624,6 @@ def seed_database() -> None:
             kon_prod = db.query(Product).filter(Product.code == "KON-001").first()
 
             if hk_wh and kac_prod and vlk_prod and kon_prod:
-                # Objednávka 1: Expedovaná
                 ord1 = Order(
                     order_number="OBJ-2026-0001",
                     customer_id=cust_marie.id,
@@ -346,7 +641,6 @@ def seed_database() -> None:
                     ],
                 )
 
-                # Objednávka 2: Rezervovaná (k expedici)
                 ord2 = Order(
                     order_number="OBJ-2026-0002",
                     customer_id=cust_petr.id,
@@ -363,7 +657,6 @@ def seed_database() -> None:
                     ],
                 )
 
-                # Objednávka 3: Rezervovaná (Houpací koník)
                 ord3 = Order(
                     order_number="OBJ-2026-0003",
                     customer_id=cust_jana.id,
