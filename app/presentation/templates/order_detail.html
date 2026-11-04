@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }} &bull; Dřevěnka s.r.o.{% endblock %}
+{% block title %}{{ title }} | Dřevěnka s.r.o.{% endblock %}
 
 {% block content %}
 <div class="content-header">
@@ -20,7 +20,7 @@
         <p class="page-subtitle">
             Přijato dne {{ order.created_at.strftime('%d.%m.%Y v %H:%M') }}
             {% if order.dispatched_at %}
-                &bull; Fyzicky expedováno: {{ order.dispatched_at.strftime('%d.%m.%Y v %H:%M') }}
+                — Fyzicky expedováno: {{ order.dispatched_at.strftime('%d.%m.%Y v %H:%M') }}
             {% endif %}
         </p>
     </div>

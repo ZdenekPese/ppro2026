@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }} &bull; Dřevěnka s.r.o.{% endblock %}
+{% block title %}{{ title }} | Dřevěnka s.r.o.{% endblock %}
 
 {% block content %}
 <div class="content-header">
@@ -16,19 +16,19 @@
                 <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Objednávky k expedici:</span>
                 <strong class="overview-value text-teal">{{ count_reserved }} objednávek</strong>
-                <span class="overview-note">&bull; zarezervováno na skladě, čeká na zabalení</span>
+                <span class="overview-note">zarezervováno na skladě, čeká na zabalení</span>
             </div>
             <div class="overview-row">
                 <span class="overview-dot dot-c7"></span>
                 <span class="overview-label">Úspěšně odesláno:</span>
                 <strong class="overview-value">{{ count_dispatched }} zásilek</strong>
-                <span class="overview-note">&bull; fyzicky odepsáno ze skladových regálů</span>
+                <span class="overview-note">fyzicky odepsáno ze skladových regálů</span>
             </div>
             <div class="overview-row">
                 <span class="overview-dot dot-c1"></span>
                 <span class="overview-label">Celkem v evidenci:</span>
                 <strong class="overview-value">{{ count_all }} objednávek</strong>
-                <span class="overview-note">&bull; z toho {{ count_cancelled }} stornováno bez ztráty zásob</span>
+                <span class="overview-note">z toho {{ count_cancelled }} stornováno bez ztráty zásob</span>
             </div>
         </div>
     </div>

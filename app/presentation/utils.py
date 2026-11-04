@@ -18,3 +18,4 @@ def parse_optional_uuid(val: Optional[Union[UUID, str]]) -> Optional[UUID]:
         except (ValueError, AttributeError):
             return None
     return None
+
