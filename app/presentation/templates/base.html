@@ -19,7 +19,7 @@
         }
     </style>
     
-    <link rel="stylesheet" href="/static/css/style.css?v=20261026_v10">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261104_v12">
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -27,55 +27,115 @@
         <!-- Horní navigační lišta -->
         <header class="navbar">
             <div class="navbar-inner">
-                <div class="navbar-left">
-                    <a href="/" class="brand-link">
+                <div class="navbar-brand-section">
+                    <a href="/" class="brand-link" title="Dřevěnka s.r.o. - Přehled skladu">
                         <span class="brand-badge">DŘEVĚNKA</span>
                         <div class="brand-text">
                             <span class="brand-title">Dřevěnka s.r.o.</span>
                             <span class="brand-subtitle">Skladový systém</span>
                         </div>
                     </a>
-
-                    <nav class="nav-links">
-                        <a href="/products" class="nav-link {% if request.url.path.startswith('/products') %}active{% endif %}">
-                            Katalog hraček
-                        </a>
-                        <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">
-                            Přehled skladu
-                        </a>
-                        <a href="/movements" class="nav-link {% if request.url.path.startswith('/movements') %}active{% endif %}">
-                            Pohyby &amp; Audit
-                        </a>
-                        <a href="/orders" class="nav-link {% if request.url.path.startswith('/orders') %}active{% endif %}">
-                            Objednávky
-                        </a>
-                        <a href="/customers" class="nav-link {% if request.url.path.startswith('/customers') %}active{% endif %}">
-                            Zákazníci
-                        </a>
-                        <a href="/reports" class="nav-link {% if request.url.path.startswith('/reports') %}active{% endif %}">
-                            Reporty &amp; Analytika
-                        </a>
-                        <a href="/docs" target="_blank" class="nav-link">
-                            REST API (Swagger)
-                        </a>
-                        <a href="/api/health" target="_blank" class="nav-link">
-                            Healthcheck
-                        </a>
-                    </nav>
                 </div>
 
+                <!-- Primární navigace (Katalog, Přehled, Pohyby, Objednávky, Zákazníci, Reporty) -->
+                <nav class="nav-links">
+                    <a href="/products" class="nav-link {% if request.url.path.startswith('/products') %}active{% endif %}">
+                        Katalog hraček
+                    </a>
+                    <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">
+                        Přehled skladu
+                    </a>
+                    <a href="/movements" class="nav-link {% if request.url.path.startswith('/movements') %}active{% endif %}">
+                        Pohyby &amp; Audit
+                    </a>
+                    <a href="/orders" class="nav-link {% if request.url.path.startswith('/orders') %}active{% endif %}">
+                        Objednávky
+                    </a>
+                    <a href="/customers" class="nav-link {% if request.url.path.startswith('/customers') %}active{% endif %}">
+                        Zákazníci
+                    </a>
+                    <a href="/reports" class="nav-link {% if request.url.path.startswith('/reports') %}active{% endif %}">
+                        Reporty &amp; Analytika
+                    </a>
+                </nav>
+
+                <!-- Pravá sekce (Skladové uzly, API odkazy a akademický tag) -->
                 <div class="navbar-right">
                     <div class="warehouse-nodes">
                         <div class="node-pill" title="Centrální sklad pro běžnou expedici">
-                            <span class="node-dot dot-primary"></span>
+                            <span class="status-dot dot-primary"></span>
                             <span class="node-name">Hradec Králové</span>
                         </div>
                         <div class="node-pill" title="Sezónní sklad a nadnormativní zásoby">
-                            <span class="node-dot dot-secondary"></span>
+                            <span class="status-dot dot-secondary"></span>
                             <span class="node-name">Garáž Třebechovice</span>
                         </div>
                     </div>
-                    <span class="tag-academic">PPRO 2026</span>
+
+                    <div class="navbar-tech-group">
+                        <a href="/docs" target="_blank" class="tech-badge" title="Interaktivní REST API dokumentace">REST API</a>
+                        <a href="/api/health" target="_blank" class="tech-badge" title="Systémový healthcheck">Health</a>
+                        <span class="tag-academic">PPRO 2026</span>
+                    </div>
+
+                    <!-- Tlačítko mobilního hamburger menu -->
+                    <button type="button" class="navbar-toggle" id="navbarToggle" aria-label="Přepnout navigaci" aria-expanded="false">
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                        <span class="hamburger-line"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobilní a tabletový výsuvný panel -->
+            <div class="mobile-drawer" id="mobileDrawer">
+                <div class="mobile-drawer-inner">
+                    <div class="mobile-section-label">Hlavní menu</div>
+                    <nav class="mobile-nav-list">
+                        <a href="/products" class="mobile-nav-link {% if request.url.path.startswith('/products') %}active{% endif %}">
+                            <span class="mobile-nav-icon">🧸</span>
+                            <span>Katalog hraček</span>
+                        </a>
+                        <a href="/" class="mobile-nav-link {% if request.url.path == '/' %}active{% endif %}">
+                            <span class="mobile-nav-icon">📊</span>
+                            <span>Přehled skladu</span>
+                        </a>
+                        <a href="/movements" class="mobile-nav-link {% if request.url.path.startswith('/movements') %}active{% endif %}">
+                            <span class="mobile-nav-icon">📦</span>
+                            <span>Pohyby &amp; Audit</span>
+                        </a>
+                        <a href="/orders" class="mobile-nav-link {% if request.url.path.startswith('/orders') %}active{% endif %}">
+                            <span class="mobile-nav-icon">🛒</span>
+                            <span>Objednávky</span>
+                        </a>
+                        <a href="/customers" class="mobile-nav-link {% if request.url.path.startswith('/customers') %}active{% endif %}">
+                            <span class="mobile-nav-icon">👥</span>
+                            <span>Zákazníci</span>
+                        </a>
+                        <a href="/reports" class="mobile-nav-link {% if request.url.path.startswith('/reports') %}active{% endif %}">
+                            <span class="mobile-nav-icon">📈</span>
+                            <span>Reporty &amp; Analytika</span>
+                        </a>
+                    </nav>
+
+                    <div class="mobile-section-label">Stav poboček</div>
+                    <div class="mobile-warehouses">
+                        <div class="node-pill">
+                            <span class="status-dot dot-primary"></span>
+                            <span>Centrální sklad Hradec Králové</span>
+                        </div>
+                        <div class="node-pill">
+                            <span class="status-dot dot-secondary"></span>
+                            <span>Sezónní garáž Třebechovice</span>
+                        </div>
+                    </div>
+
+                    <div class="mobile-section-label">Vývojářské nástroje</div>
+                    <div class="mobile-tech-actions">
+                        <a href="/docs" target="_blank" class="tech-badge-mobile">REST API (Swagger)</a>
+                        <a href="/api/health" target="_blank" class="tech-badge-mobile">Healthcheck</a>
+                        <span class="tag-academic">PPRO 2026</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -106,5 +166,28 @@
             </div>
         </footer>
     </div>
+
+    <!-- Interaktivní obsluha responzivního menu -->
+    <script>
+        (function() {
+            var toggleBtn = document.getElementById('navbarToggle');
+            var drawer = document.getElementById('mobileDrawer');
+            if (toggleBtn && drawer) {
+                toggleBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var isOpen = drawer.classList.toggle('is-open');
+                    toggleBtn.classList.toggle('is-active', isOpen);
+                    toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                });
+                document.addEventListener('click', function(e) {
+                    if (!drawer.contains(e.target) && !toggleBtn.contains(e.target)) {
+                        drawer.classList.remove('is-open');
+                        toggleBtn.classList.remove('is-active');
+                        toggleBtn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

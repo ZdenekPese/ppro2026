@@ -282,11 +282,11 @@
                 </div>
                 <div class="restock-urgency-wrap">
                     {% if rec.urgency == 'CRITICAL' %}
-                        <span class="pill-urgency pill-critical">Kritické (vyprodáno)</span>
+                        <span class="pill-urgency pill-critical"><span class="status-dot dot-danger"></span> Kritické (vyprodáno)</span>
                     {% elif rec.urgency == 'HIGH' %}
-                        <span class="pill-urgency pill-high">Vysoká priorita</span>
+                        <span class="pill-urgency pill-high"><span class="status-dot dot-warning"></span> Vysoká priorita</span>
                     {% else %}
-                        <span class="pill-urgency pill-medium">Pod minimem</span>
+                        <span class="pill-urgency pill-medium"><span class="status-dot dot-warning"></span> Dochází</span>
                     {% endif %}
                 </div>
             </div>

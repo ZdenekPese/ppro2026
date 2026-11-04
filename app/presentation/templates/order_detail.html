@@ -8,13 +8,13 @@
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
             <h1 class="page-title" style="margin-bottom: 0;">Objednávka {{ order.order_number }}</h1>
             {% if order.status == 'RESERVED' %}
-                <span class="order-pill pill-reserved">Rezervováno (K expedici)</span>
+                <span class="order-pill pill-reserved"><span class="status-dot dot-warning"></span> Rezervováno (K expedici)</span>
             {% elif order.status == 'DISPATCHED' %}
-                <span class="order-pill pill-dispatched">Odesláno zákazníkovi</span>
+                <span class="order-pill pill-dispatched"><span class="status-dot dot-ok"></span> Odesláno zákazníkovi</span>
             {% elif order.status == 'CANCELLED' %}
-                <span class="order-pill pill-cancelled">Stornováno</span>
+                <span class="order-pill pill-cancelled"><span class="status-dot dot-danger"></span> Stornováno</span>
             {% else %}
-                <span class="order-pill">{{ order.status }}</span>
+                <span class="order-pill"><span class="status-dot dot-secondary"></span> {{ order.status }}</span>
             {% endif %}
         </div>
         <p class="page-subtitle">

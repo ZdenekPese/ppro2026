@@ -140,19 +140,19 @@
                     <td style="text-align: center;">
                         {% if o.status == 'RESERVED' %}
                             <span class="order-pill pill-reserved">
-                                K expedici
+                                <span class="status-dot dot-warning"></span> K expedici
                             </span>
                         {% elif o.status == 'DISPATCHED' %}
                             <span class="order-pill pill-dispatched">
-                                Odesláno
+                                <span class="status-dot dot-ok"></span> Odesláno
                             </span>
                         {% elif o.status == 'CANCELLED' %}
                             <span class="order-pill pill-cancelled">
-                                Stornováno
+                                <span class="status-dot dot-danger"></span> Stornováno
                             </span>
                         {% else %}
                             <span class="order-pill">
-                                {{ o.status }}
+                                <span class="status-dot dot-secondary"></span> {{ o.status }}
                             </span>
                         {% endif %}
                     </td>

@@ -89,23 +89,26 @@ body {
   position: sticky;
   top: 0;
   z-index: 50;
+  backdrop-filter: blur(8px);
 }
 
 .navbar-inner {
-  max-width: 1320px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  height: 68px;
+  height: 70px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
 }
 
-.navbar-left {
+.navbar-left,
+.navbar-brand-section {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
+  flex-shrink: 0;
 }
 
 .brand-link {
@@ -149,70 +152,72 @@ body {
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
 }
 
 .nav-link {
-  color: var(--text-muted);
+  color: #cbd5e1;
   text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.88rem;
+  font-weight: 600;
   padding: 0.5rem 0.85rem;
-  border-radius: var(--radius-sm);
+  border-radius: 9999px;
   transition: all 0.15s ease-in-out;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
   color: #fff;
-  background-color: rgba(69, 94, 137, 0.2);
+  background-color: rgba(69, 94, 137, 0.25);
 }
 
 .nav-link.active {
   color: #fff;
-  background-color: rgba(46, 111, 149, 0.25);
-  border: 1px solid rgba(0, 145, 173, 0.4);
-  font-weight: 600;
+  background-color: rgba(18, 200, 232, 0.16);
+  border: 1px solid rgba(18, 200, 232, 0.45);
+  box-shadow: 0 0 10px rgba(18, 200, 232, 0.15);
+  font-weight: 700;
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
+  flex-shrink: 0;
 }
 
 .warehouse-nodes {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
-.node-pill {
+.navbar-tech-group {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  background-color: rgba(35, 49, 72, 0.85);
-  border: 1px solid var(--border-color);
-  padding: 0.35rem 0.65rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-dim);
+  border: 1px solid var(--border-subtle);
+  padding: 0.28rem 0.55rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  transition: all 0.15s ease-in-out;
+  white-space: nowrap;
 }
 
-.node-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.dot-primary {
-  background-color: var(--c-9);
-  box-shadow: 0 0 8px var(--c-9);
-}
-
-.dot-secondary {
-  background-color: var(--c-7);
+.tech-badge:hover {
+  color: #fff;
+  border-color: var(--c-9);
+  background-color: rgba(18, 200, 232, 0.12);
 }
 
 .tag-academic {
@@ -220,8 +225,158 @@ body {
   font-weight: 600;
   color: var(--text-dim);
   border: 1px solid var(--border-subtle);
-  padding: 0.3rem 0.55rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+/* Tlačítko mobilního hamburger menu */
+.navbar-toggle {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.navbar-toggle:hover {
+  background-color: rgba(69, 94, 137, 0.2);
+  border-color: var(--c-9);
+}
+
+.hamburger-line {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 2px;
+  transition: all 0.25s ease-in-out;
+}
+
+.navbar-toggle.is-active .hamburger-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.navbar-toggle.is-active .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.navbar-toggle.is-active .hamburger-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Mobilní a tabletový výsuvný panel (Drawer) */
+.mobile-drawer {
+  display: none;
+  background-color: #192335;
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.25s ease;
+  opacity: 0;
+}
+
+.mobile-drawer.is-open {
+  max-height: 85vh;
+  opacity: 1;
+  overflow-y: auto;
+}
+
+.mobile-drawer-inner {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.mobile-section-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
+.mobile-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background-color: rgba(35, 49, 72, 0.45);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.15s ease-in-out;
+}
+
+.mobile-nav-link:hover {
+  background-color: rgba(69, 94, 137, 0.35);
+  color: var(--c-9);
+}
+
+.mobile-nav-link.active {
+  background-color: rgba(18, 200, 232, 0.18);
+  border-color: rgba(18, 200, 232, 0.5);
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.mobile-nav-icon {
+  font-size: 1.1rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.mobile-warehouses {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mobile-tech-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tech-badge-mobile {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  text-decoration: none;
+  background-color: rgba(35, 49, 72, 0.6);
+  transition: all 0.15s;
+}
+
+.tech-badge-mobile:hover {
+  background-color: rgba(18, 200, 232, 0.18);
+  border-color: var(--c-9);
+  color: #fff;
 }
 
 /* ==========================================================================
@@ -1148,58 +1303,108 @@ body {
   background-color: rgba(183, 9, 76, 0.08) !important;
 }
 
-.stock-pill {
+/* ==========================================================================
+   SJEDNOCENÝ DESIGN SYSTÉM: OVÁLY (PILLS) A STAVOVÉ TEČKY (DOTS)
+   ========================================================================== */
+
+/* Jednotné stavové tečky (Dots) - přesné 8px kruhy */
+.status-dot,
+.node-dot,
+.overview-dot {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  min-height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.dot-ok {
+  background-color: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.45);
+}
+
+.dot-warning {
+  background-color: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.45);
+}
+
+.dot-danger,
+.dot-critical {
+  background-color: #f43f5e;
+  box-shadow: 0 0 6px rgba(244, 63, 94, 0.45);
+}
+
+.dot-danger-pulse {
+  background-color: #f43f5e;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.85);
+  animation: pulse-danger 1.6s infinite ease-in-out;
+}
+
+.dot-info {
+  background-color: #38bdf8;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.45);
+}
+
+.dot-primary {
+  background-color: var(--c-9);
+  box-shadow: 0 0 6px var(--c-9);
+}
+
+.dot-secondary {
+  background-color: #818cf8;
+  box-shadow: 0 0 6px rgba(129, 140, 248, 0.45);
+}
+
+.dot-transfer {
+  background-color: #c084fc;
+  box-shadow: 0 0 6px rgba(192, 132, 252, 0.45);
+}
+
+.overview-dot.dot-c1 { background-color: var(--c-1); }
+.overview-dot.dot-c5 { background-color: var(--c-5); }
+.overview-dot.dot-c7 { background-color: var(--c-7); }
+.overview-dot.dot-c9 { background-color: var(--c-9); box-shadow: 0 0 6px var(--c-9); }
+
+/* Jednotné ovály (Pills / Badges) - dokonalé zaoblení 9999px */
+.stock-pill,
+.order-pill,
+.movement-pill,
+.pill-urgency,
+.node-pill,
+.warehouse-status-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.28rem 0.72rem;
+  border-radius: 9999px; /* Dokonalý sjednocený ovál */
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.25;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
 }
 
 .pill-danger {
-  background-color: rgba(244, 63, 94, 0.16);
+  background-color: rgba(244, 63, 94, 0.15);
   border: 1px solid rgba(244, 63, 94, 0.45);
   color: #fca5a5;
 }
 
 .pill-warning {
-  background-color: rgba(245, 158, 11, 0.16);
+  background-color: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.45);
   color: #fcd34d;
 }
 
 .pill-ok {
-  background-color: rgba(18, 200, 232, 0.14);
-  border: 1px solid rgba(18, 200, 232, 0.4);
-  color: #5eead4;
-}
-
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.dot-danger {
-  background-color: #f43f5e;
-}
-
-.dot-warning {
-  background-color: #f59e0b;
-}
-
-.dot-ok {
-  background-color: #14b8a6;
-}
-
-.dot-danger-pulse {
-  background-color: #f43f5e;
-  box-shadow: 0 0 8px #f43f5e;
-  animation: pulse-danger 1.5s infinite;
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
 }
 
 .text-danger {
@@ -1301,39 +1506,32 @@ body {
 
 /* Odznáčky typů pohybů */
 .movement-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .pill-receipt {
-  color: #12c8e8;
-  background-color: rgba(18, 200, 232, 0.14);
-  border: 1px solid rgba(18, 200, 232, 0.35);
+  color: #6ee7b7;
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.45);
 }
 
 .pill-dispatch {
-  color: #e28ac2;
-  background-color: rgba(189, 68, 140, 0.16);
-  border: 1px solid rgba(189, 68, 140, 0.4);
+  color: #7dd3fc;
+  background-color: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.45);
 }
 
 .pill-transfer {
-  color: #60c5fa;
-  background-color: rgba(69, 152, 203, 0.16);
-  border: 1px solid rgba(69, 152, 203, 0.4);
+  color: #e9d5ff;
+  background-color: rgba(192, 132, 252, 0.15);
+  border: 1px solid rgba(192, 132, 252, 0.45);
 }
 
 .pill-adjustment {
-  color: #fbbf24;
-  background-color: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fcd34d;
+  background-color: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.45);
 }
 
 /* Značky skladů a množství */
@@ -1484,33 +1682,26 @@ body {
 }
 
 .order-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .pill-reserved {
-  color: #fbbf24;
+  color: #fcd34d;
   background-color: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(245, 158, 11, 0.45);
 }
 
 .pill-dispatched {
-  color: #12c8e8;
-  background-color: rgba(18, 200, 232, 0.15);
-  border: 1px solid rgba(18, 200, 232, 0.4);
+  color: #6ee7b7;
+  background-color: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.45);
 }
 
 .pill-cancelled {
-  color: #94a3b8;
-  background-color: rgba(148, 163, 184, 0.15);
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #fca5a5;
+  background-color: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.45);
 }
 
 .transfer-alert-chip {
@@ -1976,31 +2167,26 @@ body {
 }
 
 .pill-urgency {
-  display: inline-block;
-  padding: 0.2rem 0.55rem;
-  border-radius: 12px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .pill-critical {
-  background: rgba(244, 63, 94, 0.2);
-  color: #fb7185;
-  border: 1px solid #f43f5e;
+  background-color: rgba(244, 63, 94, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(244, 63, 94, 0.45);
 }
 
 .pill-high {
-  background: rgba(230, 38, 120, 0.2);
-  color: #f472b6;
-  border: 1px solid #e62678;
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.45);
 }
 
 .pill-medium {
-  background: rgba(69, 152, 203, 0.2);
-  color: var(--c-7);
-  border: 1px solid var(--c-7);
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.45);
 }
 
 .restock-stock-matrix {
@@ -2141,33 +2327,198 @@ body {
 }
 
 /* ==========================================================================
-   RESPONSIVITA
+   KOMPLEXNÍ RESPONZIVITA (TABLET & MOBIL)
    ========================================================================== */
 
-
-
-@media (max-width: 768px) {
+/* Breakpoint 1: Velké tablety & menší laptopy (do 1140px) */
+@media (max-width: 1140px) {
   .navbar-inner {
-    height: auto;
-    padding: 1rem;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .navbar-left {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.85rem;
-    width: 100%;
+    padding: 0 1.25rem;
+    gap: 1rem;
   }
   .nav-links {
+    display: none; /* Skryjeme namačkanou lištu na tabletech */
+  }
+  .navbar-tech-group {
+    display: none; /* Přesunuto do vysouvacího draweru */
+  }
+  .navbar-toggle {
+    display: flex; /* Zobrazíme čistý hamburger přepínač */
+  }
+  .mobile-drawer {
+    display: block;
+  }
+}
+
+/* Breakpoint 2: Standardní tablety (do 992px) */
+@media (max-width: 992px) {
+  .main-container {
+    padding: 1.5rem 1.25rem;
+  }
+  .content-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.25rem;
+  }
+  .header-left {
+    max-width: 100%;
+  }
+  .overview-vertical-list {
+    max-width: 100%;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .warehouses-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  .critical-items-list {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  .reports-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .reports-charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .order-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .panel-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .search-form {
+    max-width: 100%;
+    width: 100%;
     flex-wrap: wrap;
+  }
+  .records-count {
+    align-self: flex-start;
+  }
+}
+
+/* Breakpoint 3: Mobilní telefony (do 768px) */
+@media (max-width: 768px) {
+  .navbar-inner {
+    height: 62px;
+    padding: 0 1rem;
+  }
+  .warehouse-nodes {
+    display: none; /* Na mobilech skryjeme uzly v horní liště, jsou přehledně v draweru */
+  }
+  .brand-title {
+    font-size: 0.95rem;
+  }
+  .brand-subtitle {
+    font-size: 0.65rem;
+  }
+  .brand-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+  .main-container {
+    padding: 1.25rem 0.85rem;
+  }
+  .page-title {
+    font-size: 1.35rem;
+    line-height: 1.25;
+  }
+  .page-subtitle {
+    font-size: 0.85rem;
+  }
+  .header-actions {
+    flex-direction: column;
     width: 100%;
   }
-  .navbar-right {
+  .header-actions .btn {
     width: 100%;
-    justify-content: space-between;
+    justify-content: center;
+  }
+  .overview-vertical-list {
+    padding: 0.85rem 1rem;
+    gap: 0.5rem;
+  }
+  .overview-row {
+    font-size: 0.82rem;
+    gap: 0.35rem 0.5rem;
+  }
+  .warehouses-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .critical-items-list {
+    grid-template-columns: 1fr;
+  }
+  .critical-card {
+    padding: 0.75rem;
+  }
+  .critical-card-quantities {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .panel-toolbar {
+    padding: 1rem 0.85rem;
+  }
+  .search-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+  .search-input-wrapper {
+    width: 100%;
+  }
+  .category-filter-wrapper,
+  .category-select {
+    width: 100%;
+  }
+  .filter-toggle-wrapper {
+    width: 100%;
+    margin: 0.25rem 0;
+  }
+  .search-form .btn {
+    width: 100%;
+  }
+  .table-responsive {
+    margin: 0 -0.85rem;
+    padding: 0 0.85rem;
+    width: calc(100% + 1.7rem);
+    border-radius: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .inventory-table th,
+  .inventory-table td {
+    padding: 0.6rem 0.5rem;
+    font-size: 0.82rem;
   }
   .form-row {
     grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 0.65rem;
+  }
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .reports-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .restock-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .restock-stock-matrix {
+    grid-template-columns: 1fr;
+  }
+  .app-footer .footer-inner {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
   }
 }

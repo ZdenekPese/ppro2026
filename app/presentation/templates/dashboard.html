@@ -33,7 +33,7 @@
             <div class="overview-row">
                 {% if summary.critical_items_count > 0 %}
                     <span class="overview-dot dot-danger-pulse"></span>
-                    <span class="overview-label text-danger font-bold">Kritický stav („Co hoří“):</span>
+                    <span class="overview-label text-danger font-bold">Kritický stav (dochází):</span>
                     <strong class="overview-value text-danger">{{ summary.critical_items_count }} položek</strong>
                     <span class="overview-note text-danger">&bull; disponibilní zásoba klesla pod stanovené minimum!</span>
                 {% else %}
@@ -99,7 +99,7 @@
     <div class="critical-header">
         <div class="critical-title-wrap">
             <span class="pulse-indicator"></span>
-            <h2 class="critical-title">Upozornění truhlárny: {{ summary.critical_items_count }} položek hoří pod minimem</h2>
+            <h2 class="critical-title">Upozornění truhlárny: {{ summary.critical_items_count }} položek dochází</h2>
         </div>
         <span class="critical-subtitle">Okamžitě naplánujte výrobu nebo meziskladový transfer ze sezónní garáže.</span>
     </div>
@@ -185,7 +185,7 @@
                         {% if only_critical %}checked{% endif %}
                         onchange="this.form.submit()"
                     >
-                    <span>Pouze hořící pod minimem</span>
+                    <span>Pouze docházející</span>
                 </label>
             </div>
 
@@ -279,7 +279,7 @@
                     <td style="text-align: center;">
                         {% if item.status == 'danger' %}
                             <span class="stock-pill pill-danger">
-                                <span class="status-dot dot-danger"></span> Hoří pod minimem
+                                <span class="status-dot dot-danger"></span> Dochází
                             </span>
                         {% elif item.status == 'warning' %}
                             <span class="stock-pill pill-warning">

@@ -295,19 +295,28 @@ Design systém staví na vyladěné devítiúrovňové paletě přecházející 
 - **SKU kódy, ceny a časová razítka:** Google Font *JetBrains Mono* (monospaced) pro nekompromisní čitelnost kódů hraček a zarovnání číselných hodnot.
 
 ### 3. Architektura rozhraní (ERP Shell)
-- **Profesionální postranní panel (Sidebar):**
-  - Brand značka Dřevěnka s.r.o. s logem a indikací verze systému.
-  - Vektorová navigace se sémantickými SVG ikonami (Katalog, Sklady, Pohyby, Objednávky, Zákazníci, Reporty, API Swagger).
-  - Přímý status monitor obou skladových uzlů: **Centrální sklad Hradec Králové** a **Sklad Třebechovice pod Orebem** s live indikátorem dostupnosti.
-- **Top Bar a Drobečková navigace:**
-  - Kontextová navigace s indikací aktuální lokace v systému.
-  - Stav spojení na PostgreSQL 16 v reálném čase.
+- **Profesionální horní navigační lišta (Header / Navbar):**
+  - Brand značka Dřevěnka s.r.o. s gradientním odznáčkem a typografickým titulem systému.
+  - Provzdušněná primární navigace s přehlednými zaoblenými pilulkami a vysokým kontrastem (Katalog, Přehled, Pohyby, Objednávky, Zákazníci, Reporty).
+  - Oddělená pravá utility sekce pro skladové uzly (**Centrální sklad Hradec Králové** a **Sklad Třebechovice pod Orebem**), rychlé technické odkazy (`REST API`, `Health`) a akademický tag `PPRO 2026`.
+  - Responzivní hamburger přepínač (`.navbar-toggle`) a plynulý výsuvný panel (`.mobile-drawer`) pro tablety a telefony s dotykovými plochami $\ge 44\text{px}$.
 - **Metrické karty (KPI Overview):**
-  - Okamžitý přehled nad katalogem: *Celkem položek*, *Aktivní v prodeji*, *Průměrná prodejní cena*, *Průměrná marže*.
+  - Okamžitý přehled nad katalogem a sklady: *Celková hodnota zásob*, *Disponibilní zásoba*, *Fyzicky na regálech*, *Kritický stav (dochází)*.
 - **Přehledová tabulka a formuláře:**
   - Bohaté tabulky s jemným hover efektem, monospaced SKU štítky, barevně odlišenými cenovými hladinami a marží.
   - Rychlé fulltextové vyhledávání s okamžitým resetem.
   - Dvou-sloupcové přehledné editační formuláře s inline nápovědou a validací.
+
+### 4. Sjednocený design systém stavů (Tečky a Ovály)
+- **Sjednocené oválné pilulky (Pills):**
+  - Všechny stavové štítky v systému (`.stock-pill`, `.order-pill`, `.movement-pill`, `.pill-urgency`, `.node-pill`, `.warehouse-status-chip`) sdílejí jednotnou geometrii s dokonalým rádiusem `border-radius: 9999px`, paddingem `0.28rem 0.72rem`, písmem `0.76rem / 600` a jednotným poloprůhledným podbarvením.
+- **Sjednocené stavové tečky (Dots):**
+  - Všechny stavové tečky (`.status-dot`, `.node-dot`, `.overview-dot`) mají standardizovaný rozměr $8\times 8\text{ px}$ (`border-radius: 50%`) s vertikálním vycentrováním.
+  - Sémantická paleta: zelená (`.dot-ok` / `#10b981`), oranžovo-žlutá (`.dot-warning` / `#f59e0b`), červená s pulzací (`.dot-danger`, `.dot-danger-pulse` / `#f43f5e`), azurová (`.dot-info`), fialová (`.dot-transfer`) a tyrkysová (`.dot-primary`).
+  - Tečky jsou integrovány do všech stavových pilulek napříč aplikací (objednávky, pohyby, doporučení doobjednání, zákaznické karty i dashboard).
+- **Zpřesněná doménová terminologie:**
+  - Stav skladové hladiny pod minimem je označen přirozenou češtinou jako **„Dochází“** (nahrazující dřívější slangové „Hoří pod minimem“), v logické trojici: *Dochází*, *Blízko minima*, *V pořádku*.
+  - Sjednocen filtr na úvodní stránce na *„Pouze docházející“*.
 
 ---
 
@@ -614,6 +623,26 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
       2. `WH-TREB`: Skladová garáž Třebechovice pod Orebem (sezónní odkladiště).
       3. `WH-DILNA`: Truhlářská dílna a mezisklad výroby.
     - Potvrzena volnost pro uživatele: v aplikaci není žádné umělé omezení – uživatel může přes rozhraní či API zakládat i mazat libovolné množství skladů dle svých potřeb.
+- **2026-11-04 (UI/UX Refactoring, Sjednocení designu a Responzivita):**
+  - **Zpřesnění české terminologie indikátorů zásob:**
+    - Nahrazen neobratný nápis „Hoří pod minimem“ spisovným a výstižným **„Dochází“** v logické škále *Dochází* (červená) $\rightarrow$ *Blízko minima* (žlutá) $\rightarrow$ *V pořádku* (zelená).
+    - Aktualizován checkbox rychlého filtru na *„Pouze docházející“*, text souhrnného ukazatele na *„Kritický stav (dochází)“* a titulek upozornění pro truhlárnu.
+  - **Sjednocení oválů a teček napříč celou aplikací:**
+    - Všechny stavové pilulky (`.stock-pill`, `.order-pill`, `.movement-pill`, `.pill-urgency`, `.node-pill`, `.warehouse-status-chip`) sjednoceny na oválnou geometrii `border-radius: 9999px` s jednotnou výškou, paddingem a typografií.
+    - Sjednoceny všechny stavové a orientační tečky (`.status-dot`, `.node-dot`, `.overview-dot`) na kruhy o přesném průměru $8\text{ px}$ s vertikálním vycentrováním a odpovídajícími barevnými auro-efekty.
+    - Doplněny stavové tečky do pilulek v celém systému (stavy objednávek, typy skladových pohybů, urgence doobjednání i archivní zákazníci).
+  - **Provzdušnění a redesign horní navigační lišty (Header/Navbar):**
+    - Odstraněno namačkání prvků v jednom řádku – navigační lišta rozšířena na šířku 1400px s výškou 70px a jemným backdrop-blur efektem.
+    - Hlavní byznysová navigace (Katalog, Přehled, Pohyby, Objednávky, Zákazníci, Reporty) dostala zaoblené pilulkové záložky s vysokým kontrastem textu.
+    - Technické odkazy (`REST API`, `Health`) a akademický tag odděleny do samostatného pravého utility bloku.
+  - **Plná responzivita pro mobilní telefony a tablety:**
+    - Implementován čistý hamburger přepínač (`.navbar-toggle`) a výsuvný panel mobilního menu (`.mobile-drawer`) pro obrazovky $\le 1140\text{px}$.
+    - Na tabletech a telefonech jsou všechny položky uspořádány do přehledných sekcí s dotykovou výškou $\ge 44\text{px}$ a interaktivním zavíráním.
+    - Optimalizováno rozvržení mřížek skladů, přehledu kritických položek, filtrů a fulltextového vyhledávání.
+    - Formuláře přizpůsobeny na 1 responzivní sloupec a tabulky doplněny o plynulé horizontální skrolování (`-webkit-overflow-scrolling: touch`).
+  - **Automatizované testy:**
+    - Aktualizován test `test_dashboard_web_view` v `tests/test_warehouses.py` pro ověření textu „Dochází“.
+    - Všech 43 integračních i unit testů v `pytest` úspěšně prochází.
 
 
 

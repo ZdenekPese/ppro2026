@@ -167,23 +167,23 @@
                     <td style="text-align: center;">
                         {% if m.movement_type == 'receipt' %}
                             <span class="movement-pill pill-receipt">
-                                Příjem
+                                <span class="status-dot dot-ok"></span> Příjem
                             </span>
                         {% elif m.movement_type == 'dispatch' %}
                             <span class="movement-pill pill-dispatch">
-                                Výdej
+                                <span class="status-dot dot-info"></span> Výdej
                             </span>
                         {% elif m.movement_type == 'transfer' %}
                             <span class="movement-pill pill-transfer">
-                                Přesun
+                                <span class="status-dot dot-transfer"></span> Přesun
                             </span>
                         {% elif m.movement_type == 'inventory_adjustment' %}
                             <span class="movement-pill pill-adjustment">
-                                Inventura
+                                <span class="status-dot dot-warning"></span> Inventura
                             </span>
                         {% else %}
                             <span class="movement-pill">
-                                {{ m.movement_type }}
+                                <span class="status-dot dot-secondary"></span> {{ m.movement_type }}
                             </span>
                         {% endif %}
                     </td>

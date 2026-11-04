@@ -150,4 +150,4 @@ def test_dashboard_web_view(client):
     assert "Disponibilní zásoba" in html
     # Indikace co hoří
     assert "položek hoří pod minimem" in html or "Upozornění truhlárny" in html
-    assert "Hoří pod minimem" in html
+    assert "Dochází" in html
