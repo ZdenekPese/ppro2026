@@ -13,19 +13,16 @@
         <!-- Přehled metrik pod sebou na levé straně -->
         <div class="overview-vertical-list">
             <div class="overview-row">
-                <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Objednávky k expedici:</span>
                 <strong class="overview-value text-teal">{{ count_reserved }} objednávek</strong>
                 <span class="overview-note">zarezervováno na skladě, čeká na zabalení</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c7"></span>
                 <span class="overview-label">Úspěšně odesláno:</span>
                 <strong class="overview-value">{{ count_dispatched }} zásilek</strong>
                 <span class="overview-note">fyzicky odepsáno ze skladových regálů</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c1"></span>
                 <span class="overview-label">Celkem v evidenci:</span>
                 <strong class="overview-value">{{ count_all }} objednávek</strong>
                 <span class="overview-note">z toho {{ count_cancelled }} stornováno bez ztráty zásob</span>
@@ -139,21 +136,13 @@
 
                     <td style="text-align: center;">
                         {% if o.status == 'RESERVED' %}
-                            <span class="order-pill pill-reserved">
-                                <span class="status-dot dot-warning"></span> K expedici
-                            </span>
+                            <span class="order-pill pill-reserved">K expedici</span>
                         {% elif o.status == 'DISPATCHED' %}
-                            <span class="order-pill pill-dispatched">
-                                <span class="status-dot dot-ok"></span> Odesláno
-                            </span>
+                            <span class="order-pill pill-dispatched">Odesláno</span>
                         {% elif o.status == 'CANCELLED' %}
-                            <span class="order-pill pill-cancelled">
-                                <span class="status-dot dot-danger"></span> Stornováno
-                            </span>
+                            <span class="order-pill pill-cancelled">Stornováno</span>
                         {% else %}
-                            <span class="order-pill">
-                                <span class="status-dot dot-secondary"></span> {{ o.status }}
-                            </span>
+                            <span class="order-pill">{{ o.status }}</span>
                         {% endif %}
                     </td>
 

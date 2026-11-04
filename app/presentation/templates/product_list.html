@@ -13,31 +13,26 @@
         <!-- Přehled metrik pod sebou na levé straně (bez generických kostek) -->
         <div class="overview-vertical-list">
             <div class="overview-row">
-                <span class="overview-dot dot-c1"></span>
                 <span class="overview-label">Položky v katalogu:</span>
                 <strong class="overview-value">{{ total_products }}</strong>
                 <span class="overview-note">všechny zalistované hračky v systému</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c5"></span>
                 <span class="overview-label">Kategorie sortimentu:</span>
                 <strong class="overview-value">{{ total_categories }}</strong>
                 <span class="overview-note">možnost vícenásobného zařazení (M:N)</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Aktivní v prodeji:</span>
                 <strong class="overview-value text-teal">{{ active_products }}</strong>
                 <span class="overview-note">položky dostupné pro zákazníky</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c7"></span>
                 <span class="overview-label">Průměrná prodejní cena:</span>
                 <strong class="overview-value">{{ "%.0f"|format(avg_price) }} Kč</strong>
                 <span class="overview-note">výchozí hladina pro e-shop</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Průměrná marže dílny:</span>
                 <strong class="overview-value text-teal">+{{ "%.0f"|format(avg_margin) }} Kč</strong>
                 <span class="overview-note">hrubý zisk na jednotku</span>

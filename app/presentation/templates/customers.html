@@ -12,13 +12,11 @@
 
         <div class="overview-vertical-list">
             <div class="overview-row">
-                <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Zákaznická základna:</span>
                 <strong class="overview-value text-teal">{{ customers|length }} registrovaných zákazníků</strong>
                 <span class="overview-note">trvalé uchování historie nákupů</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c1"></span>
                 <span class="overview-label">Ochrana dat:</span>
                 <strong class="overview-value">Pouze syntetická data</strong>
                 <span class="overview-note">žádné reálné osobní údaje (GDPR compliance v akademickém projektu)</span>
@@ -103,11 +101,11 @@
                     <td style="text-align: center;">
                         {% if c.is_active %}
                             <span class="stock-pill pill-ok">
-                                <span class="status-dot dot-ok"></span> Aktivní
+                                Aktivní
                             </span>
                         {% else %}
                             <span class="stock-pill pill-warning">
-                                <span class="status-dot dot-warning"></span> Archivní
+                                Archivní
                             </span>
                         {% endif %}
                     </td>

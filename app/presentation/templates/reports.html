@@ -77,7 +77,6 @@
 <!-- Období badge -->
 <div class="report-period-banner">
     <div class="period-badge">
-        <span class="period-dot"></span>
         <span class="period-text">Vyhodnocované období: <strong>{{ summary.period_label }}</strong></span>
     </div>
     {% if include_reserved %}
@@ -282,11 +281,11 @@
                 </div>
                 <div class="restock-urgency-wrap">
                     {% if rec.urgency == 'CRITICAL' %}
-                        <span class="pill-urgency pill-critical"><span class="status-dot dot-danger"></span> Kritické (vyprodáno)</span>
+                        <span class="pill-urgency pill-critical">Kritické (vyprodáno)</span>
                     {% elif rec.urgency == 'HIGH' %}
-                        <span class="pill-urgency pill-high"><span class="status-dot dot-warning"></span> Vysoká priorita</span>
+                        <span class="pill-urgency pill-high">Vysoká priorita</span>
                     {% else %}
-                        <span class="pill-urgency pill-medium"><span class="status-dot dot-warning"></span> Dochází</span>
+                        <span class="pill-urgency pill-medium">Dochází</span>
                     {% endif %}
                 </div>
             </div>

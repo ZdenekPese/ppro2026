@@ -13,31 +13,26 @@
         <!-- Přehled metrik pod sebou na levé straně -->
         <div class="overview-vertical-list">
             <div class="overview-row">
-                <span class="overview-dot dot-c1"></span>
                 <span class="overview-label">Celková hodnota zásob:</span>
                 <strong class="overview-value">{{ "%.0f"|format(summary.total_stock_value) }} Kč</strong>
                 <span class="overview-note">ocenění fyzických kusů nákupní cenou dílny</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Disponibilní zásoba:</span>
                 <strong class="overview-value text-teal">{{ summary.total_available_count }} ks</strong>
                 <span class="overview-note">ihned volné k prodeji na e-shopu</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c7"></span>
                 <span class="overview-label">Fyzicky na regálech:</span>
                 <strong class="overview-value">{{ summary.total_physical_count }} ks</strong>
                 <span class="overview-note">z toho {{ summary.total_reserved_count }} ks blokováno v objednávkách</span>
             </div>
             <div class="overview-row">
                 {% if summary.critical_items_count > 0 %}
-                    <span class="overview-dot dot-danger-pulse"></span>
                     <span class="overview-label text-danger font-bold">Kritický stav (dochází):</span>
                     <strong class="overview-value text-danger">{{ summary.critical_items_count }} položek</strong>
                     <span class="overview-note text-danger">disponibilní zásoba klesla pod stanovené minimum!</span>
                 {% else %}
-                    <span class="overview-dot dot-c9"></span>
                     <span class="overview-label">Stav minimálních zásob:</span>
                     <strong class="overview-value text-teal">Vše v pořádku</strong>
                     <span class="overview-note">žádný produkt není pod minimem</span>
@@ -98,7 +93,6 @@
 <div class="critical-alert-section">
     <div class="critical-header">
         <div class="critical-title-wrap">
-            <span class="pulse-indicator"></span>
             <h2 class="critical-title">Upozornění truhlárny: {{ summary.critical_items_count }} položek dochází</h2>
         </div>
         <span class="critical-subtitle">Okamžitě naplánujte výrobu nebo meziskladový transfer ze sezónní garáže.</span>
@@ -278,17 +272,11 @@
                     <!-- Barevný status zásoby -->
                     <td style="text-align: center;">
                         {% if item.status == 'danger' %}
-                            <span class="stock-pill pill-danger">
-                                <span class="status-dot dot-danger"></span> Dochází
-                            </span>
+                            <span class="stock-pill pill-danger">Dochází</span>
                         {% elif item.status == 'warning' %}
-                            <span class="stock-pill pill-warning">
-                                <span class="status-dot dot-warning"></span> Blízko minima
-                            </span>
+                            <span class="stock-pill pill-warning">Blízko minima</span>
                         {% else %}
-                            <span class="stock-pill pill-ok">
-                                <span class="status-dot dot-ok"></span> V pořádku
-                            </span>
+                            <span class="stock-pill pill-ok">V pořádku</span>
                         {% endif %}
                     </td>
 

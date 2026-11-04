@@ -648,9 +648,13 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Vytvořena pomocná funkce [`parse_optional_uuid`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/utils.py) v novém modulu `app/presentation/utils.py`, která bezpečně převádí prázdné a whitespace řetězce na `None`.
     - Ošetřeny webové routery (`dashboard_web_router`, `product_web_router`, `stock_movement_web_router`, `order_web_router`) i REST API routery (`product_router`, `warehouse_router`, `stock_movement_router`).
     - Doplněn nový integrační test `test_web_and_api_filters_handle_empty_query_params` ověřující bezchybné zpracování prázdných parametrů na webu i v API; celkem 44 testů úspěšně prochází.
-  - **Kompletní odstranění rušivých odrážkových teček a oddělovačů uprostřed textů:**
-    - Vymazány nadbytečné odrážkové tečky (`&bull;`) a jakékoliv náhradní oddělovače před doplňkovými popisky a mezi texty (dashboard, katalog hraček, kniha pohybů, objednávky, zákazníci, detail objednávky, patička i formuláře).
-    - Žádné zástupné znaky (jako pomlčky nebo svislítka) nebyly vkládány; texty nyní plynou čistě a přirozeně.
+  - **Kompletní odstranění stavových a dekoračních teček napříč všemi stránkami:**
+    - Odstraněny barevné kruhové indikátory (`status-dot`, `overview-dot`, `node-dot`, `pulse-indicator`, `period-dot`) ze všech elementů:
+      - Ze stavových oválů a štítků tabulek (zásoby *Dochází / Blízko minima / V pořádku*, stavy objednávek, typy pohybů a stav zákazníků).
+      - Z přehledových souhrnných řádků metrik v záhlaví všech modulů.
+      - Z hlavičkového přepínače skladů (*Hradec Králové*, *Garáž Třebechovice*) na desktopu i v mobilním menu.
+      - Z výstražných bannerů a reportovacích odznaků.
+    - Všechny ovály a štítky si zachovávají své barevné typografické a kontrastní odlišení bez nutnosti vložených kruhových teček.
 
 
 

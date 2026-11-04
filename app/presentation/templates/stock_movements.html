@@ -13,13 +13,11 @@
         <!-- Informační statistika -->
         <div class="overview-vertical-list">
             <div class="overview-row">
-                <span class="overview-dot dot-c9"></span>
                 <span class="overview-label">Zásada nulové ztráty:</span>
                 <strong class="overview-value text-teal">Neměnnost historie</strong>
                 <span class="overview-note">auditní stopa každé změny skladových zásob</span>
             </div>
             <div class="overview-row">
-                <span class="overview-dot dot-c1"></span>
                 <span class="overview-label">Ochrana před přeprodejem:</span>
                 <strong class="overview-value">Zákaz záporného stavu</strong>
                 <span class="overview-note">výdej či transfer nad limit je striktně odmítnut</span>
@@ -166,25 +164,15 @@
                     <!-- Typ operace -->
                     <td style="text-align: center;">
                         {% if m.movement_type == 'receipt' %}
-                            <span class="movement-pill pill-receipt">
-                                <span class="status-dot dot-ok"></span> Příjem
-                            </span>
+                            <span class="movement-pill pill-receipt">Příjem</span>
                         {% elif m.movement_type == 'dispatch' %}
-                            <span class="movement-pill pill-dispatch">
-                                <span class="status-dot dot-info"></span> Výdej
-                            </span>
+                            <span class="movement-pill pill-dispatch">Výdej</span>
                         {% elif m.movement_type == 'transfer' %}
-                            <span class="movement-pill pill-transfer">
-                                <span class="status-dot dot-transfer"></span> Přesun
-                            </span>
+                            <span class="movement-pill pill-transfer">Přesun</span>
                         {% elif m.movement_type == 'inventory_adjustment' %}
-                            <span class="movement-pill pill-adjustment">
-                                <span class="status-dot dot-warning"></span> Inventura
-                            </span>
+                            <span class="movement-pill pill-adjustment">Inventura</span>
                         {% else %}
-                            <span class="movement-pill">
-                                <span class="status-dot dot-secondary"></span> {{ m.movement_type }}
-                            </span>
+                            <span class="movement-pill">{{ m.movement_type }}</span>
                         {% endif %}
                     </td>
 
