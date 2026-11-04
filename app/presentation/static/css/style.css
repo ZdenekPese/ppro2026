@@ -192,34 +192,6 @@ body {
   gap: 0.5rem;
 }
 
-.navbar-tech-group {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding-left: 0.5rem;
-  border-left: 1px solid var(--border-subtle);
-}
-
-.tech-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-dim);
-  border: 1px solid var(--border-subtle);
-  padding: 0.28rem 0.55rem;
-  border-radius: 9999px;
-  text-decoration: none;
-  transition: all 0.15s ease-in-out;
-  white-space: nowrap;
-}
-
-.tech-badge:hover {
-  color: #fff;
-  border-color: var(--c-9);
-  background-color: rgba(18, 200, 232, 0.12);
-}
-
 .tag-academic {
   font-size: 0.72rem;
   font-weight: 600;
@@ -350,33 +322,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.mobile-tech-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.tech-badge-mobile {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  padding: 0.4rem 0.85rem;
-  border-radius: 9999px;
-  text-decoration: none;
-  background-color: rgba(35, 49, 72, 0.6);
-  transition: all 0.15s;
-}
-
-.tech-badge-mobile:hover {
-  background-color: rgba(18, 200, 232, 0.18);
-  border-color: var(--c-9);
-  color: #fff;
 }
 
 /* ==========================================================================
@@ -1036,6 +981,28 @@ body {
   color: var(--text-dim);
   flex-wrap: wrap;
   gap: 0.75rem;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.footer-link {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: var(--c-9);
+  text-decoration: underline;
+}
+
+.footer-sep {
+  color: var(--border-subtle);
 }
 
 /* ==========================================================================
@@ -2337,10 +2304,7 @@ body {
     gap: 1rem;
   }
   .nav-links {
-    display: none; /* Skryjeme namačkanou lištu na tabletech */
-  }
-  .navbar-tech-group {
-    display: none; /* Přesunuto do vysouvacího draweru */
+    display: none; /* Skryjeme lištu na tabletech a mobilech */
   }
   .navbar-toggle {
     display: flex; /* Zobrazíme čistý hamburger přepínač */

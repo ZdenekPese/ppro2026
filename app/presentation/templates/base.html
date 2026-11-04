@@ -59,7 +59,7 @@
                     </a>
                 </nav>
 
-                <!-- Pravá sekce (Skladové uzly, API odkazy a akademický tag) -->
+                <!-- Pravá sekce (Skladové uzly a akademický tag) -->
                 <div class="navbar-right">
                     <div class="warehouse-nodes">
                         <div class="node-pill" title="Centrální sklad pro běžnou expedici">
@@ -72,11 +72,7 @@
                         </div>
                     </div>
 
-                    <div class="navbar-tech-group">
-                        <a href="/docs" target="_blank" class="tech-badge" title="Interaktivní REST API dokumentace">REST API</a>
-                        <a href="/api/health" target="_blank" class="tech-badge" title="Systémový healthcheck">Health</a>
-                        <span class="tag-academic">PPRO 2026</span>
-                    </div>
+                    <span class="tag-academic">PPRO 2026</span>
 
                     <!-- Tlačítko mobilního hamburger menu -->
                     <button type="button" class="navbar-toggle" id="navbarToggle" aria-label="Přepnout navigaci" aria-expanded="false">
@@ -129,13 +125,6 @@
                             <span>Sezónní garáž Třebechovice</span>
                         </div>
                     </div>
-
-                    <div class="mobile-section-label">Vývojářské nástroje</div>
-                    <div class="mobile-tech-actions">
-                        <a href="/docs" target="_blank" class="tech-badge-mobile">REST API (Swagger)</a>
-                        <a href="/api/health" target="_blank" class="tech-badge-mobile">Healthcheck</a>
-                        <span class="tag-academic">PPRO 2026</span>
-                    </div>
                 </div>
             </div>
         </header>
@@ -162,7 +151,13 @@
         <footer class="app-footer">
             <div class="footer-inner">
                 <span>Dřevěnka s.r.o. &bull; Zadání B: Sklad pro malý e-shop</span>
-                <span>FIM UHK &bull; Pokročilé programování 2026/2027</span>
+                <div class="footer-links">
+                    <a href="/docs" target="_blank" class="footer-link">REST API (Swagger)</a>
+                    <span class="footer-sep">&bull;</span>
+                    <a href="/api/health" target="_blank" class="footer-link">Healthcheck</a>
+                    <span class="footer-sep">&bull;</span>
+                    <span>FIM UHK &bull; Pokročilé programování 2026/2027</span>
+                </div>
             </div>
         </footer>
     </div>

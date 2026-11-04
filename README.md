@@ -298,7 +298,7 @@ Design systém staví na vyladěné devítiúrovňové paletě přecházející 
 - **Profesionální horní navigační lišta (Header / Navbar):**
   - Brand značka Dřevěnka s.r.o. s gradientním odznáčkem a typografickým titulem systému.
   - Provzdušněná primární navigace s přehlednými zaoblenými pilulkami a vysokým kontrastem (Katalog, Přehled, Pohyby, Objednávky, Zákazníci, Reporty).
-  - Oddělená pravá utility sekce pro skladové uzly (**Centrální sklad Hradec Králové** a **Sklad Třebechovice pod Orebem**), rychlé technické odkazy (`REST API`, `Health`) a akademický tag `PPRO 2026`.
+  - Oddělená pravá sekce pro skladové uzly (**Centrální sklad Hradec Králové** a **Sklad Třebechovice pod Orebem**) a akademický tag `PPRO 2026` (vývojářské odkazy REST API a Healthcheck byly přesunuty do decentní patičky stránky, aby nezatěžovaly provozní hlavičku).
   - Responzivní hamburger přepínač (`.navbar-toggle`) a plynulý výsuvný panel (`.mobile-drawer`) pro tablety a telefony s dotykovými plochami $\ge 44\text{px}$.
 - **Metrické karty (KPI Overview):**
   - Okamžitý přehled nad katalogem a sklady: *Celková hodnota zásob*, *Disponibilní zásoba*, *Fyzicky na regálech*, *Kritický stav (dochází)*.
@@ -634,7 +634,7 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - **Provzdušnění a redesign horní navigační lišty (Header/Navbar):**
     - Odstraněno namačkání prvků v jednom řádku – navigační lišta rozšířena na šířku 1400px s výškou 70px a jemným backdrop-blur efektem.
     - Hlavní byznysová navigace (Katalog, Přehled, Pohyby, Objednávky, Zákazníci, Reporty) dostala zaoblené pilulkové záložky s vysokým kontrastem textu.
-    - Technické odkazy (`REST API`, `Health`) a akademický tag odděleny do samostatného pravého utility bloku.
+    - Technické/diagnostické odkazy (`REST API`, `Health`) byly na základě požadavku z provozní hlavičky a mobilního draweru zcela odstraněny a přesunuty do decentní patičky stránky (`.app-footer`), aby hlavička sloužila výhradně denní skladové agendě.
   - **Plná responzivita pro mobilní telefony a tablety:**
     - Implementován čistý hamburger přepínač (`.navbar-toggle`) a výsuvný panel mobilního menu (`.mobile-drawer`) pro obrazovky $\le 1140\text{px}$.
     - Na tabletech a telefonech jsou všechny položky uspořádány do přehledných sekcí s dotykovou výškou $\ge 44\text{px}$ a interaktivním zavíráním.
