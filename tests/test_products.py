@@ -127,3 +127,36 @@ def test_web_form_edit_price_overflow_displays_field_error(client):
     assert "field-error" in edit_res.text
     assert "99 999 999,99" in edit_res.text
 
+
+def test_web_and_api_filters_handle_empty_query_params(client):
+    """Ověření, že odeslání prázdných hodnot filtrů (HTML <option value=''>) nezpůsobí 422 chybu parsování UUID."""
+    # 1. Web dashboard s prázdnou kategorií
+    dash_res = client.get("/?search=&category_id=&only_critical=false")
+    assert dash_res.status_code == 200
+    assert "Skladový přehled" in dash_res.text
+
+    # 2. Web katalog produktů s prázdnou kategorií
+    prod_res = client.get("/products?search=&category_id=")
+    assert prod_res.status_code == 200
+    assert "Katalog hraček" in prod_res.text
+
+    # 3. Web skladové pohyby s prázdným produktem a skladem
+    mov_res = client.get("/movements?product_id=&warehouse_id=&movement_type=")
+    assert mov_res.status_code == 200
+    assert "Auditní deník skladových pohybů" in mov_res.text
+
+    # 4. Web objednávky s prázdným stavem
+    order_res = client.get("/orders?status_filter=&search=")
+    assert order_res.status_code == 200
+
+    # 5. REST API endpointy s prázdnými stringy
+    api_prod_res = client.get("/api/products?category_id=")
+    assert api_prod_res.status_code == 200
+
+    api_stock_res = client.get("/api/stocks?category_id=")
+    assert api_stock_res.status_code == 200
+
+    api_mov_res = client.get("/api/movements?product_id=&warehouse_id=")
+    assert api_mov_res.status_code == 200
+
+

@@ -11,6 +11,7 @@ from app.domain.exceptions import (
 )
 from app.domain.models.product import ProductCreate, ProductUpdate, ProductResponse
 from app.domain.services.product_service import ProductService
+from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="/products", tags=["Produkty (Hračky)"])
 
@@ -24,11 +25,12 @@ def get_product_service(db: Session = Depends(get_db)) -> ProductService:
 def list_products(
     search: Optional[str] = Query(None, description="Hledat podle kódu, názvu nebo popisu"),
     is_active: Optional[bool] = Query(None, description="Filtrovat podle aktivity"),
-    category_id: Optional[UUID] = Query(None, description="Filtrovat podle kategorie"),
+    category_id: Optional[str] = Query(None, description="Filtrovat podle kategorie"),
     service: ProductService = Depends(get_product_service),
 ):
     """Získání seznamu produktů (dřevěných hraček) s možností filtrování dle kategorie."""
-    return service.list_products(search=search, is_active=is_active, category_id=category_id)
+    clean_category_id = parse_optional_uuid(category_id)
+    return service.list_products(search=search, is_active=is_active, category_id=clean_category_id)
 
 
 

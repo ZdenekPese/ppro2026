@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.domain.services.warehouse_service import WarehouseService
 from app.infrastructure.repositories.category_repository import CategoryRepository
+from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(tags=["Web Dashboard"])
 
@@ -25,16 +26,17 @@ def get_warehouse_service(db: Session = Depends(get_db)) -> WarehouseService:
 def dashboard_view(
     request: Request,
     search: Optional[str] = None,
-    category_id: Optional[UUID] = None,
+    category_id: Optional[str] = None,
     only_critical: bool = False,
     db: Session = Depends(get_db),
     service: WarehouseService = Depends(get_warehouse_service),
 ):
     """Barevný dashboard skladu s indikací položek pod minimem („co hoří“) a rozpadem skladů."""
+    clean_category_id = parse_optional_uuid(category_id)
     summary = service.get_dashboard_summary()
     stocks_overview = service.get_products_stock_overview(
         search=search,
-        category_id=category_id,
+        category_id=clean_category_id,
         only_critical=only_critical,
     )
     categories = CategoryRepository(db).list_all()
@@ -48,7 +50,7 @@ def dashboard_view(
             "stocks": stocks_overview,
             "warehouses": warehouses,
             "categories": categories,
-            "selected_category_id": category_id,
+            "selected_category_id": clean_category_id,
             "search": search or "",
             "only_critical": only_critical,
             "title": "Přehled skladu & Dashboard - Dřevěnka s.r.o.",

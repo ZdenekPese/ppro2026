@@ -12,6 +12,7 @@ from app.domain.exceptions import DuplicateProductCodeError, ProductNotFoundErro
 from app.domain.models.product import ProductCreate, ProductUpdate
 from app.domain.services.product_service import ProductService
 from app.infrastructure.repositories.category_repository import CategoryRepository
+from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="/products", tags=["Web Produkty"])
 
@@ -28,12 +29,13 @@ def get_service(db: Session = Depends(get_db)) -> ProductService:
 def product_list_view(
     request: Request,
     search: Optional[str] = None,
-    category_id: Optional[UUID] = None,
+    category_id: Optional[str] = None,
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
 ):
     """Zobrazení katalogu dřevěných hraček v přehledné tabulce s filtrem kategorií."""
-    products = service.list_products(search=search, category_id=category_id)
+    clean_category_id = parse_optional_uuid(category_id)
+    products = service.list_products(search=search, category_id=clean_category_id)
     cat_repo = CategoryRepository(db)
     categories = cat_repo.list_all()
 
@@ -49,7 +51,7 @@ def product_list_view(
             "products": products,
             "search": search or "",
             "categories": categories,
-            "selected_category_id": category_id,
+            "selected_category_id": clean_category_id,
             "title": "Katalog hraček - Dřevěnka s.r.o.",
             "total_products": total_products,
             "active_products": active_products,

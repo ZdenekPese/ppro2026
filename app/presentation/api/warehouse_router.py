@@ -21,6 +21,7 @@ from app.domain.models.warehouse import (
     WarehouseUpdate,
 )
 from app.domain.services.warehouse_service import WarehouseService
+from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="", tags=["Sklady a Zásoby"])
 
@@ -95,14 +96,15 @@ def delete_warehouse(
 @router.get("/stocks", response_model=List[ProductStockDetail])
 def list_stocks_overview(
     search: Optional[str] = Query(None, description="Hledat podle kódu nebo názvu"),
-    category_id: Optional[UUID] = Query(None, description="Filtrovat podle kategorie"),
+    category_id: Optional[str] = Query(None, description="Filtrovat podle kategorie"),
     only_critical: bool = Query(False, description="Zobrazit pouze položky pod minimem"),
     service: WarehouseService = Depends(get_warehouse_service),
 ):
     """Získání přehledu skladových zásob rozpadlých po skladech s indikací stavu pod minimem."""
+    clean_category_id = parse_optional_uuid(category_id)
     return service.get_products_stock_overview(
         search=search,
-        category_id=category_id,
+        category_id=clean_category_id,
         only_critical=only_critical,
     )
 

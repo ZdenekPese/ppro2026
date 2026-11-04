@@ -18,6 +18,7 @@ from app.domain.models.stock_movement import (
     StockTransferCreate,
 )
 from app.domain.services.stock_movement_service import StockMovementService
+from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="/movements", tags=["Pohyby a Audit (Sklad)"])
 
@@ -29,17 +30,20 @@ def get_movement_service(db: Session = Depends(get_db)) -> StockMovementService:
 
 @router.get("", response_model=List[StockMovementResponse])
 def list_movements(
-    product_id: Optional[UUID] = Query(None, description="Filtrovat podle produktu"),
-    warehouse_id: Optional[UUID] = Query(None, description="Filtrovat podle skladu"),
+    product_id: Optional[str] = Query(None, description="Filtrovat podle produktu"),
+    warehouse_id: Optional[str] = Query(None, description="Filtrovat podle skladu"),
     movement_type: Optional[str] = Query(None, description="Filtrovat podle typu pohybu"),
     limit: int = Query(100, ge=1, le=500, description="Maximální počet záznamů"),
     service: StockMovementService = Depends(get_movement_service),
 ):
     """Získání auditní stopy všech skladových pohybů."""
+    clean_prod_id = parse_optional_uuid(product_id)
+    clean_wh_id = parse_optional_uuid(warehouse_id)
+    clean_mov_type = movement_type.strip() if movement_type and movement_type.strip() else None
     return service.list_movements(
-        product_id=product_id,
-        warehouse_id=warehouse_id,
-        movement_type=movement_type,
+        product_id=clean_prod_id,
+        warehouse_id=clean_wh_id,
+        movement_type=clean_mov_type,
         limit=limit,
     )
 

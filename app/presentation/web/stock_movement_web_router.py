@@ -22,6 +22,7 @@ from app.domain.models.stock_movement import (
 from app.domain.services.stock_movement_service import StockMovementService
 from app.infrastructure.repositories.product_repository import ProductRepository
 from app.infrastructure.repositories.warehouse_repository import WarehouseRepository
+from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="/movements", tags=["Web Pohyby a Audit"])
 
@@ -37,17 +38,21 @@ def get_movement_service(db: Session = Depends(get_db)) -> StockMovementService:
 @router.get("", response_class=HTMLResponse)
 def movements_list_view(
     request: Request,
-    product_id: Optional[UUID] = None,
-    warehouse_id: Optional[UUID] = None,
+    product_id: Optional[str] = None,
+    warehouse_id: Optional[str] = None,
     movement_type: Optional[str] = None,
     db: Session = Depends(get_db),
     service: StockMovementService = Depends(get_movement_service),
 ):
     """Zobrazení auditního deníku skladových pohybů s filtry."""
+    clean_product_id = parse_optional_uuid(product_id)
+    clean_warehouse_id = parse_optional_uuid(warehouse_id)
+    clean_movement_type = movement_type.strip() if movement_type and movement_type.strip() else None
+
     movements = service.list_movements(
-        product_id=product_id,
-        warehouse_id=warehouse_id,
-        movement_type=movement_type,
+        product_id=clean_product_id,
+        warehouse_id=clean_warehouse_id,
+        movement_type=clean_movement_type,
     )
     products = ProductRepository(db).list_all()
     warehouses = WarehouseRepository(db).list_all()
@@ -59,9 +64,9 @@ def movements_list_view(
             "movements": movements,
             "products": products,
             "warehouses": warehouses,
-            "selected_product_id": product_id,
-            "selected_warehouse_id": warehouse_id,
-            "selected_movement_type": movement_type,
+            "selected_product_id": clean_product_id,
+            "selected_warehouse_id": clean_warehouse_id,
+            "selected_movement_type": clean_movement_type,
             "title": "Auditní deník skladových pohybů - Dřevěnka s.r.o.",
         },
     )
@@ -71,10 +76,11 @@ def movements_list_view(
 def movement_new_view(
     request: Request,
     movement_type: Optional[str] = "receipt",
-    product_id: Optional[UUID] = None,
+    product_id: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     """Zobrazení formuláře pro zadání nového skladového pohybu."""
+    clean_product_id = parse_optional_uuid(product_id)
     products = ProductRepository(db).list_all()
     warehouses = WarehouseRepository(db).list_all()
 
@@ -85,7 +91,7 @@ def movement_new_view(
             "products": products,
             "warehouses": warehouses,
             "active_type": movement_type,
-            "selected_product_id": product_id,
+            "selected_product_id": clean_product_id,
             "error": None,
             "title": "Nový skladový pohyb - Dřevěnka s.r.o.",
         },

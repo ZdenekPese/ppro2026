@@ -643,6 +643,11 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - **Automatizované testy:**
     - Aktualizován test `test_dashboard_web_view` v `tests/test_warehouses.py` pro ověření textu „Dochází“.
     - Všech 43 integračních i unit testů v `pytest` úspěšně prochází.
+  - **Oprava validace prázdných hodnot ve filtrech (UUID parsing error 422):**
+    - Vyřešena chyba `uuid_parsing / invalid length: expected length 32, found 0`, ke které docházelo při odeslání HTML filtrů s volbou *„Všechny kategorie“* / *„Všechny sklady“* / *„Všechny dřevěné hračky“* (parametry `category_id=`, `product_id=`, `warehouse_id=` v query stringu).
+    - Vytvořena pomocná funkce [`parse_optional_uuid`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/utils.py) v novém modulu `app/presentation/utils.py`, která bezpečně převádí prázdné a whitespace řetězce na `None`.
+    - Ošetřeny webové routery (`dashboard_web_router`, `product_web_router`, `stock_movement_web_router`, `order_web_router`) i REST API routery (`product_router`, `warehouse_router`, `stock_movement_router`).
+    - Doplněn nový integrační test `test_web_and_api_filters_handle_empty_query_params` ověřující bezchybné zpracování prázdných parametrů na webu i v API; celkem 44 testů úspěšně prochází.
 
 
 

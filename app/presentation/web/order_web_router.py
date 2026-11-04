@@ -47,7 +47,8 @@ def orders_list_view(
     service: OrderService = Depends(get_order_service),
 ):
     """Webový přehled všech objednávek."""
-    orders = service.list_orders(status=status_filter, search=search)
+    clean_status = status_filter.strip() if status_filter and status_filter.strip() else None
+    orders = service.list_orders(status=clean_status, search=search)
     all_orders = service.list_orders()
 
     count_all = len(all_orders)
