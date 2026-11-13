@@ -33,7 +33,7 @@
 
 <!-- Oznámení -->
 {% if success %}
-    <div class="alert-box alert-success" style="background-color: rgba(18, 200, 232, 0.15); border: 1px solid var(--c-9); color: #fff; padding: 0.85rem 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+    <div class="alert-box alert-success" style="margin-bottom: 1.25rem;">
         <strong>Úspěch:</strong> {{ success }}
     </div>
 {% endif %}
@@ -152,8 +152,8 @@
                 {% endfor %}
             </tbody>
             <tfoot>
-                <tr style="border-top: 2px solid var(--border-color); background-color: rgba(255, 255, 255, 0.02);">
-                    <td colspan="4" style="text-align: right; padding: 1rem; font-weight: 700; color: #fff;">
+                <tr style="border-top: 2px solid var(--border-color); background-color: var(--bg-input);">
+                    <td colspan="4" style="text-align: right; padding: 1rem; font-weight: 700; color: var(--text-main);">
                         Celková částka k úhradě:
                     </td>
                     <td style="text-align: right; padding: 1rem;">

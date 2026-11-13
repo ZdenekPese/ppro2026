@@ -35,12 +35,12 @@
 
             <div class="form-group">
                 <label class="form-label">Způsob zadání zákazníka</label>
-                <div style="display: flex; gap: 1.5rem; margin-top: 0.35rem;">
-                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; color: #fff; cursor: pointer;">
+                <div style="display: flex; gap: 1.5rem; margin-top: 0.35rem; flex-wrap: wrap;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-main); cursor: pointer;">
                         <input type="radio" name="customer_mode" value="existing" checked onchange="toggleCustomerMode('existing')">
                         <span>Vybrat stávajícího zákazníka</span>
                     </label>
-                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; color: #fff; cursor: pointer;">
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-main); cursor: pointer;">
                         <input type="radio" name="customer_mode" value="new" onchange="toggleCustomerMode('new')">
                         <span>Zadat nového zákazníka</span>
                     </label>
@@ -58,7 +58,7 @@
             </div>
 
             <!-- Nový zákazník -->
-            <div id="section-new-customer" style="display: none; padding: 1rem; background-color: rgba(0, 0, 0, 0.15); border-radius: var(--radius-sm); margin-bottom: 1.5rem; border: 1px dashed var(--border-color);">
+            <div id="section-new-customer" style="display: none; padding: 1rem; background-color: var(--bg-input); border-radius: var(--radius-sm); margin-bottom: 1.5rem; border: 1px dashed var(--border-color);">
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label" for="first_name">Jméno</label>
