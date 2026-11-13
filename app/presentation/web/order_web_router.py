@@ -4,7 +4,6 @@ from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -24,12 +23,13 @@ from app.infrastructure.repositories.customer_repository import CustomerReposito
 from app.infrastructure.repositories.product_repository import ProductRepository
 from app.infrastructure.repositories.warehouse_repository import WarehouseRepository
 from app.presentation.dependencies import require_staff_user
+from app.presentation.utils import get_templates
 
 router = APIRouter(tags=["Web Objednávky a Zákazníci"])
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates = get_templates(TEMPLATES_DIR)
 
 
 def get_order_service(db: Session = Depends(get_db)) -> OrderService:

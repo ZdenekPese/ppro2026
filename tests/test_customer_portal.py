@@ -422,3 +422,18 @@ def test_customer_shop_renders_eshop_storefront_and_product_images(customer_clie
         img_res = customer_client.get(img_path)
         assert img_res.status_code == 200, f"Obrázek {img_path} se nepodařilo načíst"
         assert "<svg" in img_res.text
+
+
+def test_staff_views_render_toy_thumbnails(client, warehouse_client):
+    """Náhledové ilustrace hraček se zobrazují i jednateli a skladníkovi v přehledech, pohybech a reportech."""
+    for test_client in (client, warehouse_client):
+        for path in ("/", "/products", "/movements"):
+            res = test_client.get(path)
+            assert res.status_code == 200
+            assert "staff-toy-thumb" in res.text
+            assert "/static/img/toys/" in res.text
+
+    reports_res = client.get("/reports")
+    assert reports_res.status_code == 200
+    assert "staff-toy-thumb" in reports_res.text
+    assert "/static/img/toys/" in reports_res.text

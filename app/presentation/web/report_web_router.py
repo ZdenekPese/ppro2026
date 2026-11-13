@@ -3,19 +3,19 @@ from pathlib import Path
 from typing import Optional
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.domain.services.report_service import CZECH_MONTHS, ReportService
 from app.infrastructure.db.models import User
 from app.presentation.dependencies import require_manager_user
+from app.presentation.utils import get_templates
 
 router = APIRouter(tags=["Web Reporty a Analytika"])
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates = get_templates(TEMPLATES_DIR)
 
 
 def get_report_service(db: Session = Depends(get_db)) -> ReportService:

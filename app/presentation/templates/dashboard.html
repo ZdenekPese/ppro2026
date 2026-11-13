@@ -118,6 +118,12 @@
         {% for item in summary.critical_items %}
         <div class="critical-card">
             <div class="critical-card-info">
+                <img
+                    src="{{ toy_image_url(item.product_code, item.product_name) }}"
+                    alt="{{ item.product_name }}"
+                    class="staff-toy-thumb staff-toy-thumb-sm"
+                    loading="lazy"
+                >
                 <span class="sku-badge">{{ item.product_code }}</span>
                 <strong class="critical-prod-name">{{ item.product_name }}</strong>
             </div>
@@ -282,8 +288,18 @@
                         <span class="sku-badge">{{ item.product_code }}</span>
                     </td>
                     <td>
-                        <div class="product-name">{{ item.product_name }}</div>
-                        <div class="price-dim" style="font-size: 0.8rem;">Prodejní cena: {{ "%.2f"|format(item.selling_price) }} Kč</div>
+                        <div class="staff-toy-cell">
+                            <img
+                                src="{{ toy_image_url(item.product_code, item.product_name) }}"
+                                alt="{{ item.product_name }}"
+                                class="staff-toy-thumb"
+                                loading="lazy"
+                            >
+                            <div class="staff-toy-info">
+                                <div class="product-name">{{ item.product_name }}</div>
+                                <div class="price-dim" style="font-size: 0.8rem;">Prodejní cena: {{ "%.2f"|format(item.selling_price) }} Kč</div>
+                            </div>
+                        </div>
                     </td>
 
                     <!-- Sklad Hradec Králové -->

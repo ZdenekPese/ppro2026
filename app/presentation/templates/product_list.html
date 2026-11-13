@@ -116,17 +116,27 @@
                         <span class="sku-badge">{{ p.code }}</span>
                     </td>
                     <td>
-                        <div class="product-name">{{ p.name }}</div>
-                        {% if p.description %}
-                            <div class="product-desc">{{ p.description }}</div>
-                        {% endif %}
-                        {% if p.categories %}
-                            <div class="product-category-badges">
-                                {% for cat in p.categories %}
-                                    <span class="category-badge">{{ cat.name }}</span>
-                                {% endfor %}
+                        <div class="staff-toy-cell">
+                            <img
+                                src="{{ toy_image_url(p.code, p.name) }}"
+                                alt="{{ p.name }}"
+                                class="staff-toy-thumb"
+                                loading="lazy"
+                            >
+                            <div class="staff-toy-info">
+                                <div class="product-name">{{ p.name }}</div>
+                                {% if p.description %}
+                                    <div class="product-desc">{{ p.description }}</div>
+                                {% endif %}
+                                {% if p.categories %}
+                                    <div class="product-category-badges">
+                                        {% for cat in p.categories %}
+                                            <span class="category-badge">{{ cat.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
+                        </div>
                     </td>
 
                     <td style="text-align: right;">

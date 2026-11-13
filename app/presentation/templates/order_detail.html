@@ -137,7 +137,15 @@
                         <span class="sku-badge">{{ item.product_code }}</span>
                     </td>
                     <td>
-                        <strong class="product-name" style="font-size: 0.95rem;">{{ item.product_name }}</strong>
+                        <div class="staff-toy-cell">
+                            <img
+                                src="{{ toy_image_url(item.product_code, item.product_name) }}"
+                                alt="{{ item.product_name }}"
+                                class="staff-toy-thumb staff-toy-thumb-sm"
+                                loading="lazy"
+                            >
+                            <strong class="product-name" style="font-size: 0.95rem;">{{ item.product_name }}</strong>
+                        </div>
                     </td>
                     <td style="text-align: right;" class="font-mono">
                         {{ "%.2f"|format(item.unit_price) }} Kč

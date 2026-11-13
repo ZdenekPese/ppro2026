@@ -5,7 +5,6 @@ from urllib.parse import quote
 from uuid import UUID
 from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -17,13 +16,13 @@ from app.infrastructure.db.models import User
 from app.infrastructure.repositories.category_repository import CategoryRepository
 from app.infrastructure.repositories.product_repository import ProductRepository
 from app.presentation.dependencies import require_staff_user, require_web_user
-from app.presentation.utils import parse_optional_uuid
+from app.presentation.utils import get_templates, parse_optional_uuid
 
 router = APIRouter(tags=["Web Dashboard"])
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates = get_templates(TEMPLATES_DIR)
 
 
 def get_warehouse_service(db: Session = Depends(get_db)) -> WarehouseService:

@@ -177,9 +177,17 @@
 
                     <!-- Produkt + SKU -->
                     <td>
-                        <div class="movement-product-cell">
-                            <span class="sku-inline font-mono">{{ m.product_code }}</span>
-                            <strong class="product-name" style="font-size: 0.9rem;">{{ m.product_name }}</strong>
+                        <div class="staff-toy-cell">
+                            <img
+                                src="{{ toy_image_url(m.product_code, m.product_name) }}"
+                                alt="{{ m.product_name }}"
+                                class="staff-toy-thumb staff-toy-thumb-sm"
+                                loading="lazy"
+                            >
+                            <div class="movement-product-cell">
+                                <span class="sku-inline font-mono">{{ m.product_code }}</span>
+                                <strong class="product-name" style="font-size: 0.9rem;">{{ m.product_name }}</strong>
+                            </div>
                         </div>
                     </td>
 

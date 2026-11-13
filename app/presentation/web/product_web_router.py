@@ -3,7 +3,6 @@ from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from pathlib import Path
 
@@ -14,13 +13,13 @@ from app.domain.services.product_service import ProductService
 from app.infrastructure.db.models import User
 from app.infrastructure.repositories.category_repository import CategoryRepository
 from app.presentation.dependencies import require_manager_user, require_staff_user
-from app.presentation.utils import parse_optional_uuid
+from app.presentation.utils import get_templates, parse_optional_uuid
 
 router = APIRouter(prefix="/products", tags=["Web Produkty"])
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+templates = get_templates(TEMPLATES_DIR)
 
 
 def get_service(db: Session = Depends(get_db)) -> ProductService:
