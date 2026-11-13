@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
+  <ellipse cx="120" cy="140" rx="56" ry="8" fill="#000" opacity="0.08"/>
+  <!-- Cage caps -->
+  <rect x="74" y="24" width="92" height="14" rx="7" fill="#bc8a5f"/>
+  <rect x="74" y="122" width="92" height="14" rx="7" fill="#bc8a5f"/>
+  <!-- Inner hedgehog sphere with spikes -->
+  <circle cx="120" cy="80" r="22" fill="#0f766e"/>
+  <line x1="88" y1="80" x2="152" y2="80" stroke="#0f766e" stroke-width="5" stroke-linecap="round"/>
+  <line x1="120" y1="48" x2="120" y2="112" stroke="#0f766e" stroke-width="5" stroke-linecap="round"/>
+  <line x1="97" y1="57" x2="143" y2="103" stroke="#0f766e" stroke-width="5" stroke-linecap="round"/>
+  <line x1="143" y1="57" x2="97" y2="103" stroke="#0f766e" stroke-width="5" stroke-linecap="round"/>
+  <!-- Vertical wooden bars -->
+  <rect x="80" y="36" width="9" height="88" rx="3" fill="#deb887"/>
+  <rect x="104" y="36" width="9" height="88" rx="3" fill="#d4a373"/>
+  <rect x="128" y="36" width="9" height="88" rx="3" fill="#deb887"/>
+  <rect x="151" y="36" width="9" height="88" rx="3" fill="#d4a373"/>
+</svg>

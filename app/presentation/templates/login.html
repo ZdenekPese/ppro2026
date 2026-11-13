@@ -103,6 +103,11 @@
                 </button>
             </form>
 
+            <div class="auth-switch-row">
+                <span>Nakupujete u nás poprvé?</span>
+                <a href="/register" class="auth-switch-link">Vytvořit účet zákazníka</a>
+            </div>
+
             {% if show_demo %}
             <div class="demo-panel">
                 <div class="demo-panel-header">
@@ -143,6 +148,24 @@
                         </div>
                         <p class="demo-account-desc">
                             Operace u regálu: příjem, převody HK/Třebechovice, inventura, expedice objednávek.
+                        </p>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="demo-account-card"
+                        data-username="zakaznik"
+                        data-password="{{ demo_customer_password }}"
+                    >
+                        <div class="demo-account-top">
+                            <span class="demo-account-name">Marie Svobodová</span>
+                            <span class="role-badge role-customer">Zákazník</span>
+                        </div>
+                        <div class="demo-account-meta">
+                            Login: <code>zakaznik</code> | Heslo: <code>{{ demo_customer_password }}</code>
+                        </div>
+                        <p class="demo-account-desc">
+                            E-shop hraček, výběr a objednání kusů skladem, přehled a storno vlastních objednávek.
                         </p>
                     </button>
                 </div>

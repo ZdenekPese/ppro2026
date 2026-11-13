@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
+  <ellipse cx="120" cy="138" rx="82" ry="8" fill="#000" opacity="0.08"/>
+  <!-- Mast -->
+  <rect x="116" y="22" width="7" height="86" rx="3.5" fill="#8b5e34"/>
+  <!-- Pennant -->
+  <path d="M123 24 L152 31 L123 38 Z" fill="#b7094c"/>
+  <!-- Main sail -->
+  <path d="M123 36 L176 96 L123 96 Z" fill="#fef3c7" stroke="#d4a373" stroke-width="2"/>
+  <!-- Jib sail -->
+  <path d="M115 44 L72 96 L115 96 Z" fill="#f8fafc" stroke="#d4a373" stroke-width="2"/>
+  <!-- Wooden hull -->
+  <path d="M46 102 L194 102 L174 130 L66 130 Z" fill="#d4a373"/>
+  <path d="M56 112 L184 112 L174 130 L66 130 Z" fill="#0f766e"/>
+  <rect x="44" y="98" width="152" height="8" rx="4" fill="#8b5e34"/>
+</svg>

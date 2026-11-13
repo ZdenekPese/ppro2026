@@ -17,6 +17,7 @@ from app.presentation.api.customer_router import router as customer_router
 from app.presentation.api.order_router import router as order_router
 from app.presentation.api.report_router import router as report_router
 from app.presentation.web.auth_web_router import router as auth_web_router
+from app.presentation.web.customer_portal_web_router import router as customer_portal_web_router
 from app.presentation.web.product_web_router import router as product_web_router
 from app.presentation.web.dashboard_web_router import router as dashboard_web_router
 from app.presentation.web.stock_movement_web_router import router as stock_movement_web_router
@@ -82,6 +83,7 @@ app.include_router(report_router, prefix="/api")
 
 # Registrace webových routerů
 app.include_router(auth_web_router)
+app.include_router(customer_portal_web_router)
 app.include_router(dashboard_web_router)
 app.include_router(product_web_router)
 app.include_router(stock_movement_web_router)

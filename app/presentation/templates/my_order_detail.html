@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-titles">
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
+            <h1 class="page-title" style="margin-bottom: 0;">Objednávka {{ order.order_number }}</h1>
+            {% if order.status == 'RESERVED' %}
+                <span class="order-pill pill-reserved">Rezervováno (K expedici)</span>
+            {% elif order.status == 'DISPATCHED' %}
+                <span class="order-pill pill-dispatched">Odesláno zákazníkovi</span>
+            {% elif order.status == 'CANCELLED' %}
+                <span class="order-pill pill-cancelled">Stornováno</span>
+            {% else %}
+                <span class="order-pill">{{ order.status }}</span>
+            {% endif %}
+        </div>
+        <p class="page-subtitle">
+            Přijato dne {{ order.created_at.strftime('%d.%m.%Y v %H:%M') }}
+            {% if order.dispatched_at %}
+                | Fyzicky expedováno: {{ order.dispatched_at.strftime('%d.%m.%Y v %H:%M') }}
+            {% endif %}
+        </p>
+    </div>
+    <div class="header-actions">
+        <a href="/my-orders" class="btn btn-secondary">&larr; Moje objednávky</a>
+        <a href="/shop" class="btn btn-primary">Zpět do e-shopu</a>
+    </div>
+</div>
+
+{% if created %}
+<div class="alert-box alert-success" role="status" style="margin-bottom: 1.25rem;">
+    <strong>Objednávka přijata!</strong> Vaše dřevěné hračky byly okamžitě rezervovány ve skladu a cena je pevně zafixována.
+</div>
+{% endif %}
+
+{% if cancelled %}
+<div class="alert-box alert-success" role="status" style="margin-bottom: 1.25rem;">
+    <strong>Objednávka byla stornována.</strong> Rezervované kusy byly vráceny zpět do volného prodeje.
+</div>
+{% endif %}
+
+{% if error %}
+<div class="alert-box" role="alert" style="margin-bottom: 1.25rem;">
+    <strong>Upozornění:</strong> {{ error }}
+</div>
+{% endif %}
+
+<div class="order-grid" style="margin-bottom: 1.5rem;">
+    <div class="panel-card">
+        <h2 class="card-subtitle">Doručovací údaje</h2>
+        <div class="customer-info-box">
+            <div class="info-row">
+                <span class="info-label">Zákazník:</span>
+                <strong>{{ customer.full_name }}</strong>
+            </div>
+            <div class="info-row">
+                <span class="info-label">E-mail:</span>
+                <span class="font-mono text-dim">{{ customer.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Telefon:</span>
+                <span class="font-mono text-nowrap">{{ customer.phone or 'Neuveden' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Adresa:</span>
+                <span>{{ customer.address }}</span>
+            </div>
+            {% if order.note %}
+            <div class="info-row" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);">
+                <span class="info-label">Poznámka:</span>
+                <span>{{ order.note }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel-card">
+        <h2 class="card-subtitle">Stav vyřízení ze skladu</h2>
+        <div class="customer-info-box">
+            <div class="info-row">
+                <span class="info-label">Expediční sklad:</span>
+                <strong>{{ order.warehouse_name }} ({{ order.warehouse_code }})</strong>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Aktuální stav:</span>
+                <span>
+                    {% if order.status == 'RESERVED' %}
+                        Zboží je pro vás rezervováno a čeká na zabalení skladníkem.
+                    {% elif order.status == 'DISPATCHED' %}
+                        Objednávka byla fyzicky odepsána ze skladu a odeslána.
+                    {% elif order.status == 'CANCELLED' %}
+                        Objednávka byla stornována.
+                    {% else %}
+                        {{ order.status }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Celková částka:</span>
+                <strong class="font-mono" style="font-size: 1.05rem;">{{ "%.2f"|format(order.total_price) }} Kč</strong>
+            </div>
+        </div>
+
+        {% if order.can_cancel %}
+        <form method="post" action="/my-orders/{{ order.id }}/cancel" style="margin-top: 1rem;">
+            <button
+                type="submit"
+                class="btn btn-secondary btn-sm"
+                onclick="return confirm('Opravdu chcete stornovat objednávku {{ order.order_number }}? Rezervace zboží se ihned uvolní.');"
+            >
+                Stornovat objednávku
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Kód SKU</th>
+                <th>Název hračky</th>
+                <th>Množství</th>
+                <th>Jednotková cena (fixovaná)</th>
+                <th class="text-right">Mezisoučet</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for it in order.items %}
+            <tr>
+                <td><span class="sku-badge">{{ it.product_code }}</span></td>
+                <td>
+                    <div class="order-item-cell">
+                        <img
+                            src="{{ item_images.get(it.product_id|string, '/static/img/toys/default_toy.svg') }}"
+                            alt="{{ it.product_name }}"
+                            class="order-item-thumb"
+                        >
+                        <strong>{{ it.product_name }}</strong>
+                    </div>
+                </td>
+                <td class="font-mono">{{ it.quantity }} ks</td>
+                <td class="font-mono text-nowrap">{{ "%.2f"|format(it.unit_price) }} Kč</td>
+                <td class="text-right font-mono font-bold text-nowrap">{{ "%.2f"|format(it.total_price) }} Kč</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4" class="text-right"><strong>Celkem k úhradě:</strong></td>
+                <td class="text-right font-mono font-bold text-nowrap">{{ "%.2f"|format(order.total_price) }} Kč</td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}

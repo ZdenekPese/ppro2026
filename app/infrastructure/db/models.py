@@ -601,7 +601,7 @@ class User(Base):
     __tablename__ = "users"
 
     __table_args__ = (
-        CheckConstraint("role IN ('manager', 'warehouse')", name="ck_users_valid_role"),
+        CheckConstraint("role IN ('manager', 'warehouse', 'customer')", name="ck_users_valid_role"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -629,7 +629,13 @@ class User(Base):
         default="warehouse",
         nullable=False,
         index=True,
-    )  # 'manager' (Jednatel / Manažer) nebo 'warehouse' (Skladník)
+    )  # 'manager' (Jednatel / Manažer), 'warehouse' (Skladník) nebo 'customer' (Zákazník)
+    customer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("customers.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     password_hash: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
@@ -651,6 +657,10 @@ class User(Base):
         nullable=False,
     )
 
+    customer: Mapped[Optional["Customer"]] = relationship(
+        "Customer",
+        lazy="selectin",
+    )
     sessions: Mapped[list["UserSession"]] = relationship(
         "UserSession",
         back_populates="user",
@@ -659,7 +669,12 @@ class User(Base):
 
     @property
     def role_label(self) -> str:
-        return "Jednatel / Manažer" if self.role == "manager" else "Skladník"
+        labels = {
+            "manager": "Jednatel / Manažer",
+            "warehouse": "Skladník",
+            "customer": "Zákazník",
+        }
+        return labels.get(self.role, "Uživatel")
 
     def __repr__(self) -> str:
         return f"<User(username='{self.username}', role='{self.role}')>"

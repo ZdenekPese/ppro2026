@@ -38,6 +38,13 @@ def warehouse_client():
         yield _login_client(test_client, "skladnik", settings.DEMO_WAREHOUSE_PASSWORD)
 
 
+@pytest.fixture
+def customer_client():
+    """TestClient přihlášený jako zákazník (Marie Svobodová, role customer)."""
+    with TestClient(app) as test_client:
+        yield _login_client(test_client, "zakaznik", settings.DEMO_CUSTOMER_PASSWORD)
+
+
 @pytest.fixture(autouse=True, scope="session")
 def maintain_clean_database():
     """Zajištění demo účtů před testy a návrat DB do čistého stavu po jejich skončení."""

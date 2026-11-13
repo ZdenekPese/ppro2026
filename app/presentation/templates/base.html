@@ -41,17 +41,25 @@
         <header class="navbar">
             <div class="navbar-inner">
                 <div class="navbar-brand-section">
-                    <a href="/" class="brand-link" title="Dřevěnka s.r.o. - Přehled skladu">
+                    <a href="{{ '/shop' if current_user and current_user.role == 'customer' else '/' }}" class="brand-link" title="Dřevěnka s.r.o.">
                         <span class="brand-badge">DŘEVĚNKA</span>
                         <div class="brand-text">
                             <span class="brand-title">Dřevěnka s.r.o.</span>
-                            <span class="brand-subtitle">Skladový systém</span>
+                            <span class="brand-subtitle">{{ 'Zákaznický e-shop' if current_user and current_user.role == 'customer' else 'Skladový systém' }}</span>
                         </div>
                     </a>
                 </div>
 
-                <!-- Primární navigace (Katalog, Přehled, Pohyby, Objednávky, Zákazníci, Reporty) -->
+                <!-- Primární navigace podle role -->
                 <nav class="nav-links">
+                    {% if current_user and current_user.role == 'customer' %}
+                    <a href="/shop" class="nav-link {% if request.url.path.startswith('/shop') %}active{% endif %}">
+                        E-shop hraček
+                    </a>
+                    <a href="/my-orders" class="nav-link {% if request.url.path.startswith('/my-orders') %}active{% endif %}">
+                        Moje objednávky
+                    </a>
+                    {% else %}
                     <a href="/products" class="nav-link {% if request.url.path.startswith('/products') %}active{% endif %}">
                         Katalog hraček
                     </a>
@@ -71,6 +79,7 @@
                     <a href="/reports" class="nav-link {% if request.url.path.startswith('/reports') %}active{% endif %}">
                         Reporty &amp; Analytika
                     </a>
+                    {% endif %}
                     {% endif %}
                 </nav>
 
@@ -121,6 +130,16 @@
                 <div class="mobile-drawer-inner">
                     <div class="mobile-section-label">Hlavní menu</div>
                     <nav class="mobile-nav-list">
+                        {% if current_user and current_user.role == 'customer' %}
+                        <a href="/shop" class="mobile-nav-link {% if request.url.path.startswith('/shop') %}active{% endif %}">
+                            <span class="mobile-nav-icon">🧸</span>
+                            <span>E-shop hraček</span>
+                        </a>
+                        <a href="/my-orders" class="mobile-nav-link {% if request.url.path.startswith('/my-orders') %}active{% endif %}">
+                            <span class="mobile-nav-icon">🛒</span>
+                            <span>Moje objednávky</span>
+                        </a>
+                        {% else %}
                         <a href="/products" class="mobile-nav-link {% if request.url.path.startswith('/products') %}active{% endif %}">
                             <span class="mobile-nav-icon">🧸</span>
                             <span>Katalog hraček</span>
@@ -146,6 +165,7 @@
                             <span class="mobile-nav-icon">📈</span>
                             <span>Reporty &amp; Analytika</span>
                         </a>
+                        {% endif %}
                         {% endif %}
                     </nav>
 

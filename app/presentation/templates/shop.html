@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<!-- E-shop Hero Banner -->
+<section class="shop-hero">
+    <div class="shop-hero-main">
+        <span class="shop-hero-kicker">E-shop dřevěných hraček · Dřevěnka s.r.o.</span>
+        <h1 class="shop-hero-title">Poctivé české hračky ze dřeva</h1>
+        <p class="shop-hero-subtitle">
+            Ručně opracované hračky z přírodního bukového a smrkového dřeva. Reálná dostupnost a okamžitá rezervace přímo z našeho skladu v Hradci Králové.
+        </p>
+        <div class="shop-hero-perks">
+            <span class="shop-perk-pill">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Bezpečné přírodní materiály</span>
+            </span>
+            <span class="shop-perk-pill">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span>Okamžitá rezervace ze skladu</span>
+            </span>
+            <span class="shop-perk-pill">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                <span>Expedice z Hradce Králové</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="shop-hero-side">
+        {% if customer_profile %}
+        <div class="shop-hero-profile">
+            <span class="shop-customer-kicker">Přihlášený zákazník</span>
+            <strong class="shop-hero-profile-name">{{ customer_profile.full_name }}</strong>
+            <span class="shop-customer-meta">{{ customer_profile.address }}</span>
+            <span class="font-mono shop-hero-profile-contact">{{ customer_profile.email }}{% if customer_profile.phone %} · {{ customer_profile.phone }}{% endif %}</span>
+        </div>
+        {% endif %}
+
+        {% if is_customer_role %}
+        <div class="shop-hero-actions">
+            <a href="/my-orders" class="btn btn-secondary">Moje objednávky</a>
+            <a href="#shopCartSidebar" class="btn btn-primary shop-hero-cart-jump">
+                Košík (<span id="shopHeroCartCount">0</span>)
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% if order_error %}
+<div class="alert-box" role="alert" style="margin-bottom: 1.25rem;">
+    <strong>Objednávku se nepodařilo vytvořit:</strong> {{ order_error }}
+</div>
+{% endif %}
+
+<!-- Vyhledávání a filtr kategorií -->
+<form method="get" action="/shop" class="toolbar-panel shop-toolbar">
+    <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </span>
+        <input
+            type="text"
+            name="search"
+            class="form-control search-input"
+            value="{{ search }}"
+            placeholder="Hledat hračku podle názvu nebo kódu..."
+        >
+    </div>
+
+    <div class="filter-group">
+        <select name="category_id" class="form-control filter-select" aria-label="Filtr kategorie">
+            <option value="">Všechny kategorie</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_category_id == cat.id %}selected{% endif %}>
+                {{ cat.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <label class="checkbox-filter-label">
+            <input type="checkbox" name="only_in_stock" value="true" {% if only_in_stock %}checked{% endif %}>
+            <span>Pouze skladem</span>
+        </label>
+
+        <button type="submit" class="btn btn-secondary">Filtrovat</button>
+        {% if search or selected_category_id or only_in_stock %}
+        <a href="/shop" class="btn btn-secondary">Zrušit filtr</a>
+        {% endif %}
+    </div>
+</form>
+
+<!-- Rychlé čipy kategorií -->
+{% if categories %}
+<nav class="shop-category-chips" aria-label="Rychlý filtr kategorií">
+    <a
+        href="/shop{% if search or only_in_stock %}?{% endif %}{% if search %}search={{ search|urlencode }}{% endif %}{% if search and only_in_stock %}&amp;{% endif %}{% if only_in_stock %}only_in_stock=true{% endif %}"
+        class="shop-cat-chip {% if not selected_category_id %}active{% endif %}"
+    >
+        Všechny hračky
+    </a>
+    {% for cat in categories %}
+    <a
+        href="/shop?category_id={{ cat.id }}{% if search %}&amp;search={{ search|urlencode }}{% endif %}{% if only_in_stock %}&amp;only_in_stock=true{% endif %}"
+        class="shop-cat-chip {% if selected_category_id == cat.id %}active{% endif %}"
+    >
+        {{ cat.name }}
+    </a>
+    {% endfor %}
+</nav>
+{% endif %}
+
+<!-- Dvousloupcový e-shop (katalog hraček + sticky košík) -->
+<form method="post" action="/shop/order" id="shopOrderForm" class="shop-storefront {% if not is_customer_role %}is-single-col{% endif %}">
+    <div class="shop-catalog-col">
+        <div class="shop-catalog-header">
+            <h2 class="shop-section-title">Nabídka hraček</h2>
+            <span class="shop-catalog-count">Zobrazeno <strong>{{ items|length }}</strong> položek</span>
+        </div>
+
+        <div class="shop-grid">
+            {% for item in items %}
+            <article
+                class="shop-product-card {% if item.avail_state == 'out' %}is-sold-out{% endif %}{% if item.prefill_qty > 0 %} in-cart{% endif %}"
+                data-product-id="{{ item.id }}"
+                data-price="{{ '%.2f'|format(item.selling_price) }}"
+                data-name="{{ item.name }}"
+                data-code="{{ item.code }}"
+            >
+                <div class="shop-card-media">
+                    <div class="shop-card-badges">
+                        <span class="sku-badge">{{ item.code }}</span>
+                        <span class="shop-stock-pill shop-stock-{{ item.avail_state }}">
+                            {{ item.avail_label }}
+                        </span>
+                    </div>
+                    <img
+                        src="{{ item.image_url }}"
+                        alt="{{ item.name }}"
+                        class="shop-product-img"
+                        loading="lazy"
+                    >
+                </div>
+
+                <div class="shop-card-body">
+                    {% if item.categories %}
+                    <div class="category-pills-row">
+                        {% for cat in item.categories %}
+                        <span class="category-pill">{{ cat.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <h3 class="shop-product-title">{{ item.name }}</h3>
+                    <p class="shop-product-desc">
+                        {{ item.description or 'Tradiční ručně opracovaná dřevěná hračka z českého dřeva.' }}
+                    </p>
+                </div>
+
+                <div class="shop-card-bottom">
+                    <div class="shop-price-block">
+                        <span class="shop-price-label">Cena s DPH</span>
+                        <strong class="shop-price-value">{{ "%.2f"|format(item.selling_price) }} Kč</strong>
+                    </div>
+
+                    {% if is_customer_role %}
+                        {% if item.available_quantity > 0 %}
+                        <div class="shop-buy-area">
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm shop-add-btn"
+                                data-target="qty_{{ item.id }}"
+                                {% if item.prefill_qty > 0 %}hidden{% endif %}
+                            >
+                                Do košíku
+                            </button>
+
+                            <div
+                                class="shop-qty-control"
+                                data-control-for="qty_{{ item.id }}"
+                                {% if item.prefill_qty <= 0 %}hidden{% endif %}
+                            >
+                                <button
+                                    type="button"
+                                    class="shop-qty-step"
+                                    data-step="-1"
+                                    data-target="qty_{{ item.id }}"
+                                    aria-label="Snížit počet pro {{ item.name }}"
+                                >-</button>
+                                <input
+                                    type="number"
+                                    id="qty_{{ item.id }}"
+                                    name="qty_{{ item.id }}"
+                                    class="form-control shop-qty-input"
+                                    min="0"
+                                    max="{{ item.available_quantity }}"
+                                    value="{{ item.prefill_qty }}"
+                                    data-price="{{ '%.2f'|format(item.selling_price) }}"
+                                    data-name="{{ item.name }}"
+                                    data-code="{{ item.code }}"
+                                    aria-label="Počet kusů pro {{ item.name }}"
+                                >
+                                <button
+                                    type="button"
+                                    class="shop-qty-step"
+                                    data-step="1"
+                                    data-target="qty_{{ item.id }}"
+                                    aria-label="Zvýšit počet pro {{ item.name }}"
+                                >+</button>
+                            </div>
+                        </div>
+                        {% else %}
+                        <span class="shop-soldout-tag">Není skladem</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </article>
+            {% else %}
+            <div class="panel-card shop-empty-state">
+                <p>Pro zadaný filtr nebyla nalezena žádná dostupná dřevěná hračka.</p>
+                <a href="/shop" class="btn btn-secondary" style="margin-top: 0.75rem;">Zobrazit celý katalog</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if is_customer_role and items %}
+    <aside id="shopCartSidebar" class="shop-cart-sidebar" aria-label="Nákupní košík">
+        <section class="panel-card shop-checkout-panel">
+            <div class="shop-cart-header">
+                <div>
+                    <h2 class="shop-cart-title">Nákupní košík</h2>
+                    <span class="shop-cart-subtitle">Okamžitá rezervace zásob</span>
+                </div>
+                <span class="shop-cart-count-pill" id="shopTotalQty">0 ks</span>
+            </div>
+
+            <div id="shopCartItems" class="shop-cart-items">
+                <p class="shop-cart-empty">
+                    Košík je zatím prázdný. Vyberte si hračku vlevo tlačítkem „Do košíku“.
+                </p>
+            </div>
+
+            <div class="shop-cart-summary">
+                <div class="shop-cart-summary-row">
+                    <span>Celková cena</span>
+                    <strong id="shopTotalPrice" class="shop-total-price">0.00 Kč</strong>
+                </div>
+                <p class="shop-cart-lock-note">
+                    Cena každé položky se při odeslání pevně zafixuje pro vaši objednávku.
+                </p>
+            </div>
+
+            {% if customer_profile %}
+            <div class="shop-cart-delivery">
+                <span class="shop-customer-kicker">Doručení ze skladu Hradec Králové</span>
+                <strong>{{ customer_profile.full_name }}</strong>
+                <span>{{ customer_profile.address }}</span>
+            </div>
+            {% endif %}
+
+            <div class="form-group" style="margin-top: 0.85rem;">
+                <label for="shopOrderNote" class="form-label">Poznámka k objednávce (volitelné)</label>
+                <input
+                    id="shopOrderNote"
+                    name="note"
+                    type="text"
+                    class="form-control"
+                    value="{{ note_value }}"
+                    placeholder="Např. Dárkové balení, prosím zavolat..."
+                    maxlength="500"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary shop-submit-btn" id="shopSubmitOrderBtn">
+                Odeslat závaznou objednávku
+            </button>
+        </section>
+    </aside>
+    {% endif %}
+</form>
+
+<script>
+    (function () {
+        var inputs = Array.prototype.slice.call(document.querySelectorAll('.shop-qty-input'));
+        var totalQtyEl = document.getElementById('shopTotalQty');
+        var heroCartCountEl = document.getElementById('shopHeroCartCount');
+        var totalPriceEl = document.getElementById('shopTotalPrice');
+        var cartItemsEl = document.getElementById('shopCartItems');
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function syncCardControls(inp, val) {
+            var targetId = inp.id;
+            var card = inp.closest('.shop-product-card');
+            var addBtn = document.querySelector('.shop-add-btn[data-target="' + targetId + '"]');
+            var qtyCtrl = document.querySelector('.shop-qty-control[data-control-for="' + targetId + '"]');
+
+            if (val > 0) {
+                if (card) card.classList.add('in-cart');
+                if (addBtn) addBtn.hidden = true;
+                if (qtyCtrl) qtyCtrl.hidden = false;
+            } else {
+                if (card) card.classList.remove('in-cart');
+                if (addBtn) addBtn.hidden = false;
+                if (qtyCtrl) qtyCtrl.hidden = true;
+            }
+        }
+
+        function recalcCart() {
+            var totalQty = 0;
+            var totalPrice = 0;
+            var selectedLines = [];
+
+            inputs.forEach(function (inp) {
+                var val = parseInt(inp.value, 10);
+                if (isNaN(val) || val < 0) val = 0;
+                var maxVal = parseInt(inp.getAttribute('max'), 10);
+                if (!isNaN(maxVal) && val > maxVal) {
+                    val = maxVal;
+                    inp.value = String(maxVal);
+                }
+
+                syncCardControls(inp, val);
+
+                if (val > 0) {
+                    var price = parseFloat(inp.getAttribute('data-price') || '0');
+                    var lineTotal = val * price;
+                    totalQty += val;
+                    totalPrice += lineTotal;
+                    selectedLines.push({
+                        id: inp.id,
+                        name: inp.getAttribute('data-name') || 'Produkt',
+                        code: inp.getAttribute('data-code') || '',
+                        qty: val,
+                        price: price,
+                        lineTotal: lineTotal
+                    });
+                }
+            });
+
+            if (totalQtyEl) totalQtyEl.textContent = totalQty + ' ks';
+            if (heroCartCountEl) heroCartCountEl.textContent = String(totalQty);
+            if (totalPriceEl) totalPriceEl.textContent = totalPrice.toFixed(2) + ' Kč';
+
+            if (cartItemsEl) {
+                if (selectedLines.length === 0) {
+                    cartItemsEl.innerHTML = '<p class="shop-cart-empty">Košík je zatím prázdný. Vyberte si hračku vlevo tlačítkem „Do košíku“.</p>';
+                } else {
+                    cartItemsEl.innerHTML = selectedLines.map(function (line) {
+                        return (
+                            '<div class="shop-cart-line">' +
+                                '<div class="shop-cart-line-info">' +
+                                    '<strong class="shop-cart-line-name">' + escapeHtml(line.name) + '</strong>' +
+                                    '<span class="shop-cart-line-meta font-mono">' +
+                                        line.qty + ' × ' + line.price.toFixed(2) + ' Kč' +
+                                    '</span>' +
+                                '</div>' +
+                                '<div class="shop-cart-line-right">' +
+                                    '<strong class="font-mono text-nowrap">' + line.lineTotal.toFixed(2) + ' Kč</strong>' +
+                                    '<button type="button" class="shop-cart-remove" data-remove="' + escapeHtml(line.id) + '" aria-label="Odebrat ' + escapeHtml(line.name) + ' z košíku" title="Odebrat z košíku">×</button>' +
+                                '</div>' +
+                            '</div>'
+                        );
+                    }).join('');
+                }
+            }
+        }
+
+        inputs.forEach(function (inp) {
+            inp.addEventListener('input', recalcCart);
+            inp.addEventListener('change', recalcCart);
+        });
+
+        document.querySelectorAll('.shop-add-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var targetId = btn.getAttribute('data-target');
+                var input = document.getElementById(targetId);
+                if (!input || input.disabled) return;
+                var maxVal = parseInt(input.getAttribute('max'), 10);
+                var next = (!isNaN(maxVal) && maxVal < 1) ? 0 : 1;
+                input.value = String(next);
+                recalcCart();
+            });
+        });
+
+        document.querySelectorAll('.shop-qty-step').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var targetId = btn.getAttribute('data-target');
+                var step = parseInt(btn.getAttribute('data-step') || '0', 10);
+                var input = document.getElementById(targetId);
+                if (!input || input.disabled) return;
+                var cur = parseInt(input.value, 10);
+                if (isNaN(cur)) cur = 0;
+                var next = Math.max(0, cur + step);
+                var maxVal = parseInt(input.getAttribute('max'), 10);
+                if (!isNaN(maxVal)) next = Math.min(maxVal, next);
+                input.value = String(next);
+                recalcCart();
+            });
+        });
+
+        if (cartItemsEl) {
+            cartItemsEl.addEventListener('click', function (ev) {
+                var removeBtn = ev.target.closest('.shop-cart-remove');
+                if (!removeBtn) return;
+                var targetId = removeBtn.getAttribute('data-remove');
+                var input = document.getElementById(targetId);
+                if (!input) return;
+                input.value = '0';
+                recalcCart();
+            });
+        }
+
+        recalcCart();
+    })();
+</script>
+{% endblock %}

@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     # Syntetická demo hesla pouze pro vývojové a předváděcí účty (v produkci přepsat v .env)
     DEMO_MANAGER_PASSWORD: str = "drevenka2026"
     DEMO_WAREHOUSE_PASSWORD: str = "sklad2026"
+    DEMO_CUSTOMER_PASSWORD: str = "zakaznik2026"
 
     model_config = SettingsConfigDict(
         env_file=".env",

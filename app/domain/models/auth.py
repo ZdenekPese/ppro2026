@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from enum import Enum
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -8,6 +9,7 @@ class UserRole(str, Enum):
     """Uživatelské role v systému Dřevěnka s.r.o. dle zadání."""
     MANAGER = "manager"      # Jednatel / Manažer (Petr Doležal) – plný přístup včetně ceníku a reportů
     WAREHOUSE = "warehouse"  # Skladník – příjem, výdej, převody, inventura, objednávky, zákazníci
+    CUSTOMER = "customer"    # Zákazník e-shopu – procházení katalogu, vytváření a sledování vlastních objednávek
 
 
 class LoginRequest(BaseModel):
@@ -22,6 +24,18 @@ class UserCreate(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=150)
     email: str = Field(..., min_length=5, max_length=255)
     role: UserRole = UserRole.WAREHOUSE
+    customer_id: Optional[uuid.UUID] = None
+    password: str = Field(..., min_length=6, max_length=255)
+
+
+class CustomerRegisterRequest(BaseModel):
+    """Schéma pro samoobslužnou registraci zákazníka e-shopu."""
+    username: str = Field(..., min_length=2, max_length=60)
+    first_name: str = Field(..., min_length=2, max_length=100)
+    last_name: str = Field(..., min_length=2, max_length=100)
+    email: str = Field(..., min_length=5, max_length=255)
+    phone: str = Field(..., min_length=6, max_length=30)
+    address: str = Field(..., min_length=5, max_length=500)
     password: str = Field(..., min_length=6, max_length=255)
 
 
@@ -33,6 +47,7 @@ class UserResponse(BaseModel):
     email: str
     role: str
     role_label: str
+    customer_id: Optional[uuid.UUID] = None
     is_active: bool
     created_at: datetime
 

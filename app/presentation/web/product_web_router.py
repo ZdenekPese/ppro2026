@@ -13,7 +13,7 @@ from app.domain.models.product import ProductCreate, ProductUpdate
 from app.domain.services.product_service import ProductService
 from app.infrastructure.db.models import User
 from app.infrastructure.repositories.category_repository import CategoryRepository
-from app.presentation.dependencies import require_manager_user, require_web_user
+from app.presentation.dependencies import require_manager_user, require_staff_user
 from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="/products", tags=["Web Produkty"])
@@ -34,7 +34,7 @@ def product_list_view(
     category_id: Optional[str] = None,
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Zobrazení katalogu dřevěných hraček v přehledné tabulce s filtrem kategorií."""
     clean_category_id = parse_optional_uuid(category_id)

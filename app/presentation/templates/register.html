@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | default('Registrace zákazníka — Dřevěnka s.r.o.') }}</title>
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('drevenka_theme') === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css?v=20261113_v18">
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
+    <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <section class="auth-card">
+            <div class="auth-brand">
+                <span class="brand-badge">DŘEVĚNKA</span>
+                <div>
+                    <h1 class="auth-title">Nový zákaznický účet</h1>
+                    <p class="auth-subtitle">Registrace pro objednávky v e-shopu Dřevěnka s.r.o.</p>
+                </div>
+                <button
+                    type="button"
+                    class="theme-toggle-btn auth-theme-toggle"
+                    id="themeToggleBtn"
+                    aria-label="Přepnout mezi světlým a tmavým režimem"
+                    aria-pressed="false"
+                    title="Přepnout světlý / tmavý režim"
+                >
+                    <span class="theme-icon-wrap theme-icon-moon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    </span>
+                    <span class="theme-icon-wrap theme-icon-sun" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </span>
+                    <span class="theme-toggle-label">Tmavý</span>
+                </button>
+            </div>
+
+            {% if error %}
+            <div class="auth-alert auth-alert-error" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/register" class="auth-form" autocomplete="on">
+                <div class="register-grid">
+                    <div class="form-group">
+                        <label for="first_name" class="form-label">Jméno</label>
+                        <input
+                            id="first_name"
+                            name="first_name"
+                            type="text"
+                            class="form-control"
+                            value="{{ form.first_name | default('') }}"
+                            placeholder="např. Eliška"
+                            minlength="2"
+                            required
+                            autofocus
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="last_name" class="form-label">Příjmení</label>
+                        <input
+                            id="last_name"
+                            name="last_name"
+                            type="text"
+                            class="form-control"
+                            value="{{ form.last_name | default('') }}"
+                            placeholder="např. Králová"
+                            minlength="2"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="register-grid">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Přihlašovací jméno</label>
+                        <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            class="form-control"
+                            value="{{ form.username | default('') }}"
+                            placeholder="např. eliska"
+                            minlength="2"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Telefon</label>
+                        <input
+                            id="phone"
+                            name="phone"
+                            type="text"
+                            class="form-control"
+                            value="{{ form.phone | default('') }}"
+                            placeholder="+420 777 123 456"
+                            minlength="6"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        class="form-control"
+                        value="{{ form.email | default('') }}"
+                        placeholder="eliska.kralova@example.cz"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="form-label">Doručovací adresa</label>
+                    <input
+                        id="address"
+                        name="address"
+                        type="text"
+                        class="form-control"
+                        value="{{ form.address | default('') }}"
+                        placeholder="Ulice 12, 500 02 Hradec Králové"
+                        minlength="5"
+                        required
+                    >
+                </div>
+
+                <div class="register-grid">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Heslo (min. 6 znaků)</label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            class="form-control"
+                            placeholder="Zadejte heslo"
+                            minlength="6"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="password_confirm" class="form-label">Potvrzení hesla</label>
+                        <input
+                            id="password_confirm"
+                            name="password_confirm"
+                            type="password"
+                            class="form-control"
+                            placeholder="Zopakujte heslo"
+                            minlength="6"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-submit-btn">
+                    Vytvořit zákaznický účet a nakupovat
+                </button>
+            </form>
+
+            <div class="auth-switch-row">
+                <span>Už máte u nás účet?</span>
+                <a href="/login" class="auth-switch-link">Přihlásit se zpět</a>
+            </div>
+        </section>
+
+        <footer class="auth-footer">
+            <span>Dřevěnka s.r.o. | Zákaznický portál e-shopu PPRO 2026</span>
+        </footer>
+    </main>
+
+    <script>
+        (function () {
+            var themeBtn = document.getElementById('themeToggleBtn');
+            var syncThemeButton = function () {
+                if (!themeBtn) return;
+                var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                themeBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+                themeBtn.title = isDark ? 'Přepnout na světlý režim' : 'Přepnout na tmavý režim';
+                var label = themeBtn.querySelector('.theme-toggle-label');
+                if (label) {
+                    label.textContent = isDark ? 'Světlý' : 'Tmavý';
+                }
+            };
+            syncThemeButton();
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function () {
+                    var nextDark = document.documentElement.getAttribute('data-theme') !== 'dark';
+                    if (nextDark) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                        document.documentElement.removeAttribute('data-theme');
+                    }
+                    try {
+                        localStorage.setItem('drevenka_theme', nextDark ? 'dark' : 'light');
+                    } catch (e) {}
+                    syncThemeButton();
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

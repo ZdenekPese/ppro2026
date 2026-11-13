@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.domain.exceptions import AuthenticationError, DuplicateUsernameError
-from app.domain.models.auth import UserCreate
-from app.infrastructure.db.models import User, UserSession
+from app.domain.models.auth import CustomerRegisterRequest, UserCreate
+from app.infrastructure.db.models import Customer, User, UserSession
+from app.infrastructure.repositories.customer_repository import CustomerRepository
 from app.infrastructure.repositories.user_repository import UserRepository
 
 
@@ -104,17 +105,72 @@ class AuthService:
         self.user_repo.delete_session_by_token_hash(token_hash)
 
     def create_user(self, dto: UserCreate) -> User:
-        """Založí nového pracovníka systému se zahashovaným heslem."""
+        """Založí nového pracovníka nebo zákazníka systému se zahashovaným heslem."""
         clean_username = dto.username.strip().lower()
+        clean_email = dto.email.strip().lower()
         if self.user_repo.get_by_username(clean_username):
             raise DuplicateUsernameError(clean_username)
+        if self.user_repo.get_by_email(clean_email):
+            raise ValueError(f"Účet s e-mailem '{clean_email}' již v systému existuje.")
 
         user = User(
             username=clean_username,
             full_name=dto.full_name.strip(),
-            email=dto.email.strip().lower(),
+            email=clean_email,
             role=dto.role.value,
+            customer_id=dto.customer_id,
             password_hash=hash_password(dto.password),
             is_active=True,
         )
         return self.user_repo.create(user)
+
+    def register_customer_account(self, dto: CustomerRegisterRequest) -> User:
+        """Samoobslužná registrace zákazníka e-shopu: atomicky založí (nebo propojí) Customer i User."""
+        clean_username = dto.username.strip().lower()
+        clean_email = dto.email.strip().lower()
+        first_name = dto.first_name.strip()
+        last_name = dto.last_name.strip()
+        full_name = f"{first_name} {last_name}".strip()
+
+        if self.user_repo.get_by_username(clean_username):
+            raise DuplicateUsernameError(clean_username)
+        if self.user_repo.get_by_email(clean_email):
+            raise ValueError(f"Účet s e-mailem '{clean_email}' již v systému existuje.")
+
+        try:
+            cust_repo = CustomerRepository(self.db)
+            customer = cust_repo.get_by_email(clean_email)
+            if customer is None:
+                customer = Customer(
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=clean_email,
+                    phone=dto.phone.strip(),
+                    address=dto.address.strip(),
+                    is_active=True,
+                )
+                self.db.add(customer)
+                self.db.flush()
+            else:
+                customer.first_name = first_name
+                customer.last_name = last_name
+                customer.phone = dto.phone.strip()
+                customer.address = dto.address.strip()
+                customer.is_active = True
+
+            user = User(
+                username=clean_username,
+                full_name=full_name,
+                email=clean_email,
+                role="customer",
+                customer_id=customer.id,
+                password_hash=hash_password(dto.password),
+                is_active=True,
+            )
+            self.db.add(user)
+            self.db.commit()
+            self.db.refresh(user)
+            return user
+        except Exception:
+            self.db.rollback()
+            raise

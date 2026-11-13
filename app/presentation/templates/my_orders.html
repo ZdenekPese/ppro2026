@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-titles">
+        <h1 class="page-title">Moje objednávky</h1>
+        <p class="page-subtitle">
+            Přehled vašich objednávek v e-shopu Dřevěnka s.r.o., stav rezervace a expedice ze skladu.
+        </p>
+    </div>
+    <div class="header-actions">
+        <a href="/shop" class="btn btn-primary">Objednat další hračky</a>
+    </div>
+</div>
+
+<!-- Souhrnné karty zákazníka -->
+<div class="summary-grid" style="margin-bottom: 1.5rem;">
+    <div class="summary-card">
+        <div class="summary-label">Celkem objednávek</div>
+        <div class="summary-value">{{ orders|length }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Rezervováno / Čeká na expedici</div>
+        <div class="summary-value">{{ reserved_count }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Již expedováno</div>
+        <div class="summary-value">{{ dispatched_count }}</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-label">Celkový objem nákupů</div>
+        <div class="summary-value">{{ "%.2f"|format(total_spent) }} Kč</div>
+    </div>
+</div>
+
+<!-- Stavové filtry -->
+<div class="movements-tabs" style="margin-bottom: 1.25rem;">
+    <a href="/my-orders" class="movement-tab {% if not selected_status %}active{% endif %}">
+        Všechny objednávky
+    </a>
+    <a href="/my-orders?status=RESERVED" class="movement-tab {% if selected_status == 'RESERVED' %}active{% endif %}">
+        Rezervované
+    </a>
+    <a href="/my-orders?status=DISPATCHED" class="movement-tab {% if selected_status == 'DISPATCHED' %}active{% endif %}">
+        Expedované
+    </a>
+    <a href="/my-orders?status=CANCELLED" class="movement-tab {% if selected_status == 'CANCELLED' %}active{% endif %}">
+        Stornované
+    </a>
+</div>
+
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Číslo objednávky</th>
+                <th>Datum přijetí</th>
+                <th>Položky</th>
+                <th>Celková cena</th>
+                <th>Stav objednávky</th>
+                <th>Expedováno</th>
+                <th class="text-right">Akce</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>
+                    <a href="/my-orders/{{ order.id }}" class="sku-badge" style="text-decoration: none;">
+                        {{ order.order_number }}
+                    </a>
+                </td>
+                <td class="text-nowrap">{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    <span class="font-mono">{{ order.items|length }} druhů</span>
+                </td>
+                <td class="font-mono font-bold text-nowrap">{{ "%.2f"|format(order.total_price) }} Kč</td>
+                <td>
+                    {% if order.status == 'RESERVED' %}
+                        <span class="order-pill pill-reserved">Rezervováno (K expedici)</span>
+                    {% elif order.status == 'DISPATCHED' %}
+                        <span class="order-pill pill-dispatched">Odesláno</span>
+                    {% elif order.status == 'CANCELLED' %}
+                        <span class="order-pill pill-cancelled">Stornováno</span>
+                    {% else %}
+                        <span class="order-pill">{{ order.status }}</span>
+                    {% endif %}
+                </td>
+                <td class="text-nowrap text-dim">
+                    {{ order.dispatched_at.strftime('%d.%m.%Y %H:%M') if order.dispatched_at else 'Čeká na odeslání' }}
+                </td>
+                <td class="text-right">
+                    <a href="/my-orders/{{ order.id }}" class="btn btn-secondary btn-sm">Detail</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="empty-table-cell">
+                    Zatím nemáte žádnou objednávku odpovídající zvolenému filtru. <a href="/shop">Vyberte si hračku v e-shopu</a>.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

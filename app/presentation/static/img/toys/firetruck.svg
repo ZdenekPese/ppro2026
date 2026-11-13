@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
+  <ellipse cx="120" cy="138" rx="88" ry="8" fill="#000" opacity="0.08"/>
+  <!-- Truck bed and cab -->
+  <rect x="38" y="76" width="110" height="38" rx="6" fill="#dc2626"/>
+  <path d="M148 54 L182 54 C194 54 202 68 204 86 L204 114 L148 114 Z" fill="#b91c1c"/>
+  <rect x="160" y="64" width="28" height="20" rx="3" fill="#fef3c7"/>
+  <!-- Beacon -->
+  <rect x="168" y="42" width="12" height="12" rx="4" fill="#3b82f6"/>
+  <!-- Wooden extendable ladder -->
+  <g transform="rotate(-14 96 74)">
+    <rect x="34" y="54" width="118" height="7" rx="3" fill="#deb887"/>
+    <rect x="34" y="68" width="118" height="7" rx="3" fill="#deb887"/>
+    <rect x="46" y="56" width="5" height="16" fill="#8b5e34"/>
+    <rect x="64" y="56" width="5" height="16" fill="#8b5e34"/>
+    <rect x="82" y="56" width="5" height="16" fill="#8b5e34"/>
+    <rect x="100" y="56" width="5" height="16" fill="#8b5e34"/>
+    <rect x="118" y="56" width="5" height="16" fill="#8b5e34"/>
+    <rect x="136" y="56" width="5" height="16" fill="#8b5e34"/>
+  </g>
+  <!-- Wheels -->
+  <circle cx="68" cy="118" r="17" fill="#6f4518"/>
+  <circle cx="68" cy="118" r="7" fill="#f3d5b5"/>
+  <circle cx="176" cy="118" r="17" fill="#6f4518"/>
+  <circle cx="176" cy="118" r="7" fill="#f3d5b5"/>
+</svg>

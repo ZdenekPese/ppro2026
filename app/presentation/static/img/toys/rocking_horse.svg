@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
+  <ellipse cx="120" cy="140" rx="88" ry="8" fill="#000" opacity="0.08"/>
+  <!-- Curved rockers -->
+  <path d="M40 120 Q120 148 200 120" stroke="#8b5e34" stroke-width="10" stroke-linecap="round"/>
+  <!-- Legs -->
+  <path d="M84 92 L72 126" stroke="#bc8a5f" stroke-width="11" stroke-linecap="round"/>
+  <path d="M152 92 L166 126" stroke="#bc8a5f" stroke-width="11" stroke-linecap="round"/>
+  <path d="M96 92 L92 128" stroke="#d4a373" stroke-width="11" stroke-linecap="round"/>
+  <path d="M140 92 L146 128" stroke="#d4a373" stroke-width="11" stroke-linecap="round"/>
+  <!-- Horse body -->
+  <rect x="74" y="64" width="88" height="36" rx="18" fill="#d4a373"/>
+  <!-- Tail -->
+  <path d="M74 74 Q50 72 48 96" stroke="#6f4518" stroke-width="9" stroke-linecap="round"/>
+  <!-- Neck and head -->
+  <path d="M138 72 L156 34 L176 42 L158 84 Z" fill="#d4a373"/>
+  <path d="M156 32 L188 42 C194 44 194 56 186 58 L162 56 Z" fill="#deb887"/>
+  <!-- Mane -->
+  <path d="M138 62 L152 32" stroke="#6f4518" stroke-width="7" stroke-linecap="round"/>
+  <!-- Ear & eye -->
+  <path d="M156 34 L161 21 L167 34 Z" fill="#bc8a5f"/>
+  <circle cx="171" cy="43" r="3" fill="#1e293b"/>
+  <!-- Saddle -->
+  <path d="M100 63 Q118 74 136 63 L136 82 Q118 88 100 82 Z" fill="#b7094c"/>
+  <!-- Handle peg -->
+  <line x1="158" y1="46" x2="146" y2="42" stroke="#8b5e34" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -64,6 +64,30 @@ def require_web_user(
     return current_user
 
 
+def require_staff_user(
+    current_user: User = Depends(require_web_user),
+) -> User:
+    """Vyžaduje interní roli zaměstnance (Jednatel / Manažer nebo Skladník)."""
+    if current_user.role not in (UserRole.MANAGER.value, UserRole.WAREHOUSE.value):
+        raise ForbiddenWebException(
+            required_role="Zaměstnanec skladu (Jednatel nebo Skladník)",
+            message="Tato interní skladová sekce je dostupná pouze zaměstnancům firmy Dřevěnka s.r.o. Zákazníci mají k dispozici e-shop a přehled vlastních objednávek.",
+        )
+    return current_user
+
+
+def require_customer_user(
+    current_user: User = Depends(require_web_user),
+) -> User:
+    """Vyžaduje zákaznický účet navázaný na evidovaného zákazníka."""
+    if current_user.role != UserRole.CUSTOMER.value or not current_user.customer_id:
+        raise ForbiddenWebException(
+            required_role="Zákazník",
+            message="Tato sekce je určena pouze pro přihlášené zákazníky e-shopu Dřevěnka s.r.o.",
+        )
+    return current_user
+
+
 def require_manager_user(
     current_user: User = Depends(require_web_user),
 ) -> User:

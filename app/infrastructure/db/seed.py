@@ -748,13 +748,31 @@ def seed_database() -> None:
 
 
 def ensure_demo_users(db) -> None:
-    """Idempotentně založí výchozí demo uživatele dle rolí ze zadání (Jednatel a Skladník)."""
+    """Idempotentně založí výchozí demo uživatele dle rolí (Jednatel, Skladník a Zákazník)."""
+    # Zajištění zákaznického profilu pro demo účet zákazníka (Marie Svobodová)
+    demo_customer_email = "marie.svobodova@seznam.cz"
+    demo_customer = db.query(Customer).filter(Customer.email == demo_customer_email).first()
+    customer_created = False
+    if not demo_customer:
+        demo_customer = Customer(
+            first_name="Marie",
+            last_name="Svobodová",
+            email=demo_customer_email,
+            phone="+420 603 112 233",
+            address="Smetanovo nábřeží 124, 500 02 Hradec Králové",
+            is_active=True,
+        )
+        db.add(demo_customer)
+        db.flush()
+        customer_created = True
+
     demo_users = [
         {
             "username": "dolezal",
             "full_name": "Petr Doležal",
             "email": "dolezal@drevenka-hracky.cz",
             "role": "manager",
+            "customer_id": None,
             "password": settings.DEMO_MANAGER_PASSWORD,
         },
         {
@@ -762,10 +780,19 @@ def ensure_demo_users(db) -> None:
             "full_name": "Jan Novák",
             "email": "novak@drevenka-hracky.cz",
             "role": "warehouse",
+            "customer_id": None,
             "password": settings.DEMO_WAREHOUSE_PASSWORD,
         },
+        {
+            "username": "zakaznik",
+            "full_name": "Marie Svobodová",
+            "email": demo_customer_email,
+            "role": "customer",
+            "customer_id": demo_customer.id,
+            "password": settings.DEMO_CUSTOMER_PASSWORD,
+        },
     ]
-    created_any = False
+    changed = customer_created
     for u_data in demo_users:
         existing = db.query(User).filter(User.username == u_data["username"]).first()
         if not existing:
@@ -774,14 +801,18 @@ def ensure_demo_users(db) -> None:
                 full_name=u_data["full_name"],
                 email=u_data["email"],
                 role=u_data["role"],
+                customer_id=u_data["customer_id"],
                 password_hash=hash_password(u_data["password"]),
                 is_active=True,
             )
             db.add(user)
-            created_any = True
-    if created_any:
+            changed = True
+        elif u_data["customer_id"] is not None and existing.customer_id is None:
+            existing.customer_id = u_data["customer_id"]
+            changed = True
+    if changed:
         db.commit()
-        print("[SEED] Úspěšně založeny demo uživatelské účty (dolezal, skladnik).")
+        print("[SEED] Úspěšně založeny demo uživatelské účty (dolezal, skladnik, zakaznik).")
 
 
 if __name__ == "__main__":

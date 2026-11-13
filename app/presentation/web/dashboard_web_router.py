@@ -9,13 +9,14 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.domain.models.auth import UserRole
 from app.domain.models.stock_movement import StockReceiptCreate, StockTransferCreate
 from app.domain.services.stock_movement_service import StockMovementService
 from app.domain.services.warehouse_service import WarehouseService
 from app.infrastructure.db.models import User
 from app.infrastructure.repositories.category_repository import CategoryRepository
 from app.infrastructure.repositories.product_repository import ProductRepository
-from app.presentation.dependencies import require_web_user
+from app.presentation.dependencies import require_staff_user, require_web_user
 from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(tags=["Web Dashboard"])
@@ -98,6 +99,9 @@ def dashboard_view(
     current_user: User = Depends(require_web_user),
 ):
     """Barevný dashboard skladu s indikací položek pod minimem („co hoří“) a rozpadem skladů."""
+    if current_user.role == UserRole.CUSTOMER.value:
+        return RedirectResponse(url="/shop", status_code=status.HTTP_303_SEE_OTHER)
+
     return _render_dashboard(
         request=request,
         db=db,
@@ -126,7 +130,7 @@ def dashboard_quick_action(
     confirmed: bool = Form(False),
     db: Session = Depends(get_db),
     service: WarehouseService = Depends(get_warehouse_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Rychlé doplnění nebo meziskladový přesun z upozornění docházejícího zboží s vědomým potvrzením."""
     if not confirmed:

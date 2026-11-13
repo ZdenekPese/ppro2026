@@ -23,7 +23,7 @@ from app.infrastructure.db.models import User
 from app.infrastructure.repositories.customer_repository import CustomerRepository
 from app.infrastructure.repositories.product_repository import ProductRepository
 from app.infrastructure.repositories.warehouse_repository import WarehouseRepository
-from app.presentation.dependencies import require_web_user
+from app.presentation.dependencies import require_staff_user
 
 router = APIRouter(tags=["Web Objednávky a Zákazníci"])
 
@@ -48,7 +48,7 @@ def orders_list_view(
     search: Optional[str] = None,
     db: Session = Depends(get_db),
     service: OrderService = Depends(get_order_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Webový přehled všech objednávek."""
     raw_status = status if status and status.strip() else status_filter
@@ -81,7 +81,7 @@ def orders_list_view(
 def order_new_view(
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Formulář pro vytvoření nové e-shopové objednávky."""
     customers = CustomerRepository(db).list_all(only_active=True)
@@ -120,7 +120,7 @@ def order_new_submit(
     db: Session = Depends(get_db),
     order_service: OrderService = Depends(get_order_service),
     customer_service: CustomerService = Depends(get_customer_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Zpracování založení objednávky s automatickou rezervací."""
     try:
@@ -181,7 +181,7 @@ def order_detail_view(
     error: Optional[str] = None,
     db: Session = Depends(get_db),
     service: OrderService = Depends(get_order_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Detail konkrétní objednávky s možností expedice a storna."""
     try:
@@ -205,7 +205,7 @@ def order_dispatch_submit(
     request: Request,
     order_id: UUID,
     service: OrderService = Depends(get_order_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Zpracování expedice objednávky skladníkem."""
     try:
@@ -226,7 +226,7 @@ def order_cancel_submit(
     request: Request,
     order_id: UUID,
     service: OrderService = Depends(get_order_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Zpracování storna objednávky."""
     try:
@@ -247,7 +247,7 @@ def customers_list_view(
     request: Request,
     search: Optional[str] = None,
     service: CustomerService = Depends(get_customer_service),
-    current_user: User = Depends(require_web_user),
+    current_user: User = Depends(require_staff_user),
 ):
     """Zobrazení adresáře zákazníků."""
     customers = service.list_customers(search=search)

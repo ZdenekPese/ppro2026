@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
+  <ellipse cx="120" cy="138" rx="76" ry="9" fill="#000" opacity="0.08"/>
+  <!-- Pull string -->
+  <path d="M174 96 Q204 112 222 104" stroke="#8b5e34" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 3"/>
+  <circle cx="223" cy="104" r="5" fill="#b7094c"/>
+  <!-- Duck base -->
+  <rect x="64" y="104" width="110" height="14" rx="7" fill="#8b5e34"/>
+  <!-- Duck body -->
+  <path d="M62 84 C62 66 84 62 118 68 C134 71 140 54 142 40 C145 24 168 22 174 38 C178 49 170 62 168 78 C166 96 150 106 122 106 L82 106 C68 106 62 96 62 84 Z" fill="#eab308"/>
+  <!-- Wing -->
+  <path d="M84 78 C98 72 126 76 132 88 C124 98 94 98 84 86 Z" fill="#ca8a04"/>
+  <!-- Beak & eye -->
+  <path d="M172 37 L196 43 L172 50 Z" fill="#dc2626"/>
+  <circle cx="161" cy="37" r="3.5" fill="#1e293b"/>
+  <circle cx="162" cy="36" r="1.2" fill="#fff"/>
+  <!-- Wooden wheels -->
+  <circle cx="84" cy="122" r="15" fill="#6f4518"/>
+  <circle cx="84" cy="122" r="6" fill="#f3d5b5"/>
+  <circle cx="152" cy="122" r="15" fill="#6f4518"/>
+  <circle cx="152" cy="122" r="6" fill="#f3d5b5"/>
+</svg>
