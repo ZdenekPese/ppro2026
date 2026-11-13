@@ -240,3 +240,59 @@ def test_dashboard_quick_restock_and_transfer_requires_confirmation(client):
     assert item["stocks"]["WH-TREB"]["available_quantity"] == 0
     assert item["is_below_min"] is False
 
+    # 4. Ověření zápisu do pohybů a auditního deníku (API i Web UI) včetně automatických čísel dokladů
+    movements = client.get(f"/api/movements?product_id={prod_id}").json()
+    movement_types = [m["movement_type"] for m in movements]
+    assert "transfer" in movement_types
+    assert "receipt" in movement_types
+
+    quick_transfer = next(m for m in movements if m["movement_type"] == "transfer")
+    assert quick_transfer["quantity"] == 2
+    assert quick_transfer["source_warehouse_code"] == "WH-TREB"
+    assert quick_transfer["destination_warehouse_code"] == "WH-HK"
+    assert quick_transfer["reference_code"] and quick_transfer["reference_code"].startswith("PREV-")
+    assert quick_transfer["performed_by"] == "Petr Doležal"
+
+    quick_receipt = next(
+        m for m in movements
+        if m["movement_type"] == "receipt" and m["destination_warehouse_code"] == "WH-HK"
+    )
+    assert quick_receipt["quantity"] == 8
+    assert quick_receipt["reference_code"] and quick_receipt["reference_code"].startswith("DL-")
+    assert quick_receipt["performed_by"] == "Petr Doležal"
+
+    movements_html = client.get(f"/movements?product_id={prod_id}").text
+    assert quick_transfer["reference_code"] in movements_html
+    assert quick_receipt["reference_code"] in movements_html
+
+    # 5. Ověření dopadu na reporty (/api/reports/restock-recommendations) -> produkt už není k doobjednání
+    recs = client.get("/api/reports/restock-recommendations").json()
+    assert not any(r["product_id"] == prod_id for r in recs)
+
+    # 6. Ověření dopadu na dashboard (banner s odkazem do auditu)
+    dash_after = client.get(ok_receipt.headers["location"]).text
+    assert "/movements" in dash_after
+    assert quick_receipt["reference_code"] in dash_after
+
+    # 7. Ověření dopadu na objednávky (doplněné kusy lze okamžitě rezervovat v nové objednávce)
+    cust_res = client.post(
+        "/api/customers",
+        json={
+            "first_name": "Karel",
+            "last_name": "Doplněný",
+            "email": f"quick-{uuid.uuid4().hex[:6]}@example.com",
+            "phone": "+420 777 111 222",
+            "address": "Skladová 1, Hradec Králové",
+        },
+    )
+    assert cust_res.status_code == 201
+    order_res = client.post(
+        "/api/orders",
+        json={
+            "customer_id": cust_res.json()["id"],
+            "items": [{"product_id": prod_id, "quantity": 9}],
+        },
+    )
+    assert order_res.status_code == 201
+
+

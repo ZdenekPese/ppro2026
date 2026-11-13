@@ -11,11 +11,11 @@
 
 {% if action_ok == 'receipt' %}
 <div class="alert-box alert-success" role="status">
-    <strong>Naskladnění provedeno:</strong> Na centrální sklad Hradec Králové bylo přidáno <strong>{{ action_qty }} ks</strong> položky <code>{{ action_sku }}</code> a záznam byl uložen do auditního deníku.
+    <strong>Naskladnění provedeno:</strong> Přidáno <strong>{{ action_qty }} ks</strong> položky <code>{{ action_sku }}</code>{% if action_ref %} (doklad <code>{{ action_ref }}</code>){% endif %} — zásoby, přehledy i doporučení byly aktualizovány. <a href="/movements" style="color: inherit; font-weight: 700; text-decoration: underline;">Zobrazit v pohybech &amp; auditu &rarr;</a>
 </div>
 {% elif action_ok == 'transfer' %}
 <div class="alert-box alert-success" role="status">
-    <strong>Meziskladový přesun proveden:</strong> Ze sezónní garáže v Třebechovicích bylo do Hradce Králové přesunuto <strong>{{ action_qty }} ks</strong> položky <code>{{ action_sku }}</code> a pohyb byl zapsán do auditu.
+    <strong>Meziskladový přesun proveden:</strong> Z garáže v Třebechovicích bylo do Hradce Králové přesunuto <strong>{{ action_qty }} ks</strong> položky <code>{{ action_sku }}</code>{% if action_ref %} (doklad <code>{{ action_ref }}</code>){% endif %}. <a href="/movements" style="color: inherit; font-weight: 700; text-decoration: underline;">Zobrazit v pohybech &amp; auditu &rarr;</a>
 </div>
 {% endif %}
 
@@ -379,7 +379,6 @@
         <form method="post" action="/quick-action" id="quickActionForm">
             <input type="hidden" name="action_type" id="quickActionType">
             <input type="hidden" name="product_id" id="quickActionProductId">
-            <input type="hidden" name="warehouse_id" id="quickActionWarehouseId">
             <input type="hidden" name="source_warehouse_id" id="quickActionSourceId">
             <input type="hidden" name="destination_warehouse_id" id="quickActionDestId">
 
@@ -389,6 +388,17 @@
             </div>
 
             <div class="modal-warning-banner" id="quickModalWarning" role="alert"></div>
+
+            <div class="form-group" id="quickWarehouseGroup" style="margin-bottom: 0.9rem;">
+                <label class="form-label" for="quickActionWarehouseSelect">Cílový sklad pro doplnění</label>
+                <select id="quickActionWarehouseSelect" name="warehouse_id" class="form-control">
+                    {% for wh in warehouses %}
+                    <option value="{{ wh.id }}" {% if hk_warehouse and wh.id == hk_warehouse.id %}selected{% endif %}>
+                        {{ wh.name }} ({{ wh.code }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
             <div class="form-row">
                 <div class="form-group">
@@ -405,15 +415,26 @@
                     <small class="field-hint" id="quickQuantityHint"></small>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="quickActionNote">Poznámka do auditu</label>
+                    <label class="form-label" for="quickActionRef">Číslo dokladu (nepovinné)</label>
                     <input
                         type="text"
-                        id="quickActionNote"
-                        name="note"
-                        class="form-control"
-                        placeholder="Např. Doplnění pod minimum z truhlárny"
+                        id="quickActionRef"
+                        name="reference_code"
+                        class="form-control font-mono"
+                        placeholder="Automaticky DL-... / PREV-..."
                     >
                 </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.75rem;">
+                <label class="form-label" for="quickActionNote">Poznámka do auditního deníku</label>
+                <input
+                    type="text"
+                    id="quickActionNote"
+                    name="note"
+                    class="form-control"
+                    placeholder="Např. Doplnění pod minimum z truhlárny"
+                >
             </div>
 
             <label class="modal-confirm-box" for="quickActionConfirmed">
@@ -455,7 +476,9 @@
 
         var typeInput = document.getElementById('quickActionType');
         var prodIdInput = document.getElementById('quickActionProductId');
-        var whInput = document.getElementById('quickActionWarehouseId');
+        var whGroup = document.getElementById('quickWarehouseGroup');
+        var whSelect = document.getElementById('quickActionWarehouseSelect');
+        var refInput = document.getElementById('quickActionRef');
         var srcInput = document.getElementById('quickActionSourceId');
         var dstInput = document.getElementById('quickActionDestId');
 
@@ -480,10 +503,10 @@
                 var hkAvail = btn.getAttribute('data-hk-avail') || '0';
                 var trebAvail = parseInt(btn.getAttribute('data-treb-avail') || '0', 10);
                 var defaultQty = btn.getAttribute('data-default-qty') || '1';
+                var defaultWhId = btn.getAttribute('data-warehouse-id') || '';
 
                 typeInput.value = mode;
                 prodIdInput.value = btn.getAttribute('data-product-id') || '';
-                whInput.value = btn.getAttribute('data-warehouse-id') || '';
                 srcInput.value = btn.getAttribute('data-source-warehouse-id') || '';
                 dstInput.value = btn.getAttribute('data-destination-warehouse-id') || '';
 
@@ -494,23 +517,31 @@
                     ' ks | Hradec: ' + hkAvail + ' ks | Garáž: ' + trebAvail + ' ks';
 
                 qtyInput.value = defaultQty;
+                if (refInput) refInput.value = '';
                 noteInput.value = '';
                 confirmCheckbox.checked = false;
                 submitBtn.disabled = true;
 
                 if (mode === 'transfer') {
                     titleEl.textContent = 'Rychlý přesun z garáže do Hradce';
+                    if (whGroup) whGroup.hidden = true;
+                    if (whSelect) whSelect.disabled = true;
                     qtyInput.max = String(trebAvail);
                     qtyHintEl.textContent = 'Maximálně lze převézt ' + trebAvail + ' disponibilních ks z garáže.';
                     warningEl.innerHTML =
                         '<strong>Upozornění před přesunem:</strong> Chystáte se okamžitě převést vybraný počet kusů ze sezónní garáže v Třebechovicích (WH-TREB) do centrálního skladu Hradec Králové (WH-HK). Zásoby se ihned převedou a pohyb se zapíše do auditního deníku.';
                     submitBtn.textContent = 'Potvrdit a přesunout';
                 } else {
-                    titleEl.textContent = 'Rychlé doplnění na centrální sklad';
+                    titleEl.textContent = 'Rychlé doplnění na sklad';
+                    if (whGroup) whGroup.hidden = false;
+                    if (whSelect) {
+                        whSelect.disabled = false;
+                        if (defaultWhId) whSelect.value = defaultWhId;
+                    }
                     qtyInput.removeAttribute('max');
-                    qtyHintEl.textContent = 'Naskladní se přímo na centrální sklad Hradec Králové (WH-HK).';
+                    qtyHintEl.textContent = 'Navýší fyzickou zásobu vybraného skladu a zapíše pohyb Příjem.';
                     warningEl.innerHTML =
-                        '<strong>Upozornění před naskladněním:</strong> Chystáte se okamžitě navýšit fyzickou zásobu na centrálním skladu Hradec Králové (WH-HK). Proveďte tuto akci pouze tehdy, pokud zboží reálně přibylo na sklad nebo odchází z truhlárny.';
+                        '<strong>Upozornění před naskladněním:</strong> Chystáte se okamžitě navýšit fyzickou zásobu vybraného skladu. Proveďte tuto akci pouze tehdy, pokud zboží reálně přibylo na sklad nebo odchází z truhlárny.';
                     submitBtn.textContent = 'Potvrdit a doplnit';
                 }
 

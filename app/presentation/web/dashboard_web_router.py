@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote
@@ -38,6 +39,7 @@ def _render_dashboard(
     action_ok: Optional[str] = None,
     action_qty: Optional[int] = None,
     action_sku: Optional[str] = None,
+    action_ref: Optional[str] = None,
     action_error: Optional[str] = None,
     status_code: int = status.HTTP_200_OK,
 ):
@@ -73,6 +75,7 @@ def _render_dashboard(
             "action_ok": action_ok,
             "action_qty": action_qty,
             "action_sku": action_sku,
+            "action_ref": action_ref,
             "action_error": action_error,
             "title": "Přehled skladu & Dashboard - Dřevěnka s.r.o.",
         },
@@ -89,6 +92,7 @@ def dashboard_view(
     action_ok: Optional[str] = None,
     action_qty: Optional[int] = None,
     action_sku: Optional[str] = None,
+    action_ref: Optional[str] = None,
     db: Session = Depends(get_db),
     service: WarehouseService = Depends(get_warehouse_service),
     current_user: User = Depends(require_web_user),
@@ -104,6 +108,7 @@ def dashboard_view(
         action_ok=action_ok,
         action_qty=action_qty,
         action_sku=action_sku,
+        action_ref=action_ref,
     )
 
 
@@ -116,6 +121,7 @@ def dashboard_quick_action(
     warehouse_id: Optional[UUID] = Form(None),
     source_warehouse_id: Optional[UUID] = Form(None),
     destination_warehouse_id: Optional[UUID] = Form(None),
+    reference_code: Optional[str] = Form(None),
     note: Optional[str] = Form(None),
     confirmed: bool = Form(False),
     db: Session = Depends(get_db),
@@ -142,16 +148,20 @@ def dashboard_quick_action(
     product = ProductRepository(db).get_by_id(product_id)
     sku_label = product.code if product else ""
     movement_service = StockMovementService(db)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    cleaned_ref = (reference_code or "").strip()
 
     try:
         if action_type == "receipt":
             target_wh_id = warehouse_id or (hk_warehouse.id if hk_warehouse else None)
             if not target_wh_id:
                 raise ValueError("Nebyl nalezen cílový sklad pro naskladnění.")
+            doc_ref = cleaned_ref or f"DL-{stamp}"
             dto = StockReceiptCreate(
                 warehouse_id=target_wh_id,
                 product_id=product_id,
                 quantity=quantity,
+                reference_code=doc_ref,
                 note=(note or "").strip() or "Rychlé doplnění docházející položky z přehledu skladu",
             )
             movement_service.record_receipt(dto, performed_by=current_user.full_name)
@@ -160,11 +170,13 @@ def dashboard_quick_action(
             dst_id = destination_warehouse_id or (hk_warehouse.id if hk_warehouse else None)
             if not src_id or not dst_id:
                 raise ValueError("Nebyly nalezeny oba sklady pro meziskladový přesun.")
+            doc_ref = cleaned_ref or f"PREV-{stamp}"
             dto = StockTransferCreate(
                 source_warehouse_id=src_id,
                 destination_warehouse_id=dst_id,
                 product_id=product_id,
                 quantity=quantity,
+                reference_code=doc_ref,
                 note=(note or "").strip() or "Rychlý přesun docházející položky z garáže do Hradce",
             )
             movement_service.record_transfer(dto, performed_by=current_user.full_name)
@@ -172,8 +184,9 @@ def dashboard_quick_action(
             raise ValueError("Neplatný typ rychlé skladové operace.")
 
         sku_param = quote(sku_label, safe="")
+        ref_param = quote(doc_ref, safe="")
         return RedirectResponse(
-            url=f"/?action_ok={action_type}&action_qty={quantity}&action_sku={sku_param}",
+            url=f"/?action_ok={action_type}&action_qty={quantity}&action_sku={sku_param}&action_ref={ref_param}",
             status_code=status.HTTP_303_SEE_OTHER,
         )
     except Exception as exc:
