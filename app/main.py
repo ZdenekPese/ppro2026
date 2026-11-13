@@ -3,7 +3,7 @@ from urllib.parse import quote
 from fastapi import FastAPI, Request, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 
 from app.core.config import settings
 from app.presentation.dependencies import ForbiddenWebException, NotAuthenticatedWebException
@@ -38,6 +38,12 @@ TEMPLATES_DIR = BASE_DIR / "presentation" / "templates"
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    """Vrací výchozí favicon ikonu webu pro prohlížeče."""
+    return FileResponse(STATIC_DIR / "favicon.ico", media_type="image/x-icon")
 
 
 @app.exception_handler(NotAuthenticatedWebException)

@@ -25,3 +25,18 @@ def test_health_check_healthy(client):
         assert data["database"] == "connected"
     finally:
         app.dependency_overrides.clear()
+
+
+def test_favicon_served(client):
+    """Ověření, že favicon webu je dostupná jak na /favicon.ico, tak jako SVG v /static/img/favicon.svg."""
+    resp_ico = client.get("/favicon.ico")
+    assert resp_ico.status_code == 200
+    assert "image/x-icon" in resp_ico.headers.get("content-type", "")
+    assert len(resp_ico.content) > 0
+
+    resp_svg = client.get("/static/img/favicon.svg")
+    assert resp_svg.status_code == 200
+    assert "svg" in resp_svg.headers.get("content-type", "").lower()
+    assert b"<svg" in resp_svg.content
+    assert b"brandGrad" in resp_svg.content
+

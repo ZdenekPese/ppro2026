@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b7094c"/>
+      <stop offset="100%" stop-color="#723c70"/>
+    </linearGradient>
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#fcedd0"/>
+    </linearGradient>
+  </defs>
+  <!-- Zaoblený podklad ve firemní karmínové paletě -->
+  <rect width="64" height="64" rx="14" fill="url(#brandGrad)"/>
+  
+  <!-- Tradiční dřevěný houpací koník Dřevěnka -->
+  <!-- Houpadlo (rocker arc) -->
+  <path d="M11 50 C24 57.5 40 57.5 53 50" fill="none" stroke="url(#woodGrad)" stroke-width="4.5" stroke-linecap="round"/>
+  
+  <!-- Přední noha -->
+  <line x1="39" y1="36" x2="45" y2="51" stroke="url(#woodGrad)" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Zadní noha -->
+  <line x1="24" y1="36" x2="19" y2="51" stroke="url(#woodGrad)" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Trup koníka -->
+  <path d="M22 36 Q32 37.5 41 36" fill="none" stroke="url(#woodGrad)" stroke-width="6.5" stroke-linecap="round"/>
+  
+  <!-- Krk a hlava koníka -->
+  <path d="M36 36 L42 22 L48 23 L48 19.5 L43 16 L38 21 L34 35 Z" fill="url(#woodGrad)" stroke-linejoin="round"/>
+  
+  <!-- Ouško -->
+  <polygon points="41,16 43,10.5 44.5,16" fill="url(#woodGrad)"/>
+  
+  <!-- Hříva -->
+  <path d="M37 21 L33.5 23.5 L36.5 26.5 L33.5 29.5 L35 32.5" stroke="url(#woodGrad)" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- Ocásek -->
+  <path d="M21 35 C17 33 16 26.5 19 22.5" fill="none" stroke="url(#woodGrad)" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Sedlo -->
+  <path d="M28.5 34.5 Q31.5 37.5 34.5 34.5" fill="none" stroke="#b7094c" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
