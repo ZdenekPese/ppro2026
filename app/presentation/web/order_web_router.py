@@ -43,6 +43,7 @@ def get_customer_service(db: Session = Depends(get_db)) -> CustomerService:
 @router.get("/orders", response_class=HTMLResponse)
 def orders_list_view(
     request: Request,
+    status: Optional[str] = None,
     status_filter: Optional[str] = None,
     search: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -50,7 +51,8 @@ def orders_list_view(
     current_user: User = Depends(require_web_user),
 ):
     """Webový přehled všech objednávek."""
-    clean_status = status_filter.strip() if status_filter and status_filter.strip() else None
+    raw_status = status if status and status.strip() else status_filter
+    clean_status = raw_status.strip().upper() if raw_status and raw_status.strip() else None
     orders = service.list_orders(status=clean_status, search=search)
     all_orders = service.list_orders()
 
@@ -64,7 +66,7 @@ def orders_list_view(
         name="orders.html",
         context={
             "orders": orders,
-            "status_filter": status_filter,
+            "status_filter": clean_status,
             "search": search or "",
             "count_all": count_all,
             "count_reserved": count_reserved,

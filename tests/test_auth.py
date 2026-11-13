@@ -174,3 +174,39 @@ def test_stock_movement_records_performed_by_authenticated_user(warehouse_client
             "note": "Kompenzace testovacího příjmu",
         },
     )
+
+
+def test_header_excludes_warehouse_nodes_for_all_roles(client, warehouse_client):
+    """Hlavička neobsahuje zbytečné uzly Hradec Králové / Garáž Třebechovice u žádné role."""
+    for test_client in (client, warehouse_client):
+        resp = test_client.get("/products")
+        assert resp.status_code == 200
+        header_html = resp.text.split("</header>")[0]
+        assert "warehouse-nodes" not in header_html
+        assert "Garáž Třebechovice" not in header_html
+
+
+def test_orders_status_filter_works_for_manager_and_warehouse(client, warehouse_client):
+    """Filtr objednávek (?status=RESERVED / DISPATCHED / CANCELLED) funguje pro skladníka i jednatele."""
+    for test_client in (client, warehouse_client):
+        for target_status, badge_text in [
+            ("RESERVED", "K expedici"),
+            ("DISPATCHED", "Odeslané"),
+            ("CANCELLED", "Stornované"),
+        ]:
+            resp = test_client.get(f"/orders?status={target_status}")
+            assert resp.status_code == 200
+            # Záložka má třídu active
+            assert f'href="/orders?status={target_status}" class="order-tab active"' in resp.text
+            # Skryté pole ve vyhledávacím formuláři uchovává filtr
+            assert f'<input type="hidden" name="status" value="{target_status}">' in resp.text
+            # V řádcích tabulky (pokud nějaké jsou) se nevyskytují jiné stavy
+            tbody = resp.text.split("<tbody>", 1)[1].split("</tbody>", 1)[0]
+            if "table-empty" not in tbody:
+                if target_status == "RESERVED":
+                    assert "pill-dispatched" not in tbody and "pill-cancelled" not in tbody
+                elif target_status == "DISPATCHED":
+                    assert "pill-reserved" not in tbody and "pill-cancelled" not in tbody
+                elif target_status == "CANCELLED":
+                    assert "pill-reserved" not in tbody and "pill-dispatched" not in tbody
+            assert badge_text in resp.text

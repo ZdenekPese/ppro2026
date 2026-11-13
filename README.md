@@ -328,7 +328,7 @@ Design systém staví na vyladěné devítiúrovňové paletě přecházející 
 - **Profesionální horní navigační lišta (Header / Navbar):**
   - Brand značka Dřevěnka s.r.o. s gradientním odznáčkem a typografickým titulem systému.
   - Provzdušněná primární navigace s přehlednými zaoblenými pilulkami a vysokým kontrastem (Katalog, Přehled, Pohyby, Objednávky, Zákazníci, Reporty).
-  - Oddělená pravá sekce pro skladové uzly (**Centrální sklad Hradec Králové** a **Sklad Třebechovice pod Orebem**) a akademický tag `PPRO 2026` (vývojářské odkazy REST API a Healthcheck byly přesunuty do decentní patičky stránky, aby nezatěžovaly provozní hlavičku).
+  - Oddělená pravá sekce pro přihlášeného uživatele, jeho roli a odhlášení (nadbytečné textové štítky skladů i vývojářské odkazy REST API / Healthcheck byly z provozní hlavičky odstraněny pro maximální přehlednost a dostatek místa).
   - Responzivní hamburger přepínač (`.navbar-toggle`) a plynulý výsuvný panel (`.mobile-drawer`) pro tablety a telefony s dotykovými plochami $\ge 44\text{px}$.
 - **Metrické karty (KPI Overview):**
   - Okamžitý přehled nad katalogem a sklady: *Celková hodnota zásob*, *Disponibilní zásoba*, *Fyzicky na regálech*, *Kritický stav (dochází)*.
@@ -698,7 +698,11 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Šablony `product_list.html`, `dashboard.html` a `stock_movements.html` upraveny podle rolí (manažer spravuje katalog/ceny/reporty, skladník má přímou akci na skladový pohyb; tabulka pohybů zobrazuje sloupec **Provedl**).
   - **Testy (`pytest`):**
     - Aktualizována konfigurace testovacích klientů v [`tests/conftest.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/conftest.py) (`client`, `warehouse_client`, `anon_client`) a přidán komplexní modul [`tests/test_auth.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_auth.py) pokrývající hashování, přesměrování nepřihlášených požadavků, ochranu proti open redirect, oprávnění rolí, odhlášení, API auth a auditní stopu `performed_by`.
-    - Všech 53 testů v projektu úspěšně prochází (`pytest`).
+  - **Úpravy UI hlavičky, přihlašovací obrazovky a oprava filtru objednávek:**
+    - Odebrány nadbytečné texty skladových uzlů (*Hradec Králové*, *Garáž Třebechovice*) z horní navigační lišty i mobilního menu v [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html) u všech rolí pro čistší a užší header.
+    - Opraven filtr stavů objednávek v [`order_web_router.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/web/order_web_router.py) (`orders_list_view`) – nyní korektně zpracovává parametr `?status=` ze záložek *K expedici / Odeslané / Stornované* (při zachování zpětné kompatibility s `status_filter`) pro role `manager` i `warehouse`.
+    - Barevně sjednocena a zklidněna přihlašovací obrazovka [`login.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/login.html) a role štítky v [`style.css`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/css/style.css) do jednotné palety *Soft Slate 2026* bez rušivých barevných gradientů a kontrastních textů.
+    - Doplněny testy v [`tests/test_auth.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_auth.py) ověřující čistotu hlavičky i filtrování objednávek podle stavu u obou rolí; všech 55 testů v `pytest` úspěšně prochází.
 
 
 
