@@ -40,7 +40,7 @@
                 <rect x="14" y="14" width="7" height="7"></rect>
                 <rect x="3" y="14" width="7" height="7"></rect>
             </svg>
-            <span>Barevný přehled skladu</span>
+            <span>Přehled skladu</span>
         </a>
     </div>
 </div>
@@ -92,7 +92,7 @@
 <!-- Filtrační lišta a tabulka auditní stopy -->
 <div class="panel-card" style="margin-top: 1.5rem;">
     <div class="panel-toolbar">
-        <form method="get" action="/movements" class="search-form">
+        <form method="get" action="/movements" class="movements-filter-form">
             <!-- Filtr produktů -->
             <div class="category-filter-wrapper">
                 <select name="product_id" class="category-select" onchange="this.form.submit()">
@@ -143,16 +143,14 @@
         <table class="inventory-table">
             <thead>
                 <tr>
-                    <th style="width: 140px;">Datum a čas</th>
-                    <th style="width: 150px; text-align: center;">Typ operace</th>
-                    <th style="width: 120px;">Kód (SKU)</th>
+                    <th style="width: 135px; white-space: nowrap;">Datum a čas</th>
+                    <th style="width: 115px; text-align: center;">Operace</th>
                     <th>Produkt</th>
-                    <th style="width: 150px;">Odkud (Zdroj)</th>
-                    <th style="width: 150px;">Kam (Cíl)</th>
-                    <th style="width: 100px; text-align: right;">Množství</th>
-                    <th style="width: 130px;">Doklad / Ref</th>
-                    <th style="width: 140px;">Provedl</th>
-                    <th>Poznámka / Důvod</th>
+                    <th style="min-width: 240px;">Trasa (Odkud → Kam)</th>
+                    <th style="width: 95px; text-align: right; white-space: nowrap;">Množství</th>
+                    <th style="width: 120px; white-space: nowrap;">Doklad</th>
+                    <th style="width: 130px; white-space: nowrap;">Provedl</th>
+                    <th>Poznámka</th>
                 </tr>
             </thead>
             <tbody>
@@ -177,40 +175,29 @@
                         {% endif %}
                     </td>
 
-                    <!-- SKU -->
+                    <!-- Produkt + SKU -->
                     <td>
-                        <span class="sku-badge">{{ m.product_code }}</span>
+                        <div class="movement-product-cell">
+                            <span class="sku-inline font-mono">{{ m.product_code }}</span>
+                            <strong class="product-name" style="font-size: 0.9rem;">{{ m.product_name }}</strong>
+                        </div>
                     </td>
 
-                    <!-- Produkt -->
+                    <!-- Trasa (Odkud -> Kam) -->
                     <td>
-                        <strong class="product-name" style="font-size: 0.9rem;">{{ m.product_name }}</strong>
-                    </td>
-
-                    <!-- Odkud -->
-                    <td>
-                        {% if m.source_warehouse_name %}
-                            <span class="warehouse-tag tag-src">
-                                {{ m.source_warehouse_name }}
+                        <div class="movement-route">
+                            <span class="route-node {% if not m.source_warehouse_name %}route-external{% endif %}">
+                                {{ m.source_warehouse_name or 'Dodavatel / Dílna' }}
                             </span>
-                        {% else %}
-                            <span class="text-dim" style="font-size: 0.82rem;">— Dodavatel / Dílna</span>
-                        {% endif %}
-                    </td>
-
-                    <!-- Kam -->
-                    <td>
-                        {% if m.destination_warehouse_name %}
-                            <span class="warehouse-tag tag-dst">
-                                {{ m.destination_warehouse_name }}
+                            <span class="route-arrow" aria-hidden="true">&rarr;</span>
+                            <span class="route-node {% if not m.destination_warehouse_name %}route-external{% endif %}">
+                                {{ m.destination_warehouse_name or 'Zákazník / Expedice' }}
                             </span>
-                        {% else %}
-                            <span class="text-dim" style="font-size: 0.82rem;">— Zákazník / Expedice</span>
-                        {% endif %}
+                        </div>
                     </td>
 
                     <!-- Množství -->
-                    <td style="text-align: right;">
+                    <td style="text-align: right; white-space: nowrap;">
                         {% if m.movement_type == 'receipt' %}
                             <strong class="qty-plus font-mono">+{{ m.quantity }} ks</strong>
                         {% elif m.movement_type == 'dispatch' %}
@@ -223,7 +210,7 @@
                     </td>
 
                     <!-- Doklad -->
-                    <td>
+                    <td style="white-space: nowrap;">
                         {% if m.reference_code %}
                             <span class="ref-badge">{{ m.reference_code }}</span>
                         {% else %}
@@ -232,7 +219,7 @@
                     </td>
 
                     <!-- Provedl -->
-                    <td>
+                    <td style="white-space: nowrap;">
                         {% if m.performed_by %}
                             <span class="performed-by-name">{{ m.performed_by }}</span>
                         {% else %}
@@ -251,7 +238,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="10" class="table-empty">
+                    <td colspan="8" class="table-empty">
                         <p>Zatím nebyly zaznamenány žádné skladové pohyby splňující zadaná kritéria.</p>
                     </td>
                 </tr>

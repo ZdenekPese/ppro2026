@@ -63,7 +63,7 @@
             </svg>
             <span>Tisk výkazu</span>
         </button>
-        <a href="#restock-section" class="btn btn-accent" title="Přejít na doporučení k doobjednání">
+        <a href="#restock-section" class="btn btn-primary" title="Přejít na doporučení k doobjednání">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -97,7 +97,7 @@
         </div>
         <div class="kpi-content">
             <span class="kpi-label">Celkový obrat (Tržby)</span>
-            <span class="kpi-value text-accent">{{ "%.2f"|format(summary.total_revenue) }} Kč</span>
+            <span class="kpi-value">{{ "%.2f"|format(summary.total_revenue) }} Kč</span>
             <span class="kpi-subtext">z fixovaných cen položek objednávek</span>
         </div>
     </div>
@@ -111,7 +111,7 @@
         </div>
         <div class="kpi-content">
             <span class="kpi-label">Nákupní náklady dílny</span>
-            <span class="kpi-value text-dim">{{ "%.2f"|format(summary.total_cost) }} Kč</span>
+            <span class="kpi-value text-muted-val">{{ "%.2f"|format(summary.total_cost) }} Kč</span>
             <span class="kpi-subtext">hodnota materiálu a výroby prodaných kusů</span>
         </div>
     </div>
@@ -140,7 +140,7 @@
         </div>
         <div class="kpi-content">
             <span class="kpi-label">Průměrná marže truhlárny</span>
-            <span class="kpi-value text-cyan">{{ summary.average_margin_percentage }} %</span>
+            <span class="kpi-value">{{ summary.average_margin_percentage }} %</span>
             <span class="kpi-subtext">průměrná ziskovost prodaného sortimentu</span>
         </div>
     </div>
@@ -183,12 +183,12 @@
 
     {% if categories %}
     <div class="table-responsive">
-        <table class="data-table">
+        <table class="inventory-table">
             <thead>
                 <tr>
-                    <th style="width: 25%;">Kategorie hraček</th>
+                    <th style="width: 26%;">Kategorie hraček</th>
                     <th style="width: 12%; text-align: right;">Prodané kusy</th>
-                    <th style="width: 12%; text-align: right;">Objednávek</th>
+                    <th style="width: 11%; text-align: right;">Objednávek</th>
                     <th style="width: 14%; text-align: right;">Obrat (Tržby)</th>
                     <th style="width: 13%; text-align: right;">Nákupní náklady</th>
                     <th style="width: 12%; text-align: right;">Hrubý zisk</th>
@@ -208,16 +208,16 @@
                             </div>
                         </div>
                     </td>
-                    <td class="text-right">
+                    <td class="text-right" style="white-space: nowrap;">
                         <span class="font-mono font-bold">{{ cat.items_sold_count }} ks</span>
                     </td>
                     <td class="text-right font-mono">{{ cat.orders_count }}</td>
-                    <td class="text-right">
-                        <strong class="font-mono text-accent">{{ "%.2f"|format(cat.total_revenue) }} Kč</strong>
+                    <td class="text-right" style="white-space: nowrap;">
+                        <strong class="font-mono price-highlight">{{ "%.2f"|format(cat.total_revenue) }} Kč</strong>
                     </td>
-                    <td class="text-right font-mono text-dim">{{ "%.2f"|format(cat.total_cost) }} Kč</td>
-                    <td class="text-right font-mono text-teal">{{ "%.2f"|format(cat.gross_profit) }} Kč</td>
-                    <td class="text-right">
+                    <td class="text-right font-mono text-dim" style="white-space: nowrap;">{{ "%.2f"|format(cat.total_cost) }} Kč</td>
+                    <td class="text-right font-mono text-teal" style="white-space: nowrap;">{{ "%.2f"|format(cat.gross_profit) }} Kč</td>
+                    <td class="text-right" style="white-space: nowrap;">
                         <span class="badge-margin">{{ cat.margin_percentage }} %</span>
                     </td>
                 </tr>
@@ -294,13 +294,13 @@
             <div class="restock-stock-matrix">
                 <div class="matrix-item">
                     <span class="matrix-label">Centrála HK (volné):</span>
-                    <strong class="matrix-val {% if rec.hk_available <= 0 %}text-danger font-bold{% elif rec.hk_available < rec.min_stock_level %}text-accent{% else %}text-teal{% endif %}">
+                    <strong class="matrix-val {% if rec.hk_available <= 0 %}text-danger font-bold{% elif rec.hk_available < rec.min_stock_level %}text-warning-soft{% else %}text-teal{% endif %}">
                         {{ rec.hk_available }} ks
                     </strong>
                 </div>
                 <div class="matrix-item">
                     <span class="matrix-label">Garáž Třebechovice:</span>
-                    <strong class="matrix-val text-cyan">{{ rec.treb_available }} ks</strong>
+                    <strong class="matrix-val">{{ rec.treb_available }} ks</strong>
                 </div>
                 <div class="matrix-item">
                     <span class="matrix-label">Minimální hladina:</span>
@@ -380,16 +380,16 @@
 
     {% if top_products %}
     <div class="table-responsive">
-        <table class="data-table">
+        <table class="inventory-table">
             <thead>
                 <tr>
-                    <th style="width: 8%;">Pořadí</th>
-                    <th style="width: 15%;">Kód (SKU)</th>
+                    <th style="width: 7%; white-space: nowrap;">Pořadí</th>
+                    <th style="width: 14%; white-space: nowrap;">Kód (SKU)</th>
                     <th style="width: 27%;">Název dřevěné hračky</th>
-                    <th style="width: 20%;">Kategorie</th>
-                    <th style="width: 10%; text-align: right;">Prodané kusy</th>
-                    <th style="width: 10%; text-align: right;">Tržby</th>
-                    <th style="width: 10%; text-align: right;">Marže dílny</th>
+                    <th style="width: 22%;">Kategorie</th>
+                    <th style="width: 10%; text-align: right; white-space: nowrap;">Prodané kusy</th>
+                    <th style="width: 10%; text-align: right; white-space: nowrap;">Tržby</th>
+                    <th style="width: 10%; text-align: right; white-space: nowrap;">Marže dílny</th>
                 </tr>
             </thead>
             <tbody>
@@ -398,26 +398,26 @@
                     <td>
                         <span class="rank-badge rank-{{ loop.index }}">#{{ loop.index }}</span>
                     </td>
-                    <td>
+                    <td style="white-space: nowrap;">
                         <span class="sku-badge">{{ prod.product_code }}</span>
                     </td>
                     <td>
-                        <strong class="product-title">{{ prod.product_name }}</strong>
+                        <strong class="product-name">{{ prod.product_name }}</strong>
                     </td>
                     <td>
-                        <div class="tags-list">
+                        <div class="product-category-badges">
                             {% for c_name in prod.category_names %}
-                                <span class="tag-category">{{ c_name }}</span>
+                                <span class="category-badge">{{ c_name }}</span>
                             {% endfor %}
                         </div>
                     </td>
-                    <td class="text-right">
+                    <td class="text-right" style="white-space: nowrap;">
                         <strong class="font-mono">{{ prod.units_sold }} ks</strong>
                     </td>
-                    <td class="text-right">
-                        <strong class="font-mono text-accent">{{ "%.2f"|format(prod.total_revenue) }} Kč</strong>
+                    <td class="text-right" style="white-space: nowrap;">
+                        <strong class="font-mono price-highlight">{{ "%.2f"|format(prod.total_revenue) }} Kč</strong>
                     </td>
-                    <td class="text-right">
+                    <td class="text-right" style="white-space: nowrap;">
                         <span class="badge-margin">{{ prod.margin_percentage }} %</span>
                     </td>
                 </tr>

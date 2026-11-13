@@ -71,7 +71,7 @@
                 <tr>
                     <th>Zákazník</th>
                     <th>E-mail</th>
-                    <th>Telefon</th>
+                    <th style="width: 155px; white-space: nowrap;">Telefon</th>
                     <th>Doručovací adresa</th>
                     <th style="width: 120px; text-align: center;">Objednávky</th>
                     <th style="width: 120px; text-align: center;">Stav karty</th>
@@ -87,7 +87,7 @@
                     <td class="font-mono text-dim" style="font-size: 0.85rem;">
                         {{ c.email }}
                     </td>
-                    <td class="font-mono text-dim" style="font-size: 0.85rem;">
+                    <td class="font-mono text-dim phone-cell" style="font-size: 0.85rem;">
                         {{ c.phone or '—' }}
                     </td>
                     <td style="font-size: 0.85rem; color: var(--text-muted);">
