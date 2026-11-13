@@ -210,3 +210,24 @@ def test_orders_status_filter_works_for_manager_and_warehouse(client, warehouse_
                 elif target_status == "CANCELLED":
                     assert "pill-reserved" not in tbody and "pill-dispatched" not in tbody
             assert badge_text in resp.text
+
+
+def test_header_and_login_include_theme_toggle(client, warehouse_client, anon_client):
+    """Hlavička u všech rolí i přihlašovací obrazovka obsahují funkční přepínač světlého/tmavého režimu."""
+    for test_client in (client, warehouse_client):
+        resp = test_client.get("/products")
+        assert resp.status_code == 200
+        header_html = resp.text.split("</header>")[0]
+        assert 'id="themeToggleBtn"' in header_html
+        assert "drevenka_theme" in resp.text
+
+    login_resp = anon_client.get("/login")
+    assert login_resp.status_code == 200
+    assert 'id="themeToggleBtn"' in login_resp.text
+    assert "drevenka_theme" in login_resp.text
+
+    css_resp = anon_client.get("/static/css/style.css?v=20261113_v17")
+    assert css_resp.status_code == 200
+    assert '[data-theme="dark"]' in css_resp.text
+    assert ".theme-toggle-btn" in css_resp.text
+

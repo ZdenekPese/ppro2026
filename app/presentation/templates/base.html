@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sklad Dřevěnka s.r.o.{% endblock %}</title>
+    <script>
+        (function () {
+            try {
+                if (localStorage.getItem('drevenka_theme') === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
     
     <!-- Kritická ochrana před přetečením ikon i při mezipaměti prohlížeče -->
     <style>
@@ -19,7 +28,7 @@
         }
     </style>
     
-    <link rel="stylesheet" href="/static/css/style.css?v=20261113_v16">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261113_v17">
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -62,8 +71,25 @@
                     {% endif %}
                 </nav>
 
-                <!-- Pravá sekce (Přihlášený uživatel a mobilní menu) -->
+                <!-- Pravá sekce (Přepínač motivu, přihlášený uživatel a mobilní menu) -->
                 <div class="navbar-right">
+                    <button
+                        type="button"
+                        class="theme-toggle-btn"
+                        id="themeToggleBtn"
+                        aria-label="Přepnout mezi světlým a tmavým režimem"
+                        aria-pressed="false"
+                        title="Přepnout světlý / tmavý režim"
+                    >
+                        <span class="theme-icon-wrap theme-icon-moon" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                        </span>
+                        <span class="theme-icon-wrap theme-icon-sun" aria-hidden="true">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                        </span>
+                        <span class="theme-toggle-label">Tmavý</span>
+                    </button>
+
                     {% if current_user %}
                     <div class="user-session-bar">
                         <div class="user-info-compact">
@@ -167,9 +193,36 @@
         </footer>
     </div>
 
-    <!-- Interaktivní obsluha responzivního menu -->
+    <!-- Interaktivní obsluha responzivního menu a přepínače motivu -->
     <script>
         (function() {
+            var themeBtn = document.getElementById('themeToggleBtn');
+            var syncThemeButton = function() {
+                if (!themeBtn) return;
+                var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                themeBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+                themeBtn.title = isDark ? 'Přepnout na světlý režim' : 'Přepnout na tmavý režim';
+                var label = themeBtn.querySelector('.theme-toggle-label');
+                if (label) {
+                    label.textContent = isDark ? 'Světlý' : 'Tmavý';
+                }
+            };
+            syncThemeButton();
+            if (themeBtn) {
+                themeBtn.addEventListener('click', function() {
+                    var nextDark = document.documentElement.getAttribute('data-theme') !== 'dark';
+                    if (nextDark) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                        document.documentElement.removeAttribute('data-theme');
+                    }
+                    try {
+                        localStorage.setItem('drevenka_theme', nextDark ? 'dark' : 'light');
+                    } catch (e) {}
+                    syncThemeButton();
+                });
+            }
+
             var toggleBtn = document.getElementById('navbarToggle');
             var drawer = document.getElementById('mobileDrawer');
             if (toggleBtn && drawer) {
