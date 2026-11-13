@@ -181,16 +181,22 @@ def order_detail_view(
     error: Optional[str] = None,
     db: Session = Depends(get_db),
     service: OrderService = Depends(get_order_service),
+    customer_service: CustomerService = Depends(get_customer_service),
     current_user: User = Depends(require_staff_user),
 ):
     """Detail konkrétní objednávky s možností expedice a storna."""
     try:
         order = service.get_order_response(order_id)
+        try:
+            customer = customer_service.get_customer_response(order.customer_id)
+        except Exception:
+            customer = None
         return templates.TemplateResponse(
             request=request,
             name="order_detail.html",
             context={
                 "order": order,
+                "customer": customer,
                 "success": success,
                 "error": error,
                 "title": f"Objednávka {order.order_number} - Dřevěnka s.r.o.",

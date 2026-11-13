@@ -1941,9 +1941,10 @@ select.form-control {
 .warehouse-tag {
   display: inline-block;
   font-size: 0.82rem;
-  padding: 0.2rem 0.55rem;
+  padding: 0.35rem 0.72rem;
   border-radius: var(--radius-sm);
   font-weight: 600;
+  width: fit-content;
 }
 
 .tag-src {
@@ -2085,8 +2086,15 @@ select.form-control {
 }
 
 .order-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.78rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .pill-reserved {
@@ -2126,24 +2134,159 @@ select.form-control {
   gap: 1.25rem;
 }
 
+.order-grid .panel-card {
+  padding: 1.5rem 1.65rem;
+}
+
+.order-card-header {
+  padding: 1.25rem 1.5rem;
+  background-color: var(--surface-soft);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.order-actions-bar {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border-subtle);
+  background-color: var(--surface-soft);
+}
+
 .card-subtitle {
   font-size: 1.05rem;
   color: var(--text-main);
   font-weight: 700;
-  margin-bottom: 0.75rem;
+  margin: 0 0 1rem 0;
 }
 
 .customer-info-box {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.8rem;
 }
 
 .info-row {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  font-size: 0.88rem;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.2rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.summary-value {
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.movements-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.movement-tab {
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 0.5rem 0.95rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  transition: all 0.15s ease;
+}
+
+.movement-tab:hover {
+  color: var(--text-main);
+  background-color: var(--surface-subtle);
+}
+
+.movement-tab.active {
+  color: var(--nav-active-text);
+  background-color: var(--nav-active-bg);
+  border-color: var(--nav-active-border);
+}
+
+.table-container {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.data-table thead th {
+  background-color: var(--surface-subtle);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.95rem 1.35rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.1s ease;
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--bg-card-hover);
+}
+
+.data-table tbody td,
+.data-table tfoot td {
+  padding: 1.05rem 1.35rem;
+  vertical-align: middle;
+}
+
+.data-table tfoot td {
+  background-color: var(--surface-soft);
+  border-top: 2px solid var(--border-color);
+}
+
+.empty-table-cell {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
 }
 
 .info-label {
@@ -3742,7 +3885,7 @@ select.form-control {
 
 .shop-checkout-panel {
   border: 1px solid var(--border-color);
-  padding: 1.15rem;
+  padding: 1.4rem 1.45rem;
 }
 
 .shop-cart-header {
@@ -3879,15 +4022,16 @@ select.form-control {
 }
 
 .shop-cart-delivery {
-  margin-top: 0.85rem;
-  padding: 0.65rem 0.75rem;
+  margin-top: 0.95rem;
+  padding: 0.85rem 1rem;
   border-radius: var(--radius-sm);
   background-color: var(--surface-subtle);
   border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  font-size: 0.82rem;
+  gap: 0.25rem;
+  font-size: 0.83rem;
+  line-height: 1.45;
   color: var(--text-muted);
 }
 

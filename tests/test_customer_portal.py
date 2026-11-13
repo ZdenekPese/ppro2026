@@ -274,6 +274,13 @@ def test_customer_order_end_to_end_propagation(customer_client, warehouse_client
     staff_order_page = warehouse_client.get(f"/orders/{order_id}")
     assert staff_order_page.status_code == 200
     assert "Marie Svobodová" in staff_order_page.text
+    assert "Smetanovo nábřeží 124" in staff_order_page.text
+    assert "order-card-header" in staff_order_page.text
+
+    my_orders_res = customer_client.get("/my-orders")
+    assert my_orders_res.status_code == 200
+    assert "summary-card" in my_orders_res.text
+    assert "table-container" in my_orders_res.text
 
     dispatch_res = warehouse_client.post(f"/orders/{order_id}/dispatch", follow_redirects=False)
     assert dispatch_res.status_code == 303

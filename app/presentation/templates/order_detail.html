@@ -78,7 +78,10 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Doručovací adresa:</span>
-                <span>{{ order.customer_name }}<br>{{ order.customer_id }}</span>
+                <span>
+                    {{ order.customer_name }}<br>
+                    {{ customer.address if customer and customer.address else 'Adresa neuvedena' }}
+                </span>
             </div>
             {% if order.note %}
             <div class="info-row" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--border-subtle);">
@@ -118,7 +121,9 @@
 
 <!-- Tabulka položek objednávky -->
 <div class="panel-card" style="margin-top: 1.5rem;">
-    <h3 class="card-subtitle" style="margin-bottom: 1rem;">Objednané dřevěné hračky</h3>
+    <div class="order-card-header">
+        <h3 class="card-subtitle" style="margin-bottom: 0;">Objednané dřevěné hračky</h3>
+    </div>
     <div class="table-responsive">
         <table class="inventory-table">
             <thead>
@@ -147,13 +152,13 @@
                             <strong class="product-name" style="font-size: 0.95rem;">{{ item.product_name }}</strong>
                         </div>
                     </td>
-                    <td style="text-align: right;" class="font-mono">
+                    <td style="text-align: right;" class="font-mono text-nowrap">
                         {{ "%.2f"|format(item.unit_price) }} Kč
                     </td>
-                    <td style="text-align: center;" class="font-mono">
+                    <td style="text-align: center;" class="font-mono text-nowrap">
                         <strong>{{ item.quantity }} ks</strong>
                     </td>
-                    <td style="text-align: right;" class="font-mono text-teal">
+                    <td style="text-align: right;" class="font-mono text-teal text-nowrap">
                         <strong>{{ "%.2f"|format(item.total_price) }} Kč</strong>
                     </td>
                 </tr>
@@ -161,11 +166,11 @@
             </tbody>
             <tfoot>
                 <tr style="border-top: 2px solid var(--border-color); background-color: var(--bg-input);">
-                    <td colspan="4" style="text-align: right; padding: 1rem; font-weight: 700; color: var(--text-main);">
+                    <td colspan="4" style="text-align: right; padding: 1.15rem 1.35rem; font-weight: 700; color: var(--text-main);">
                         Celková částka k úhradě:
                     </td>
-                    <td style="text-align: right; padding: 1rem;">
-                        <strong class="font-mono text-teal" style="font-size: 1.25rem;">
+                    <td style="text-align: right; padding: 1.15rem 1.35rem; white-space: nowrap;">
+                        <strong class="font-mono text-teal text-nowrap" style="font-size: 1.25rem;">
                             {{ "%.2f"|format(order.total_price) }} Kč
                         </strong>
                     </td>
@@ -175,7 +180,7 @@
     </div>
 
     <!-- Akce objednávky pro skladníka -->
-    <div class="order-actions-bar" style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end; align-items: center; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+    <div class="order-actions-bar">
         {% if order.can_dispatch %}
             <form method="post" action="/orders/{{ order.id }}/dispatch" onsubmit="return confirm('Opravdu chcete objednávku označit jako odeslanou a fyzicky odepsat zboží ze skladu?');">
                 <button type="submit" class="btn btn-primary">
