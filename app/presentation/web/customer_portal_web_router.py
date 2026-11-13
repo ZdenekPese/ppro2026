@@ -1,3 +1,4 @@
+import re
 from decimal import Decimal
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -20,7 +21,6 @@ from app.domain.services.customer_service import CustomerService
 from app.domain.services.order_service import OrderService
 from app.domain.services.product_service import ProductService
 from app.infrastructure.db.models import User
-from app.infrastructure.repositories.category_repository import CategoryRepository
 from app.presentation.dependencies import (
     ForbiddenWebException,
     require_customer_user,
@@ -93,12 +93,100 @@ def resolve_product_image(code: str, name: str = "") -> str:
     return "/static/img/toys/default_toy.svg"
 
 
+_TEST_SUFFIX_RE = re.compile(r"(?:[- ][0-9a-f]{5,6})$", re.IGNORECASE)
+
+
+def _public_card_categories(categories) -> list:
+    """Skryje dočasné testovací štítky kategorií s hex příponou ze zákaznické výlohy."""
+    return [c for c in (categories or []) if not _TEST_SUFFIX_RE.search(c.name or "")]
+
+
+SHOP_FILTER_TAGS = [
+    ("do500", "Dárky do 500 Kč"),
+    ("kluky", "Pro kluky"),
+    ("holky", "Pro holky"),
+    ("batolata", "Pro batolata"),
+    ("stavebnice", "Stavebnice a vláčky"),
+]
+
+
+def _matches_shop_tag(prod, tag: Optional[str]) -> bool:
+    """Vyhodnotí pevný zákaznický filtr e-shopu bez zobrazování surových interních kategorií."""
+    if not tag:
+        return True
+    cat_names = {c.name.lower() for c in (prod.categories or [])}
+    name_lower = (prod.name or "").lower()
+
+    if tag == "do500":
+        return prod.selling_price <= Decimal("500.00")
+
+    if tag == "kluky":
+        if "dopravní prostředky" in cat_names or "stavebnice a hlavolamy" in cat_names:
+            return True
+        return any(
+            kw in name_lower
+            for kw in (
+                "vláč",
+                "lokomotiv",
+                "aut",
+                "hasič",
+                "náklaď",
+                "letad",
+                "dvouploš",
+                "loď",
+                "plachetn",
+                "kostk",
+                "staveb",
+                "ježek",
+                "datel",
+                "tangram",
+                "domino",
+            )
+        )
+
+    if tag == "holky":
+        if "pro batolata" in cat_names or "tradiční hračky" in cat_names:
+            return True
+        return any(
+            kw in name_lower
+            for kw in (
+                "koník",
+                "kůň",
+                "divad",
+                "loutk",
+                "xylofon",
+                "rumba",
+                "kačer",
+                "káč",
+                "věž",
+                "puzzle",
+                "domino",
+                "kostk",
+                "zvířát",
+                "plachetn",
+            )
+        )
+
+    if tag == "batolata":
+        if "pro batolata" in cat_names:
+            return True
+        return any(kw in name_lower for kw in ("batolat", "tahací", "kačer", "káč", "kostk", "koník", "věž"))
+
+    if tag == "stavebnice":
+        if "stavebnice a hlavolamy" in cat_names or "dopravní prostředky" in cat_names:
+            return True
+        return any(kw in name_lower for kw in ("kostk", "staveb", "vláč", "lokomotiv", "puzzle", "tangram", "domino", "ježek"))
+
+    return True
+
+
 def _render_shop(
     request: Request,
     db: Session,
     current_user: User,
     search: Optional[str] = None,
     category_id: Optional[str] = None,
+    tag: Optional[str] = None,
     only_in_stock: bool = False,
     order_error: Optional[str] = None,
     submitted_quantities: Optional[Dict[str, int]] = None,
@@ -106,16 +194,20 @@ def _render_shop(
     status_code: int = status.HTTP_200_OK,
 ):
     clean_category_id = parse_optional_uuid(category_id)
+    valid_tags = {slug for slug, _ in SHOP_FILTER_TAGS}
+    clean_tag = tag.strip().lower() if tag and tag.strip().lower() in valid_tags else None
+
     product_service = ProductService(db)
     products = product_service.list_products(
         search=search,
         is_active=True,
         category_id=clean_category_id,
     )
-    categories = CategoryRepository(db).list_all()
 
     shop_items = []
     for prod in products:
+        if not _matches_shop_tag(prod, clean_tag):
+            continue
         avail = max(0, prod.total_available_quantity)
         if only_in_stock and avail <= 0:
             continue
@@ -137,11 +229,10 @@ def _render_shop(
         shop_items.append(
             {
                 "id": prod.id,
-                "code": prod.code,
                 "name": prod.name,
                 "description": prod.description,
                 "selling_price": prod.selling_price,
-                "categories": prod.categories,
+                "categories": _public_card_categories(prod.categories),
                 "available_quantity": avail,
                 "avail_state": avail_state,
                 "avail_label": avail_label,
@@ -162,8 +253,8 @@ def _render_shop(
         name="shop.html",
         context={
             "items": shop_items,
-            "categories": categories,
-            "selected_category_id": clean_category_id,
+            "filter_tags": SHOP_FILTER_TAGS,
+            "selected_tag": clean_tag,
             "search": search or "",
             "only_in_stock": only_in_stock,
             "customer_profile": customer_profile,
@@ -181,17 +272,21 @@ def shop_catalog_view(
     request: Request,
     search: Optional[str] = None,
     category_id: Optional[str] = None,
+    tag: Optional[str] = None,
+    audience: Optional[str] = None,
     only_in_stock: bool = False,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_web_user),
 ):
-    """Veřejný katalog pro přihlášené zákazníky (pouze prodejní ceny a dostupnost bez nákupních marží)."""
+    """Veřejný katalog pro přihlášené zákazníky (pouze prodejní ceny a dostupnost bez interních kódů)."""
+    resolved_tag = tag or audience
     return _render_shop(
         request=request,
         db=db,
         current_user=current_user,
         search=search,
         category_id=category_id,
+        tag=resolved_tag,
         only_in_stock=only_in_stock,
     )
 

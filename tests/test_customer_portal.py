@@ -239,6 +239,8 @@ def test_customer_order_end_to_end_propagation(customer_client, warehouse_client
     assert "Rezervováno (K expedici)" in detail_res.text
     assert "order-item-thumb" in detail_res.text
     assert "/static/img/toys/" in detail_res.text
+    assert "Kód SKU" not in detail_res.text
+    assert sku not in detail_res.text
     assert "450.00 Kč" in detail_res.text
     assert "1800.00 Kč" in detail_res.text
     assert "Prosím dárkově zabalit" in detail_res.text
@@ -370,7 +372,7 @@ def test_customer_order_cancellation_and_isolation(customer_client, client):
 
 
 def test_customer_shop_renders_eshop_storefront_and_product_images(customer_client):
-    """Zákaznický e-shop zobrazuje výlohu s obrázky hraček, čipy kategorií a košíkem bez teček."""
+    """Zákaznický e-shop zobrazuje výlohu s obrázky hraček a zákaznickými filtry bez kódů SKU."""
     resp = customer_client.get("/shop")
     assert resp.status_code == 200
     html = resp.text
@@ -378,13 +380,38 @@ def test_customer_shop_renders_eshop_storefront_and_product_images(customer_clie
     assert "Poctivé české hračky ze dřeva" in html
     assert "shop-category-chips" in html
     assert "Všechny hračky" in html
+    assert "Dárky do 500 Kč" in html
+    assert "Pro kluky" in html
+    assert "Pro holky" in html
     assert "Nákupní košík" in html
     assert "Do košíku" in html
     assert "shop-product-img" in html
     assert "/static/img/toys/train.svg" in html
     assert "/static/img/toys/duck.svg" in html
+    assert "sku-badge" not in html
+    assert "VLK-001" not in html
+    assert "KAC-002" not in html
+    assert "podle kódu" not in html
+    assert "filter-select" not in html
+    assert "Batolata-" not in html
+    assert "Dárky500-" not in html
     assert "status-dot" not in html
     assert "&bull;" not in html
+
+    # Zákaznické čipy jsou omezené na čistou sadu bez zahlcení z DB
+    assert html.count('class="shop-cat-chip') == 6
+
+    do500_res = customer_client.get("/shop?tag=do500")
+    assert do500_res.status_code == 200
+    assert "Dřevěný vláček" in do500_res.text
+
+    boys_res = customer_client.get("/shop?tag=kluky")
+    assert boys_res.status_code == 200
+    assert "Dřevěný vláček" in boys_res.text
+
+    girls_res = customer_client.get("/shop?tag=holky")
+    assert girls_res.status_code == 200
+    assert "Houpací koník" in girls_res.text
 
     for img_path in [
         "/static/img/toys/train.svg",

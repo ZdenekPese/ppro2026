@@ -52,3 +52,15 @@ def maintain_clean_database():
         ensure_demo_users(db)
     yield
     seed_database()
+    # Odstranění dočasných testovacích kategorií s hex příponou (např. Batolata-1c82f)
+    import re
+    from sqlalchemy import text
+    from app.infrastructure.db.models import Category
+
+    test_cat_re = re.compile(r"[- ][0-9a-f]{5,6}$", re.IGNORECASE)
+    with SessionLocal() as db:
+        stray_ids = [c.id for c in db.query(Category).all() if test_cat_re.search(c.name or "")]
+        if stray_ids:
+            db.execute(text("DELETE FROM product_categories WHERE category_id = ANY(:ids)"), {"ids": stray_ids})
+            db.execute(text("DELETE FROM categories WHERE id = ANY(:ids)"), {"ids": stray_ids})
+            db.commit()

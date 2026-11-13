@@ -54,8 +54,12 @@
 </div>
 {% endif %}
 
-<!-- Vyhledávání a filtr kategorií -->
+<!-- Vyhledávání hraček -->
 <form method="get" action="/shop" class="toolbar-panel shop-toolbar">
+    {% if selected_tag %}
+    <input type="hidden" name="tag" value="{{ selected_tag }}">
+    {% endif %}
+
     <div class="search-wrap">
         <span class="search-icon" aria-hidden="true">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -65,51 +69,40 @@
             name="search"
             class="form-control search-input"
             value="{{ search }}"
-            placeholder="Hledat hračku podle názvu nebo kódu..."
+            placeholder="Hledat hračku (např. vláček, kostky, koník)..."
         >
     </div>
 
     <div class="filter-group">
-        <select name="category_id" class="form-control filter-select" aria-label="Filtr kategorie">
-            <option value="">Všechny kategorie</option>
-            {% for cat in categories %}
-            <option value="{{ cat.id }}" {% if selected_category_id == cat.id %}selected{% endif %}>
-                {{ cat.name }}
-            </option>
-            {% endfor %}
-        </select>
-
         <label class="checkbox-filter-label">
             <input type="checkbox" name="only_in_stock" value="true" {% if only_in_stock %}checked{% endif %}>
             <span>Pouze skladem</span>
         </label>
 
-        <button type="submit" class="btn btn-secondary">Filtrovat</button>
-        {% if search or selected_category_id or only_in_stock %}
+        <button type="submit" class="btn btn-secondary">Hledat</button>
+        {% if search or selected_tag or only_in_stock %}
         <a href="/shop" class="btn btn-secondary">Zrušit filtr</a>
         {% endif %}
     </div>
 </form>
 
-<!-- Rychlé čipy kategorií -->
-{% if categories %}
-<nav class="shop-category-chips" aria-label="Rychlý filtr kategorií">
+<!-- Zákaznické rychlé filtry -->
+<nav class="shop-category-chips" aria-label="Rychlý výběr hraček">
     <a
         href="/shop{% if search or only_in_stock %}?{% endif %}{% if search %}search={{ search|urlencode }}{% endif %}{% if search and only_in_stock %}&amp;{% endif %}{% if only_in_stock %}only_in_stock=true{% endif %}"
-        class="shop-cat-chip {% if not selected_category_id %}active{% endif %}"
+        class="shop-cat-chip {% if not selected_tag %}active{% endif %}"
     >
         Všechny hračky
     </a>
-    {% for cat in categories %}
+    {% for tag_slug, tag_label in filter_tags %}
     <a
-        href="/shop?category_id={{ cat.id }}{% if search %}&amp;search={{ search|urlencode }}{% endif %}{% if only_in_stock %}&amp;only_in_stock=true{% endif %}"
-        class="shop-cat-chip {% if selected_category_id == cat.id %}active{% endif %}"
+        href="/shop?tag={{ tag_slug }}{% if search %}&amp;search={{ search|urlencode }}{% endif %}{% if only_in_stock %}&amp;only_in_stock=true{% endif %}"
+        class="shop-cat-chip {% if selected_tag == tag_slug %}active{% endif %}"
     >
-        {{ cat.name }}
+        {{ tag_label }}
     </a>
     {% endfor %}
 </nav>
-{% endif %}
 
 <!-- Dvousloupcový e-shop (katalog hraček + sticky košík) -->
 <form method="post" action="/shop/order" id="shopOrderForm" class="shop-storefront {% if not is_customer_role %}is-single-col{% endif %}">
@@ -126,11 +119,9 @@
                 data-product-id="{{ item.id }}"
                 data-price="{{ '%.2f'|format(item.selling_price) }}"
                 data-name="{{ item.name }}"
-                data-code="{{ item.code }}"
             >
                 <div class="shop-card-media">
                     <div class="shop-card-badges">
-                        <span class="sku-badge">{{ item.code }}</span>
                         <span class="shop-stock-pill shop-stock-{{ item.avail_state }}">
                             {{ item.avail_label }}
                         </span>
@@ -198,7 +189,6 @@
                                     value="{{ item.prefill_qty }}"
                                     data-price="{{ '%.2f'|format(item.selling_price) }}"
                                     data-name="{{ item.name }}"
-                                    data-code="{{ item.code }}"
                                     aria-label="Počet kusů pro {{ item.name }}"
                                 >
                                 <button
@@ -338,7 +328,6 @@
                     selectedLines.push({
                         id: inp.id,
                         name: inp.getAttribute('data-name') || 'Produkt',
-                        code: inp.getAttribute('data-code') || '',
                         qty: val,
                         price: price,
                         lineTotal: lineTotal
