@@ -3,6 +3,22 @@
 {% block title %}Přehled skladu & Barevný dashboard{% endblock %}
 
 {% block content %}
+{% if action_error %}
+<div class="alert-box" role="alert">
+    <strong>Operaci se nepodařilo provést:</strong> {{ action_error }}
+</div>
+{% endif %}
+
+{% if action_ok == 'receipt' %}
+<div class="alert-box alert-success" role="status">
+    <strong>Naskladnění provedeno:</strong> Na centrální sklad Hradec Králové bylo přidáno <strong>{{ action_qty }} ks</strong> položky <code>{{ action_sku }}</code> a záznam byl uložen do auditního deníku.
+</div>
+{% elif action_ok == 'transfer' %}
+<div class="alert-box alert-success" role="status">
+    <strong>Meziskladový přesun proveden:</strong> Ze sezónní garáže v Třebechovicích bylo do Hradce Králové přesunuto <strong>{{ action_qty }} ks</strong> položky <code>{{ action_sku }}</code> a pohyb byl zapsán do auditu.
+</div>
+{% endif %}
+
 <div class="content-header">
     <div class="header-left">
         <h1 class="page-title">Skladový přehled & Barevný dashboard</h1>
@@ -122,16 +138,61 @@
                     </span>
                 </div>
             </div>
+            {% set hk_avail = item.stocks['WH-HK'].available_quantity if 'WH-HK' in item.stocks else 0 %}
+            {% set treb_avail = item.stocks['WH-TREB'].available_quantity if 'WH-TREB' in item.stocks else 0 %}
+            {% set recommended_receipt = item.min_stock_level - item.total_available %}
+            {% if recommended_receipt < 1 %}{% set recommended_receipt = 1 %}{% endif %}
             <div class="critical-action-wrap">
-                {% if 'WH-TREB' in item.stocks and item.stocks['WH-TREB'].available_quantity > 0 %}
+                {% if treb_avail > 0 %}
                     <span class="advice-chip advice-transfer">
-                        Možno převézt {{ item.stocks['WH-TREB'].available_quantity }} ks z garáže
+                        Možno převézt {{ treb_avail }} ks z garáže
                     </span>
                 {% else %}
                     <span class="advice-chip advice-produce">
                         Nutno zadat do výroby
                     </span>
                 {% endif %}
+
+                <div class="critical-quick-btns">
+                    {% if hk_warehouse %}
+                    <button
+                        type="button"
+                        class="btn-quick-action btn-quick-receipt js-open-quick-modal"
+                        data-mode="receipt"
+                        data-product-id="{{ item.product_id }}"
+                        data-product-code="{{ item.product_code }}"
+                        data-product-name="{{ item.product_name }}"
+                        data-available="{{ item.total_available }}"
+                        data-min-limit="{{ item.min_stock_level }}"
+                        data-hk-avail="{{ hk_avail }}"
+                        data-treb-avail="{{ treb_avail }}"
+                        data-default-qty="{{ recommended_receipt }}"
+                        data-warehouse-id="{{ hk_warehouse.id }}"
+                    >
+                        Doplnit na sklad
+                    </button>
+                    {% endif %}
+
+                    {% if treb_avail > 0 and treb_warehouse and hk_warehouse %}
+                    <button
+                        type="button"
+                        class="btn-quick-action btn-quick-transfer js-open-quick-modal"
+                        data-mode="transfer"
+                        data-product-id="{{ item.product_id }}"
+                        data-product-code="{{ item.product_code }}"
+                        data-product-name="{{ item.product_name }}"
+                        data-available="{{ item.total_available }}"
+                        data-min-limit="{{ item.min_stock_level }}"
+                        data-hk-avail="{{ hk_avail }}"
+                        data-treb-avail="{{ treb_avail }}"
+                        data-default-qty="{{ treb_avail }}"
+                        data-source-warehouse-id="{{ treb_warehouse.id }}"
+                        data-destination-warehouse-id="{{ hk_warehouse.id }}"
+                    >
+                        Přesunout z garáže
+                    </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -303,4 +364,175 @@
         </table>
     </div>
 </div>
+
+<!-- Potvrzovací dialog pro rychlé doplnění / meziskladový přesun -->
+<div class="quick-modal-backdrop" id="quickRestockModal" hidden role="dialog" aria-modal="true" aria-labelledby="quickModalTitle">
+    <div class="quick-modal">
+        <div class="quick-modal-header">
+            <div>
+                <span class="sku-badge" id="quickModalSku">SKU</span>
+                <h3 class="quick-modal-title" id="quickModalTitle">Rychlá skladová operace</h3>
+            </div>
+            <button type="button" class="quick-modal-close" id="quickModalCloseBtn" aria-label="Zavřít okno">&times;</button>
+        </div>
+
+        <form method="post" action="/quick-action" id="quickActionForm">
+            <input type="hidden" name="action_type" id="quickActionType">
+            <input type="hidden" name="product_id" id="quickActionProductId">
+            <input type="hidden" name="warehouse_id" id="quickActionWarehouseId">
+            <input type="hidden" name="source_warehouse_id" id="quickActionSourceId">
+            <input type="hidden" name="destination_warehouse_id" id="quickActionDestId">
+
+            <div class="quick-modal-product-box">
+                <strong id="quickModalProductName">Název produktu</strong>
+                <div class="quick-modal-stats" id="quickModalStats"></div>
+            </div>
+
+            <div class="modal-warning-banner" id="quickModalWarning" role="alert"></div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="quickActionQuantity">Počet kusů (ks)</label>
+                    <input
+                        type="number"
+                        id="quickActionQuantity"
+                        name="quantity"
+                        class="form-control font-mono"
+                        min="1"
+                        step="1"
+                        required
+                    >
+                    <small class="field-hint" id="quickQuantityHint"></small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="quickActionNote">Poznámka do auditu</label>
+                    <input
+                        type="text"
+                        id="quickActionNote"
+                        name="note"
+                        class="form-control"
+                        placeholder="Např. Doplnění pod minimum z truhlárny"
+                    >
+                </div>
+            </div>
+
+            <label class="modal-confirm-box" for="quickActionConfirmed">
+                <input type="checkbox" id="quickActionConfirmed" name="confirmed" value="true" required>
+                <span>
+                    <strong>Vědomé potvrzení:</strong> Potvrzuji, že si jsem vědom(a) okamžité změny fyzických zásob a trvalého zápisu do auditního deníku pod mým účtem.
+                </span>
+            </label>
+
+            <div class="quick-modal-actions">
+                <button type="button" class="btn btn-secondary" id="quickModalCancelBtn">Zrušit</button>
+                <button type="submit" class="btn btn-primary" id="quickActionSubmitBtn" disabled>
+                    Potvrdit a provést
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var modal = document.getElementById('quickRestockModal');
+        if (!modal) return;
+
+        var form = document.getElementById('quickActionForm');
+        var closeBtn = document.getElementById('quickModalCloseBtn');
+        var cancelBtn = document.getElementById('quickModalCancelBtn');
+        var confirmCheckbox = document.getElementById('quickActionConfirmed');
+        var submitBtn = document.getElementById('quickActionSubmitBtn');
+
+        var titleEl = document.getElementById('quickModalTitle');
+        var skuEl = document.getElementById('quickModalSku');
+        var prodNameEl = document.getElementById('quickModalProductName');
+        var statsEl = document.getElementById('quickModalStats');
+        var warningEl = document.getElementById('quickModalWarning');
+        var qtyInput = document.getElementById('quickActionQuantity');
+        var qtyHintEl = document.getElementById('quickQuantityHint');
+        var noteInput = document.getElementById('quickActionNote');
+
+        var typeInput = document.getElementById('quickActionType');
+        var prodIdInput = document.getElementById('quickActionProductId');
+        var whInput = document.getElementById('quickActionWarehouseId');
+        var srcInput = document.getElementById('quickActionSourceId');
+        var dstInput = document.getElementById('quickActionDestId');
+
+        var closeModal = function () {
+            modal.hidden = true;
+            document.body.style.overflow = '';
+            confirmCheckbox.checked = false;
+            submitBtn.disabled = true;
+        };
+
+        confirmCheckbox.addEventListener('change', function () {
+            submitBtn.disabled = !confirmCheckbox.checked;
+        });
+
+        document.querySelectorAll('.js-open-quick-modal').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var mode = btn.getAttribute('data-mode');
+                var sku = btn.getAttribute('data-product-code') || '';
+                var name = btn.getAttribute('data-product-name') || '';
+                var avail = btn.getAttribute('data-available') || '0';
+                var minLimit = btn.getAttribute('data-min-limit') || '0';
+                var hkAvail = btn.getAttribute('data-hk-avail') || '0';
+                var trebAvail = parseInt(btn.getAttribute('data-treb-avail') || '0', 10);
+                var defaultQty = btn.getAttribute('data-default-qty') || '1';
+
+                typeInput.value = mode;
+                prodIdInput.value = btn.getAttribute('data-product-id') || '';
+                whInput.value = btn.getAttribute('data-warehouse-id') || '';
+                srcInput.value = btn.getAttribute('data-source-warehouse-id') || '';
+                dstInput.value = btn.getAttribute('data-destination-warehouse-id') || '';
+
+                skuEl.textContent = sku;
+                prodNameEl.textContent = name;
+                statsEl.textContent =
+                    'Disponibilní: ' + avail + ' ks | Min. limit: ' + minLimit +
+                    ' ks | Hradec: ' + hkAvail + ' ks | Garáž: ' + trebAvail + ' ks';
+
+                qtyInput.value = defaultQty;
+                noteInput.value = '';
+                confirmCheckbox.checked = false;
+                submitBtn.disabled = true;
+
+                if (mode === 'transfer') {
+                    titleEl.textContent = 'Rychlý přesun z garáže do Hradce';
+                    qtyInput.max = String(trebAvail);
+                    qtyHintEl.textContent = 'Maximálně lze převézt ' + trebAvail + ' disponibilních ks z garáže.';
+                    warningEl.innerHTML =
+                        '<strong>Upozornění před přesunem:</strong> Chystáte se okamžitě převést vybraný počet kusů ze sezónní garáže v Třebechovicích (WH-TREB) do centrálního skladu Hradec Králové (WH-HK). Zásoby se ihned převedou a pohyb se zapíše do auditního deníku.';
+                    submitBtn.textContent = 'Potvrdit a přesunout';
+                } else {
+                    titleEl.textContent = 'Rychlé doplnění na centrální sklad';
+                    qtyInput.removeAttribute('max');
+                    qtyHintEl.textContent = 'Naskladní se přímo na centrální sklad Hradec Králové (WH-HK).';
+                    warningEl.innerHTML =
+                        '<strong>Upozornění před naskladněním:</strong> Chystáte se okamžitě navýšit fyzickou zásobu na centrálním skladu Hradec Králové (WH-HK). Proveďte tuto akci pouze tehdy, pokud zboží reálně přibylo na sklad nebo odchází z truhlárny.';
+                    submitBtn.textContent = 'Potvrdit a doplnit';
+                }
+
+                modal.hidden = false;
+                document.body.style.overflow = 'hidden';
+                qtyInput.focus();
+            });
+        });
+
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !modal.hidden) closeModal();
+        });
+        form.addEventListener('submit', function (e) {
+            if (!confirmCheckbox.checked) {
+                e.preventDefault();
+            }
+        });
+    })();
+</script>
 {% endblock %}

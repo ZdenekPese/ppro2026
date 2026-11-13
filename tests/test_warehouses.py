@@ -151,3 +151,92 @@ def test_dashboard_web_view(client):
     # Indikace co hoří
     assert "položek hoří pod minimem" in html or "Upozornění truhlárny" in html
     assert "Dochází" in html
+    assert "Doplnit na sklad" in html
+    assert 'id="quickRestockModal"' in html
+    assert 'id="quickActionConfirmed"' in html
+
+
+def test_dashboard_quick_restock_and_transfer_requires_confirmation(client):
+    """Rychlé doplnění / přesun z upozornění docházejících položek vyžaduje vědomé potvrzení."""
+    import uuid
+
+    warehouses = client.get("/api/warehouses").json()
+    hk = next(w for w in warehouses if w["code"] == "WH-HK")
+    treb = next(w for w in warehouses if w["code"] == "WH-TREB")
+
+    prod_res = client.post(
+        "/api/products",
+        json={
+            "name": "Testovací docházející koník",
+            "code": f"QCK-{uuid.uuid4().hex[:6].upper()}",
+            "purchase_price": "100.00",
+            "selling_price": "250.00",
+            "min_stock_level": 10,
+            "is_active": True,
+        },
+    )
+    assert prod_res.status_code == 201
+    prod_id = prod_res.json()["id"]
+
+    # Naskladníme 2 ks do garáže, takže celkem 2 < min 10 -> zobrazí se tlačítko Přesunout z garáže i Doplnit
+    assert client.post(
+        "/api/movements/receipt",
+        json={"warehouse_id": treb["id"], "product_id": prod_id, "quantity": 2, "note": "Setup"},
+    ).status_code == 201
+
+    dash_html = client.get("/").text
+    assert "Přesunout z garáže" in dash_html
+
+    # 1. Pokus bez potvrzení (confirmed chybí) -> musí být odmítnuto (422) a stav zůstane 0 / 2
+    fail_resp = client.post(
+        "/quick-action",
+        data={
+            "action_type": "transfer",
+            "product_id": prod_id,
+            "source_warehouse_id": treb["id"],
+            "destination_warehouse_id": hk["id"],
+            "quantity": "2",
+        },
+        follow_redirects=False,
+    )
+    assert fail_resp.status_code == 422
+    assert "vědomé potvrzení" in fail_resp.text
+
+    # 2. Potvrzený rychlý přesun z garáže do Hradce
+    ok_transfer = client.post(
+        "/quick-action",
+        data={
+            "action_type": "transfer",
+            "product_id": prod_id,
+            "source_warehouse_id": treb["id"],
+            "destination_warehouse_id": hk["id"],
+            "quantity": "2",
+            "confirmed": "true",
+        },
+        follow_redirects=False,
+    )
+    assert ok_transfer.status_code == 303
+    assert "action_ok=transfer" in ok_transfer.headers["location"]
+
+    # 3. Potvrzené rychlé doplnění na centrální sklad Hradec
+    ok_receipt = client.post(
+        "/quick-action",
+        data={
+            "action_type": "receipt",
+            "product_id": prod_id,
+            "warehouse_id": hk["id"],
+            "quantity": "8",
+            "confirmed": "true",
+        },
+        follow_redirects=False,
+    )
+    assert ok_receipt.status_code == 303
+    assert "action_ok=receipt" in ok_receipt.headers["location"]
+
+    # Ověříme výsledný stav přes API
+    stocks = client.get("/api/stocks").json()
+    item = next(s for s in stocks if s["product_id"] == prod_id)
+    assert item["stocks"]["WH-HK"]["available_quantity"] == 10
+    assert item["stocks"]["WH-TREB"]["available_quantity"] == 0
+    assert item["is_below_min"] is False
+

@@ -226,7 +226,7 @@ def test_header_and_login_include_theme_toggle(client, warehouse_client, anon_cl
     assert 'id="themeToggleBtn"' in login_resp.text
     assert "drevenka_theme" in login_resp.text
 
-    css_resp = anon_client.get("/static/css/style.css?v=20261113_v17")
+    css_resp = anon_client.get("/static/css/style.css?v=20261113_v18")
     assert css_resp.status_code == 200
     assert '[data-theme="dark"]' in css_resp.text
     assert ".theme-toggle-btn" in css_resp.text

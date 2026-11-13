@@ -1443,6 +1443,187 @@ select.form-control {
   color: var(--danger-text-strong);
 }
 
+.critical-action-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.critical-quick-btns {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.btn-quick-action {
+  appearance: none;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.34rem 0.72rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.btn-quick-action:hover {
+  transform: translateY(-1px);
+}
+
+.btn-quick-receipt {
+  background-color: var(--success-bg);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
+}
+
+.btn-quick-receipt:hover {
+  background-color: var(--c-9);
+  border-color: var(--c-9);
+  color: #ffffff;
+}
+
+.btn-quick-transfer {
+  background-color: var(--info-bg);
+  border: 1px solid var(--info-border);
+  color: var(--info-text);
+}
+
+.btn-quick-transfer:hover {
+  background-color: var(--c-7);
+  border-color: var(--c-7);
+  color: #ffffff;
+}
+
+/* Potvrzovací dialog pro rychlé doplnění / přesun */
+.quick-modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.quick-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.quick-modal {
+  width: 100%;
+  max-width: 560px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  color: var(--text-main);
+}
+
+.quick-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.quick-modal-title {
+  margin: 0.4rem 0 0 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.quick-modal-close {
+  appearance: none;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.quick-modal-close:hover {
+  background: var(--surface-hover);
+  color: var(--text-main);
+}
+
+.quick-modal-product-box {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.95rem;
+  margin-bottom: 0.95rem;
+}
+
+.quick-modal-stats {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.modal-warning-banner {
+  background-color: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-left: 4px solid var(--warning-text);
+  color: var(--warning-text);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.95rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  margin-bottom: 1rem;
+}
+
+.modal-confirm-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem 0.95rem;
+  background-color: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-sm);
+  color: var(--danger-text-strong);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.modal-confirm-box input[type="checkbox"] {
+  margin-top: 0.2rem;
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  accent-color: var(--c-1);
+}
+
+.quick-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.quick-modal-actions .btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* Skladová matice */
 .stock-quad-badge {
   font-family: var(--font-mono);
