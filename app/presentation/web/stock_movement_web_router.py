@@ -20,8 +20,10 @@ from app.domain.models.stock_movement import (
     StockTransferCreate,
 )
 from app.domain.services.stock_movement_service import StockMovementService
+from app.infrastructure.db.models import User
 from app.infrastructure.repositories.product_repository import ProductRepository
 from app.infrastructure.repositories.warehouse_repository import WarehouseRepository
+from app.presentation.dependencies import require_web_user
 from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="/movements", tags=["Web Pohyby a Audit"])
@@ -43,6 +45,7 @@ def movements_list_view(
     movement_type: Optional[str] = None,
     db: Session = Depends(get_db),
     service: StockMovementService = Depends(get_movement_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zobrazení auditního deníku skladových pohybů s filtry."""
     clean_product_id = parse_optional_uuid(product_id)
@@ -78,6 +81,7 @@ def movement_new_view(
     movement_type: Optional[str] = "receipt",
     product_id: Optional[str] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_web_user),
 ):
     """Zobrazení formuláře pro zadání nového skladového pohybu."""
     clean_product_id = parse_optional_uuid(product_id)
@@ -108,6 +112,7 @@ def movement_receipt_submit(
     reference_code: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     service: StockMovementService = Depends(get_movement_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zpracování příjmu zboží na sklad."""
     try:
@@ -118,7 +123,7 @@ def movement_receipt_submit(
             note=note,
             reference_code=reference_code,
         )
-        service.record_receipt(dto)
+        service.record_receipt(dto, performed_by=current_user.full_name)
         return RedirectResponse(url="/movements", status_code=status.HTTP_303_SEE_OTHER)
     except Exception as exc:
         products = ProductRepository(db).list_all()
@@ -148,6 +153,7 @@ def movement_transfer_submit(
     reference_code: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     service: StockMovementService = Depends(get_movement_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zpracování vnitroskladového přesunu mezi sklady."""
     try:
@@ -159,7 +165,7 @@ def movement_transfer_submit(
             note=note,
             reference_code=reference_code,
         )
-        service.record_transfer(dto)
+        service.record_transfer(dto, performed_by=current_user.full_name)
         return RedirectResponse(url="/movements", status_code=status.HTTP_303_SEE_OTHER)
     except Exception as exc:
         products = ProductRepository(db).list_all()
@@ -187,6 +193,7 @@ def movement_inventory_adjustment_submit(
     note: str = Form(...),
     db: Session = Depends(get_db),
     service: StockMovementService = Depends(get_movement_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zpracování inventurního vyrovnání."""
     try:
@@ -196,7 +203,7 @@ def movement_inventory_adjustment_submit(
             actual_quantity=actual_quantity,
             note=note,
         )
-        service.record_inventory_adjustment(dto)
+        service.record_inventory_adjustment(dto, performed_by=current_user.full_name)
         return RedirectResponse(url="/movements", status_code=status.HTTP_303_SEE_OTHER)
     except Exception as exc:
         products = ProductRepository(db).list_all()

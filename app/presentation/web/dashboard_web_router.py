@@ -8,7 +8,9 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.domain.services.warehouse_service import WarehouseService
+from app.infrastructure.db.models import User
 from app.infrastructure.repositories.category_repository import CategoryRepository
+from app.presentation.dependencies import require_web_user
 from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(tags=["Web Dashboard"])
@@ -30,6 +32,7 @@ def dashboard_view(
     only_critical: bool = False,
     db: Session = Depends(get_db),
     service: WarehouseService = Depends(get_warehouse_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Barevný dashboard skladu s indikací položek pod minimem („co hoří“) a rozpadem skladů."""
     clean_category_id = parse_optional_uuid(category_id)

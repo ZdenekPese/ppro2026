@@ -137,6 +137,16 @@ V souladu s pokyny zadání pro otevřené body klienta zde definujeme jednozna�
 - **Rozhodnutí:** Projekt bude realizován v programovacím jazyce **Python (3.11+)** s využitím moderního webového frameworku **FastAPI**, relační databáze **PostgreSQL 16**, ORM nástroje **SQLAlchemy 2.0** a migračního systému **Alembic**. Pro pilotní klientské rozhraní se využije šablonovací engine **Jinja2 s responzivním Vanilla CSS** a automatická interaktivní dokumentace **OpenAPI / Swagger UI**.
 - **Zdůvodnění:** Python a FastAPI umožňují čisté oddělení tří vrstev, striktní typování pomocí Pydantic schémat, automatickou tvorbu API dokumentace pro e-shop a rychlé nasazení do Docker kontejnerů s minimální režií.
 
+### ADR 7: Autentizace uživatelů, role (RBAC) a sledování autora skladového pohybu
+- **Zadání klienta:** V systému pracuje jednatel (**Petr Doležal**, majitel e-shopu) a 3 pracovníci skladu; auditní stopa vyžaduje evidenci *kdo, kdy, kolik, odkud, kam a z jakého důvodu* pohyb provedl.
+- **Rozhodnutí:**
+  - Webové rozhraní vyžaduje přihlášení prostřednictvím formuláře `/login` využívajícího `HttpOnly` cookie session uloženou v PostgreSQL (`user_sessions`, SHA-256 hash náhodného tokenu) a hesla hashovaná algoritmem `scrypt` se solí (standardní knihovna Pythonu).
+  - Zavádíme dvě role odpovídající provozu skladu:
+    - **`manager` (Jednatel / Manažer):** Plný přístup ke všem modulům včetně zakládání/úpravy produktů, cenotvorby a finančních reportů (`/reports`, `/products/new`, `/products/{id}/edit`).
+    - **`warehouse` (Skladník):** Plný přístup k operativě u regálu (`/`, `/products` ke čtení s rychlým odkazem na skladový pohyb, `/movements`, `/orders`, `/customers`), zatímco finanční reporty a změny ceníku/katalogu jsou chráněny stavem **HTTP 403 (`403.html`)**.
+  - Při každém webovém skladovém pohybu a expedici objednávky se jméno přihlášeného pracovníka automaticky zapisuje do sloupce `stock_movements.performed_by`.
+  - Veškeré výchozí přístupy pro testování používají výhradně syntetická demo data konfiguretelná proměnnými prostředí (`DEMO_MANAGER_PASSWORD`, `DEMO_WAREHOUSE_PASSWORD`).
+
 ---
 
 ## 🗄️ Datový model a doménové entity
@@ -145,6 +155,7 @@ Navržený datový model plně pokrývá požadavky na minimálně 5 entit, M:N 
 
 ```mermaid
 erDiagram
+    USER ||--o{ USER_SESSION : "holds"
     PRODUCT ||--o{ PRODUCT_CATEGORY : has
     CATEGORY ||--o{ PRODUCT_CATEGORY : contains
     PRODUCT ||--o{ WAREHOUSE_STOCK : "stocked in"
@@ -201,8 +212,27 @@ erDiagram
         uuid target_warehouse_id FK "Kam (null při výdeji zákazníkovi)"
         int quantity "Přemístěné množství (> 0)"
         string movement_type "RECEIPT | DISPATCH | TRANSFER | INVENTORY_CORRECTION"
+        string performed_by "Jméno přihlášeného pracovníka, který pohyb provedl"
         string note "Zdůvodnění např. Inventura garáž / Objednávka č. 1024"
         timestamp created_at "Čas provedení pohybu"
+    }
+
+    USER {
+        uuid id PK
+        string username UK "Přihlašovací jméno"
+        string full_name "Zobrazované jméno v auditní stopě"
+        string email "Kontaktní e-mail"
+        string role "manager | warehouse"
+        string password_hash "Salted scrypt hash hesla"
+        boolean is_active "Aktivní účet"
+    }
+
+    USER_SESSION {
+        uuid id PK
+        uuid user_id FK
+        string token_hash UK "SHA-256 otisk session tokenu"
+        timestamp expires_at "Platnost přihlášení"
+        timestamp created_at "Čas přihlášení"
     }
 
     CUSTOMER {
@@ -655,6 +685,21 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
       - Z hlavičkového přepínače skladů (*Hradec Králové*, *Garáž Třebechovice*) na desktopu i v mobilním menu.
       - Z výstražných bannerů a reportovacích odznaků.
     - Všechny ovály a štítky si zachovávají své barevné typografické a kontrastní odlišení bez nutnosti vložených kruhových teček.
+- **2026-11-13 (Přihlašovací obrazovka, autentizace a role podle zadání – RBAC):**
+  - **Doménový model & migrace (`alembic/versions/ddeddcf0b732_create_users_and_sessions_tables.py`):**
+    - Přidány entity `User` (`users`, role `'manager' | 'warehouse'` se striktním CHECK omezením) a `UserSession` (`user_sessions` s SHA-256 otisky neprůhledných tokenů).
+    - Do tabulky `stock_movements` přidán auditní sloupec `performed_by` pro záznam osoby, která pohyb provedla.
+  - **Aplikační vrstva a bezpečnost (`AuthService`, `UserRepository`):**
+    - Bezpečné hashování hesel pomocí `hashlib.scrypt` se solí a konstantním porovnáním (`hmac.compare_digest`).
+    - Seedování dvou syntetických demo účtů ze zadání v `ensure_demo_users`: `dolezal` (*Petr Doležal* – Jednatel / Manažer) a `skladnik` (*Jan Novák* – Skladník) s výchozími hesly konfigurovatelnými přes `.env.example`.
+  - **Prezentační vrstva (Web UI & REST API):**
+    - Přidány webové routery `/login` a `/logout` (`auth_web_router.py`), API endpointy `/api/auth/login`, `/api/auth/logout`, `/api/auth/me` (`auth_router.py`) a závislosti `require_web_user` / `require_manager_user` (`dependencies.py`).
+    - Vytvořena responzivní přihlašovací obrazovka [`login.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/login.html) se přepínačem viditelnosti hesla a jednoklikovým výběrem demo rolí (striktně bez kruhových teček), stránka [`403.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/403.html) pro nepovolené manažerské sekce a uživatelská lišta s tlačítkem odhlášení v [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html).
+    - Šablony `product_list.html`, `dashboard.html` a `stock_movements.html` upraveny podle rolí (manažer spravuje katalog/ceny/reporty, skladník má přímou akci na skladový pohyb; tabulka pohybů zobrazuje sloupec **Provedl**).
+  - **Testy (`pytest`):**
+    - Aktualizována konfigurace testovacích klientů v [`tests/conftest.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/conftest.py) (`client`, `warehouse_client`, `anon_client`) a přidán komplexní modul [`tests/test_auth.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_auth.py) pokrývající hashování, přesměrování nepřihlášených požadavků, ochranu proti open redirect, oprávnění rolí, odhlášení, API auth a auditní stopu `performed_by`.
+    - Všech 53 testů v projektu úspěšně prochází (`pytest`).
+
 
 
 

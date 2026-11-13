@@ -1,7 +1,9 @@
 from decimal import Decimal
 from datetime import datetime
 from typing import Dict, List, TypedDict
+from app.core.config import settings
 from app.core.database import SessionLocal
+from app.domain.services.auth_service import hash_password
 from app.infrastructure.db.models import (
     Product,
     Category,
@@ -11,6 +13,7 @@ from app.infrastructure.db.models import (
     Customer,
     Order,
     OrderItem,
+    User,
     product_categories,
 )
 
@@ -734,11 +737,51 @@ def seed_database() -> None:
                 db.commit()
                 print("[SEED] Úspěšně vloženy 3 demo objednávky.")
 
+        # 8. Seed uživatelů pro přihlašovací obrazovku a role (Jednatel vs. Skladník)
+        ensure_demo_users(db)
+
     except Exception as exc:
         db.rollback()
         print(f"[SEED ERROR] Chyba při seedování: {exc}")
     finally:
         db.close()
+
+
+def ensure_demo_users(db) -> None:
+    """Idempotentně založí výchozí demo uživatele dle rolí ze zadání (Jednatel a Skladník)."""
+    demo_users = [
+        {
+            "username": "dolezal",
+            "full_name": "Petr Doležal",
+            "email": "dolezal@drevenka-hracky.cz",
+            "role": "manager",
+            "password": settings.DEMO_MANAGER_PASSWORD,
+        },
+        {
+            "username": "skladnik",
+            "full_name": "Jan Novák",
+            "email": "novak@drevenka-hracky.cz",
+            "role": "warehouse",
+            "password": settings.DEMO_WAREHOUSE_PASSWORD,
+        },
+    ]
+    created_any = False
+    for u_data in demo_users:
+        existing = db.query(User).filter(User.username == u_data["username"]).first()
+        if not existing:
+            user = User(
+                username=u_data["username"],
+                full_name=u_data["full_name"],
+                email=u_data["email"],
+                role=u_data["role"],
+                password_hash=hash_password(u_data["password"]),
+                is_active=True,
+            )
+            db.add(user)
+            created_any = True
+    if created_any:
+        db.commit()
+        print("[SEED] Úspěšně založeny demo uživatelské účty (dolezal, skladnik).")
 
 
 if __name__ == "__main__":

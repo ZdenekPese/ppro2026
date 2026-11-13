@@ -65,6 +65,7 @@ class StockMovementResponse(BaseModel):
     quantity: int
     note: Optional[str] = None
     reference_code: Optional[str] = None
+    performed_by: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

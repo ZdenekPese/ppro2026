@@ -367,6 +367,10 @@ class StockMovement(Base):
         nullable=True,
         index=True,
     )
+    performed_by: Mapped[Optional[str]] = mapped_column(
+        String(150),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -589,6 +593,116 @@ class OrderItem(Base):
             f"<OrderItem(order_id={self.order_id}, product_id={self.product_id}, "
             f"qty={self.quantity}, unit_price={self.unit_price})>"
         )
+
+
+class User(Base):
+    """SQLAlchemy ORM entita oprávněného pracovníka skladu nebo vedení (Jednatel / Skladník)."""
+
+    __tablename__ = "users"
+
+    __table_args__ = (
+        CheckConstraint("role IN ('manager', 'warehouse')", name="ck_users_valid_role"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    username: Mapped[str] = mapped_column(
+        String(60),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    full_name: Mapped[str] = mapped_column(
+        String(150),
+        nullable=False,
+    )
+    email: Mapped[str] = mapped_column(
+        String(255),
+        unique=True,
+        nullable=False,
+    )
+    role: Mapped[str] = mapped_column(
+        String(30),
+        default="warehouse",
+        nullable=False,
+        index=True,
+    )  # 'manager' (Jednatel / Manažer) nebo 'warehouse' (Skladník)
+    password_hash: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
+    )
+
+    sessions: Mapped[list["UserSession"]] = relationship(
+        "UserSession",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def role_label(self) -> str:
+        return "Jednatel / Manažer" if self.role == "manager" else "Skladník"
+
+    def __repr__(self) -> str:
+        return f"<User(username='{self.username}', role='{self.role}')>"
+
+
+class UserSession(Base):
+    """Databázová session přihlášeného uživatele (token je uložen jako SHA-256 hash)."""
+
+    __tablename__ = "user_sessions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    token_hash: Mapped[str] = mapped_column(
+        String(64),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="sessions",
+        lazy="selectin",
+    )
 
 
 

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set current_user = request.state.user if request.state is defined and request.state.user is defined else none %}
+
+<section class="forbidden-wrap">
+    <div class="card forbidden-card">
+        <div class="forbidden-code">403</div>
+        <h1 class="forbidden-title">Přístup omezen podle role</h1>
+        <p class="forbidden-message">
+            {{ message | default('K této sekci nemáte potřebné oprávnění.') }}
+        </p>
+
+        <div class="forbidden-meta">
+            {% if current_user %}
+            <span>Přihlášený uživatel: <strong>{{ current_user.full_name }}</strong> ({{ current_user.role_label }})</span>
+            {% endif %}
+            {% if required_role %}
+            <span>Požadovaná role: <strong>{{ required_role }}</strong></span>
+            {% endif %}
+        </div>
+
+        <div class="forbidden-actions">
+            <a href="/" class="btn btn-primary">Zpět na přehled skladu</a>
+            <form method="post" action="/logout" style="display: inline-block;">
+                <button type="submit" class="btn btn-secondary">Přihlásit se jiným účtem</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

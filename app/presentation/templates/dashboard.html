@@ -281,9 +281,15 @@
                     </td>
 
                     <td style="text-align: center;">
+                        {% if request.state is defined and request.state.user is defined and request.state.user and request.state.user.role == 'manager' %}
                         <a href="/products/{{ item.product_id }}/edit" class="btn btn-action" title="Upravit produkt">
                             Upravit
                         </a>
+                        {% else %}
+                        <a href="/movements/new?product_id={{ item.product_id }}" class="btn btn-action" title="Zapsat skladový pohyb">
+                            Pohyb
+                        </a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% else %}

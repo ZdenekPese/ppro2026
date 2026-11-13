@@ -11,7 +11,9 @@ from app.core.database import get_db
 from app.domain.exceptions import DuplicateProductCodeError, ProductNotFoundError, InvalidPriceError
 from app.domain.models.product import ProductCreate, ProductUpdate
 from app.domain.services.product_service import ProductService
+from app.infrastructure.db.models import User
 from app.infrastructure.repositories.category_repository import CategoryRepository
+from app.presentation.dependencies import require_manager_user, require_web_user
 from app.presentation.utils import parse_optional_uuid
 
 router = APIRouter(prefix="/products", tags=["Web Produkty"])
@@ -32,6 +34,7 @@ def product_list_view(
     category_id: Optional[str] = None,
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zobrazení katalogu dřevěných hraček v přehledné tabulce s filtrem kategorií."""
     clean_category_id = parse_optional_uuid(category_id)
@@ -66,6 +69,7 @@ def product_list_view(
 def product_create_view(
     request: Request,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_manager_user),
 ):
     """Zobrazení formuláře pro přidání nové dřevěné hračky včetně výběru kategorií."""
     cat_repo = CategoryRepository(db)
@@ -128,6 +132,7 @@ def product_create_submit(
     category_ids: list[UUID] = Form(default=[]),
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
+    current_user: User = Depends(require_manager_user),
 ):
     """Zpracování formuláře pro přidání hračky včetně kategorií."""
     cat_repo = CategoryRepository(db)
@@ -178,6 +183,7 @@ def product_edit_view(
     product_id: UUID,
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
+    current_user: User = Depends(require_manager_user),
 ):
     """Zobrazení formuláře pro editaci hračky."""
     try:
@@ -214,6 +220,7 @@ def product_edit_submit(
     category_ids: list[UUID] = Form(default=[]),
     db: Session = Depends(get_db),
     service: ProductService = Depends(get_service),
+    current_user: User = Depends(require_manager_user),
 ):
     """Uložení upraveného produktu včetně přiřazených kategorií."""
     cat_repo = CategoryRepository(db)

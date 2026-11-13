@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | default('Přihlášení — Dřevěnka s.r.o.') }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261113_v13">
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <section class="auth-card">
+            <div class="auth-brand">
+                <span class="brand-badge">DŘEVĚNKA</span>
+                <div>
+                    <h1 class="auth-title">Dřevěnka s.r.o.</h1>
+                    <p class="auth-subtitle">Skladový a objednávkový systém</p>
+                </div>
+            </div>
+
+            {% if logged_out %}
+            <div class="alert alert-success" role="status">
+                Byli jste úspěšně odhlášeni ze systému.
+            </div>
+            {% endif %}
+
+            {% if error %}
+            <div class="alert alert-error" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" action="/login" class="auth-form" autocomplete="on">
+                <input type="hidden" name="next" value="{{ next_url | default('/') }}">
+
+                <div class="form-group">
+                    <label for="username" class="form-label">Uživatelské jméno</label>
+                    <input
+                        id="username"
+                        name="username"
+                        type="text"
+                        class="form-control"
+                        value="{{ username | default('') }}"
+                        placeholder="např. dolezal nebo skladnik"
+                        autocomplete="username"
+                        required
+                        autofocus
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Heslo</label>
+                    <div class="password-input-wrap">
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            class="form-control"
+                            placeholder="Zadejte heslo"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <button
+                            type="button"
+                            class="btn-password-toggle"
+                            id="togglePasswordBtn"
+                            aria-label="Zobrazit nebo skrýt heslo"
+                        >
+                            Zobrazit
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-submit-btn">
+                    Přihlásit se
+                </button>
+            </form>
+
+            {% if show_demo %}
+            <div class="demo-panel">
+                <div class="demo-panel-header">
+                    <span class="demo-panel-title">Demo účty podle rolí ze zadání</span>
+                    <span class="demo-panel-hint">Kliknutím předvyplníte údaje</span>
+                </div>
+                <div class="demo-accounts-grid">
+                    <button
+                        type="button"
+                        class="demo-account-card"
+                        data-username="dolezal"
+                        data-password="{{ demo_manager_password }}"
+                    >
+                        <div class="demo-account-top">
+                            <span class="demo-account-name">Petr Doležal</span>
+                            <span class="role-badge role-manager">Jednatel / Manažer</span>
+                        </div>
+                        <div class="demo-account-meta">
+                            Login: <code>dolezal</code> | Heslo: <code>{{ demo_manager_password }}</code>
+                        </div>
+                        <p class="demo-account-desc">
+                            Plný přístup včetně správy ceníku, katalogu a finančních reportů.
+                        </p>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="demo-account-card"
+                        data-username="skladnik"
+                        data-password="{{ demo_warehouse_password }}"
+                    >
+                        <div class="demo-account-top">
+                            <span class="demo-account-name">Jan Novák</span>
+                            <span class="role-badge role-warehouse">Skladník</span>
+                        </div>
+                        <div class="demo-account-meta">
+                            Login: <code>skladnik</code> | Heslo: <code>{{ demo_warehouse_password }}</code>
+                        </div>
+                        <p class="demo-account-desc">
+                            Operace u regálu: příjem, převody HK/Třebechovice, inventura, expedice objednávek.
+                        </p>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <footer class="auth-footer">
+            <span>Dřevěnka s.r.o. | Interní skladový systém PPRO 2026</span>
+        </footer>
+    </main>
+
+    <script>
+        (function () {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+            const usernameInput = document.getElementById('username');
+
+            if (toggleBtn && passwordInput) {
+                toggleBtn.addEventListener('click', function () {
+                    const isHidden = passwordInput.type === 'password';
+                    passwordInput.type = isHidden ? 'text' : 'password';
+                    toggleBtn.textContent = isHidden ? 'Skrýt' : 'Zobrazit';
+                });
+            }
+
+            document.querySelectorAll('.demo-account-card').forEach(function (card) {
+                card.addEventListener('click', function () {
+                    if (usernameInput) {
+                        usernameInput.value = card.getAttribute('data-username') || '';
+                    }
+                    if (passwordInput) {
+                        passwordInput.value = card.getAttribute('data-password') || '';
+                    }
+                    if (usernameInput) {
+                        usernameInput.focus();
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

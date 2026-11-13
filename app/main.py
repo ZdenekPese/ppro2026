@@ -1,10 +1,13 @@
 from pathlib import Path
-from fastapi import FastAPI, Request
+from urllib.parse import quote
+from fastapi import FastAPI, Request, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.core.config import settings
+from app.presentation.dependencies import ForbiddenWebException, NotAuthenticatedWebException
+from app.presentation.api.auth_router import router as auth_router
 from app.presentation.api.health_router import router as health_router
 from app.presentation.api.product_router import router as product_router
 from app.presentation.api.category_router import router as category_router
@@ -13,6 +16,7 @@ from app.presentation.api.stock_movement_router import router as stock_movement_
 from app.presentation.api.customer_router import router as customer_router
 from app.presentation.api.order_router import router as order_router
 from app.presentation.api.report_router import router as report_router
+from app.presentation.web.auth_web_router import router as auth_web_router
 from app.presentation.web.product_web_router import router as product_web_router
 from app.presentation.web.dashboard_web_router import router as dashboard_web_router
 from app.presentation.web.stock_movement_web_router import router as stock_movement_web_router
@@ -35,7 +39,32 @@ TEMPLATES_DIR = BASE_DIR / "presentation" / "templates"
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+
+@app.exception_handler(NotAuthenticatedWebException)
+def not_authenticated_web_handler(request: Request, exc: NotAuthenticatedWebException):
+    """Přesměruje nepřihlášeného uživatele na přihlašovací obrazovku."""
+    next_param = quote(exc.next_url, safe="/?=&")
+    target = f"/login?next={next_param}" if exc.next_url and exc.next_url != "/" else "/login"
+    return RedirectResponse(url=target, status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.exception_handler(ForbiddenWebException)
+def forbidden_web_handler(request: Request, exc: ForbiddenWebException):
+    """Zobrazí přehlednou stránku 403 při nedostatečné uživatelské roli."""
+    return templates.TemplateResponse(
+        request=request,
+        name="403.html",
+        context={
+            "required_role": exc.required_role,
+            "message": exc.message,
+            "title": "Přístup omezen",
+        },
+        status_code=status.HTTP_403_FORBIDDEN,
+    )
+
+
 # Registrace API routerů
+app.include_router(auth_router, prefix="/api")
 app.include_router(health_router, prefix="/api")
 app.include_router(product_router, prefix="/api")
 app.include_router(category_router, prefix="/api")
@@ -46,6 +75,7 @@ app.include_router(order_router, prefix="/api")
 app.include_router(report_router, prefix="/api")
 
 # Registrace webových routerů
+app.include_router(auth_web_router)
 app.include_router(dashboard_web_router)
 app.include_router(product_web_router)
 app.include_router(stock_movement_web_router)

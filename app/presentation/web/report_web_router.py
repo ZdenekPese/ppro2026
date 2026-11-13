@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.domain.services.report_service import CZECH_MONTHS, ReportService
+from app.infrastructure.db.models import User
+from app.presentation.dependencies import require_manager_user
 
 router = APIRouter(tags=["Web Reporty a Analytika"])
 
@@ -28,6 +30,7 @@ def reports_dashboard_view(
     include_reserved: Optional[str] = None,
     db: Session = Depends(get_db),
     service: ReportService = Depends(get_report_service),
+    current_user: User = Depends(require_manager_user),
 ):
     """
     Manažerský reportovací a analytický dashboard pro pana Petra Doležala.

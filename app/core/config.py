@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = (
         "postgresql+psycopg://drevenka:drevenka_secret@db:5432/drevenka_db"
     )
+    SESSION_COOKIE_NAME: str = "drevenka_session"
+    SESSION_TTL_HOURS: int = 24
+    # Syntetická demo hesla pouze pro vývojové a předváděcí účty (v produkci přepsat v .env)
+    DEMO_MANAGER_PASSWORD: str = "drevenka2026"
+    DEMO_WAREHOUSE_PASSWORD: str = "sklad2026"
 
     model_config = SettingsConfigDict(
         env_file=".env",

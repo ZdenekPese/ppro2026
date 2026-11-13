@@ -102,4 +102,22 @@ class InvalidOrderStatusError(DomainException):
         )
 
 
+class AuthenticationError(DomainException):
+    """Výjimka vyvolaná při neplatných přihlašovacích údajích nebo neaktivním účtu."""
+    def __init__(self, message: str = "Neplatné uživatelské jméno nebo heslo."):
+        super().__init__(message)
+
+
+class PermissionDeniedError(DomainException):
+    """Výjimka vyvolaná při nedostatečném oprávnění pro požadovanou operaci."""
+    def __init__(self, message: str = "Pro tuto akci nemáte dostatečná oprávnění."):
+        super().__init__(message)
+
+
+class DuplicateUsernameError(DomainException):
+    """Výjimka vyvolaná při pokusu založit uživatele s již existujícím přihlašovacím jménem."""
+    def __init__(self, username: str):
+        super().__init__(f"Uživatelské jméno '{username}' již v systému existuje.")
+
+
 

@@ -219,7 +219,7 @@ class OrderService:
         saved = self.order_repo.create(order)
         return self._format_order(saved)
 
-    def dispatch_order(self, order_id: UUID) -> OrderResponse:
+    def dispatch_order(self, order_id: UUID, performed_by: Optional[str] = None) -> OrderResponse:
         """
         Fyzická expedice objednávky:
         1. Ověření stavu (lze expedovat pouze rezervovanou/novou).
@@ -258,6 +258,7 @@ class OrderService:
                 quantity=item.quantity,
                 reference_code=order.order_number,
                 note=f"Expedice e-shop objednávky č. {order.order_number} zákazníkovi {order.customer.full_name}",
+                performed_by=performed_by,
             )
             self.movement_repo.create(movement)
 

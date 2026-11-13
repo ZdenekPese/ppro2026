@@ -151,6 +151,7 @@
                     <th style="width: 150px;">Kam (Cíl)</th>
                     <th style="width: 100px; text-align: right;">Množství</th>
                     <th style="width: 130px;">Doklad / Ref</th>
+                    <th style="width: 140px;">Provedl</th>
                     <th>Poznámka / Důvod</th>
                 </tr>
             </thead>
@@ -230,6 +231,15 @@
                         {% endif %}
                     </td>
 
+                    <!-- Provedl -->
+                    <td>
+                        {% if m.performed_by %}
+                            <span class="performed-by-name">{{ m.performed_by }}</span>
+                        {% else %}
+                            <span class="text-dim">—</span>
+                        {% endif %}
+                    </td>
+
                     <!-- Poznámka -->
                     <td>
                         {% if m.note %}
@@ -241,7 +251,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="9" class="table-empty">
+                    <td colspan="10" class="table-empty">
                         <p>Zatím nebyly zaznamenány žádné skladové pohyby splňující zadaná kritéria.</p>
                     </td>
                 </tr>

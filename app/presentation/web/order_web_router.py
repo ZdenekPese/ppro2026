@@ -19,9 +19,11 @@ from app.domain.models.customer import CustomerCreate
 from app.domain.models.order import OrderCreate, OrderItemCreate
 from app.domain.services.customer_service import CustomerService
 from app.domain.services.order_service import OrderService
+from app.infrastructure.db.models import User
 from app.infrastructure.repositories.customer_repository import CustomerRepository
 from app.infrastructure.repositories.product_repository import ProductRepository
 from app.infrastructure.repositories.warehouse_repository import WarehouseRepository
+from app.presentation.dependencies import require_web_user
 
 router = APIRouter(tags=["Web Objednávky a Zákazníci"])
 
@@ -45,6 +47,7 @@ def orders_list_view(
     search: Optional[str] = None,
     db: Session = Depends(get_db),
     service: OrderService = Depends(get_order_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Webový přehled všech objednávek."""
     clean_status = status_filter.strip() if status_filter and status_filter.strip() else None
@@ -76,6 +79,7 @@ def orders_list_view(
 def order_new_view(
     request: Request,
     db: Session = Depends(get_db),
+    current_user: User = Depends(require_web_user),
 ):
     """Formulář pro vytvoření nové e-shopové objednávky."""
     customers = CustomerRepository(db).list_all(only_active=True)
@@ -114,6 +118,7 @@ def order_new_submit(
     db: Session = Depends(get_db),
     order_service: OrderService = Depends(get_order_service),
     customer_service: CustomerService = Depends(get_customer_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zpracování založení objednávky s automatickou rezervací."""
     try:
@@ -174,6 +179,7 @@ def order_detail_view(
     error: Optional[str] = None,
     db: Session = Depends(get_db),
     service: OrderService = Depends(get_order_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Detail konkrétní objednávky s možností expedice a storna."""
     try:
@@ -197,10 +203,11 @@ def order_dispatch_submit(
     request: Request,
     order_id: UUID,
     service: OrderService = Depends(get_order_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zpracování expedice objednávky skladníkem."""
     try:
-        service.dispatch_order(order_id)
+        service.dispatch_order(order_id, performed_by=current_user.full_name)
         return RedirectResponse(
             url=f"/orders/{order_id}?success=Objednávka+byla+úspěšně+expedována+a+položky+byly+odepsány+ze+skladu.",
             status_code=status.HTTP_303_SEE_OTHER,
@@ -217,6 +224,7 @@ def order_cancel_submit(
     request: Request,
     order_id: UUID,
     service: OrderService = Depends(get_order_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zpracování storna objednávky."""
     try:
@@ -237,6 +245,7 @@ def customers_list_view(
     request: Request,
     search: Optional[str] = None,
     service: CustomerService = Depends(get_customer_service),
+    current_user: User = Depends(require_web_user),
 ):
     """Zobrazení adresáře zákazníků."""
     customers = service.list_customers(search=search)

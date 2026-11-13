@@ -57,10 +57,11 @@ class StockMovementService:
             quantity=movement.quantity,
             note=movement.note,
             reference_code=movement.reference_code,
+            performed_by=movement.performed_by,
             created_at=movement.created_at,
         )
 
-    def record_receipt(self, dto: StockReceiptCreate) -> StockMovementResponse:
+    def record_receipt(self, dto: StockReceiptCreate, performed_by: Optional[str] = None) -> StockMovementResponse:
         """Příjem zboží od dodavatele nebo z dílny do skladu."""
         warehouse = self.warehouse_repo.get_by_id(dto.warehouse_id)
         if not warehouse:
@@ -82,11 +83,12 @@ class StockMovementService:
             quantity=dto.quantity,
             note=dto.note,
             reference_code=dto.reference_code,
+            performed_by=performed_by,
         )
         saved = self.movement_repo.create(movement)
         return self._format_movement_response(saved)
 
-    def record_dispatch(self, dto: StockDispatchCreate) -> StockMovementResponse:
+    def record_dispatch(self, dto: StockDispatchCreate, performed_by: Optional[str] = None) -> StockMovementResponse:
         """Výdej zboží ze skladu (expedice zákazníkovi) se zákazem záporu."""
         warehouse = self.warehouse_repo.get_by_id(dto.warehouse_id)
         if not warehouse:
@@ -111,11 +113,12 @@ class StockMovementService:
             quantity=dto.quantity,
             note=dto.note,
             reference_code=dto.reference_code,
+            performed_by=performed_by,
         )
         saved = self.movement_repo.create(movement)
         return self._format_movement_response(saved)
 
-    def record_transfer(self, dto: StockTransferCreate) -> StockMovementResponse:
+    def record_transfer(self, dto: StockTransferCreate, performed_by: Optional[str] = None) -> StockMovementResponse:
         """Meziskladový převoz (např. ze sezónní garáže v Třebechovicích do Hradce)."""
         if dto.source_warehouse_id == dto.destination_warehouse_id:
             raise ValueError("Zdrojový a cílový sklad musí být různé.")
@@ -153,11 +156,14 @@ class StockMovementService:
             quantity=dto.quantity,
             note=dto.note or f"Meziskladový převoz {src_wh.code} -> {dst_wh.code}",
             reference_code=dto.reference_code,
+            performed_by=performed_by,
         )
         saved = self.movement_repo.create(movement)
         return self._format_movement_response(saved)
 
-    def record_inventory_adjustment(self, dto: InventoryAdjustmentCreate) -> StockMovementResponse:
+    def record_inventory_adjustment(
+        self, dto: InventoryAdjustmentCreate, performed_by: Optional[str] = None
+    ) -> StockMovementResponse:
         """Inventurní vyrovnání skladu (vyřešení rozporů v garáži či HK se 100% auditní stopou)."""
         warehouse = self.warehouse_repo.get_by_id(dto.warehouse_id)
         if not warehouse:
@@ -206,6 +212,7 @@ class StockMovementService:
             quantity=qty,
             note=note,
             reference_code="INVENTURA",
+            performed_by=performed_by,
         )
         saved = self.movement_repo.create(movement)
         return self._format_movement_response(saved)
