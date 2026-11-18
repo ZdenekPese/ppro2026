@@ -61,17 +61,39 @@
   --info-border: #edd3b2;
   --info-text: #965218;
 
-  --warning-bg: #fef7e6;
-  --warning-border: #f5d68a;
-  --warning-text: #9a5b08;
+  --warning-bg: #fdf0d5;
+  --warning-border: #e5b96d;
+  --warning-text: #92400e;
+  --warning-row-bg: #fcfaf5;
+  --warning-card-bg: #fcfaf5;
+  --warning-stripe: #c26a1b;
 
-  --danger-bg: #fdf1ef;
-  --danger-border: #f2c4bc;
-  --danger-text: #b83227;
-  --danger-text-strong: #942319;
-  --danger-row-bg: #fff6f4;
-  --danger-card-bg: #fff7f5;
-  --danger-soft-bg: #fffbfa;
+  --near-bg: #f6f3eb;
+  --near-border: #d6cfc2;
+  --near-text: #6e5a3a;
+
+  --danger-bg: #ffffff;
+  --danger-border: #c96452;
+  --danger-text: #a32b19;
+  --danger-text-strong: #872011;
+  --danger-row-bg: #ffffff;
+  --danger-card-bg: #fcfaf5;
+  --danger-soft-bg: #ffffff;
+
+  --soldout-bg: #b83d2b;
+  --soldout-border: #9e2f1f;
+  --soldout-text: #ffffff;
+  --soldout-stripe: #b83d2b;
+
+  --alert-card-bg: #fcfaf5;
+  --alert-card-border: #e5b96d;
+  --alert-card-stripe: #c26a1b;
+  --alert-title-color: #92400e;
+  --alert-subtitle-color: #5c5850;
+  --low-stock-text: #92400e;
+  --advice-produce-bg: #fdf0d5;
+  --advice-produce-border: #e5b96d;
+  --advice-produce-text: #92400e;
 
   --brand-tint: #eef6f3;
   --progress-bar-fill: #b46927;
@@ -137,6 +159,13 @@
   --warning-bg: rgba(234, 179, 8, 0.13);
   --warning-border: rgba(234, 179, 8, 0.30);
   --warning-text: #f3c85c;
+  --warning-row-bg: rgba(217, 72, 65, 0.09);
+  --warning-card-bg: rgba(217, 72, 65, 0.07);
+  --warning-stripe: transparent;
+
+  --near-bg: rgba(234, 179, 8, 0.13);
+  --near-border: rgba(234, 179, 8, 0.30);
+  --near-text: #f3c85c;
 
   --danger-bg: rgba(217, 72, 65, 0.14);
   --danger-border: rgba(217, 72, 65, 0.32);
@@ -145,6 +174,21 @@
   --danger-row-bg: rgba(217, 72, 65, 0.09);
   --danger-card-bg: rgba(217, 72, 65, 0.07);
   --danger-soft-bg: rgba(217, 72, 65, 0.09);
+
+  --soldout-bg: rgba(217, 72, 65, 0.14);
+  --soldout-border: rgba(217, 72, 65, 0.32);
+  --soldout-text: #f28b82;
+  --soldout-stripe: transparent;
+
+  --alert-card-bg: rgba(217, 72, 65, 0.07);
+  --alert-card-border: rgba(217, 72, 65, 0.32);
+  --alert-card-stripe: #2d8a6e;
+  --alert-title-color: #f6aba4;
+  --alert-subtitle-color: #f28b82;
+  --low-stock-text: #f28b82;
+  --advice-produce-bg: rgba(217, 72, 65, 0.14);
+  --advice-produce-border: rgba(217, 72, 65, 0.32);
+  --advice-produce-text: #f6aba4;
 
   --brand-tint: rgba(45, 138, 110, 0.16);
   --progress-bar-fill: #d98a41;
@@ -1326,9 +1370,9 @@ select.form-control {
 
 /* Sekce „Co hoří“ */
 .critical-alert-section {
-  background-color: var(--danger-card-bg);
-  border: 1px solid var(--danger-border);
-  border-left: 4px solid var(--c-1);
+  background-color: var(--alert-card-bg);
+  border: 1px solid var(--alert-card-border);
+  border-left: 4px solid var(--alert-card-stripe);
   border-radius: var(--radius-md);
   padding: 1.35rem 1.5rem;
   margin-top: 1.5rem;
@@ -1362,14 +1406,13 @@ select.form-control {
 .critical-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--danger-text-strong);
+  color: var(--alert-title-color);
   margin: 0;
 }
 
 .critical-subtitle {
   font-size: 0.82rem;
-  color: var(--danger-text);
-  opacity: 0.9;
+  color: var(--alert-subtitle-color);
   display: block;
   margin-top: 0.25rem;
 }
@@ -1382,7 +1425,7 @@ select.form-control {
 
 .critical-card {
   background-color: var(--bg-card);
-  border: 1px solid var(--danger-border);
+  border: 1px solid var(--alert-card-border);
   border-radius: var(--radius-sm);
   padding: 0.85rem 1rem;
   display: flex;
@@ -1440,9 +1483,9 @@ select.form-control {
 }
 
 .advice-produce {
-  background-color: var(--danger-bg);
-  border: 1px solid var(--danger-border);
-  color: var(--danger-text-strong);
+  background-color: var(--advice-produce-bg);
+  border: 1px solid var(--advice-produce-border);
+  color: var(--advice-produce-text);
 }
 
 .critical-action-wrap {
@@ -1665,6 +1708,16 @@ select.form-control {
   background-color: var(--danger-row-bg) !important;
 }
 
+.row-warning-bg {
+  background-color: var(--warning-row-bg) !important;
+  box-shadow: inset 3px 0 0 var(--warning-stripe);
+}
+
+.row-soldout-bg {
+  background-color: var(--danger-row-bg) !important;
+  box-shadow: inset 3px 0 0 var(--soldout-stripe);
+}
+
 /* ==========================================================================
    SJEDNOCENÝ DESIGN SYSTÉM: OVÁLY (PILLS) A STAVOVÉ TEČKY (DOTS)
    ========================================================================== */
@@ -1757,10 +1810,28 @@ select.form-control {
   color: var(--danger-text);
 }
 
+.pill-low {
+  background-color: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-text);
+}
+
+.pill-soldout {
+  background-color: var(--soldout-bg);
+  border: 1px solid var(--soldout-border);
+  color: var(--soldout-text);
+}
+
 .pill-warning {
   background-color: var(--warning-bg);
   border: 1px solid var(--warning-border);
   color: var(--warning-text);
+}
+
+.pill-warning-near {
+  background-color: var(--near-bg);
+  border: 1px solid var(--near-border);
+  color: var(--near-text);
 }
 
 .pill-ok {
@@ -1771,6 +1842,10 @@ select.form-control {
 
 .text-danger {
   color: var(--danger-text) !important;
+}
+
+.text-warning-amber {
+  color: var(--low-stock-text) !important;
 }
 
 .font-bold {
@@ -3869,9 +3944,9 @@ select.form-control {
 }
 
 .shop-stock-out {
-  background-color: var(--danger-bg);
-  color: var(--danger-text-strong);
-  border: 1px solid var(--danger-border);
+  background-color: var(--soldout-bg);
+  color: var(--soldout-text);
+  border: 1px solid var(--soldout-border);
 }
 
 .shop-card-body {

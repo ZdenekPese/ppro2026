@@ -152,8 +152,10 @@
                     <td style="text-align: center;">
                         <span class="stock-min">{{ p.min_stock_level }} ks</span>
                         <div style="font-size: 0.72rem; margin-top: 0.25rem;">
-                            {% if p.total_available_quantity < p.min_stock_level %}
+                            {% if p.total_available_quantity <= 0 %}
                                 <span class="text-danger font-bold">Volno: {{ p.total_available_quantity }} ks</span>
+                            {% elif p.total_available_quantity < p.min_stock_level %}
+                                <span class="text-warning-amber font-bold">Volno: {{ p.total_available_quantity }} ks</span>
                             {% else %}
                                 <span class="text-teal font-mono">Volno: {{ p.total_available_quantity }} ks</span>
                             {% endif %}

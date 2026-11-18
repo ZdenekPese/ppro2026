@@ -45,9 +45,9 @@
             </div>
             <div class="overview-row">
                 {% if summary.critical_items_count > 0 %}
-                    <span class="overview-label text-danger font-bold">Kritický stav (dochází):</span>
-                    <strong class="overview-value text-danger">{{ summary.critical_items_count }} položek</strong>
-                    <span class="overview-note text-danger">disponibilní zásoba klesla pod stanovené minimum!</span>
+                    <span class="overview-label text-warning-amber font-bold">Kritický stav (dochází):</span>
+                    <strong class="overview-value text-warning-amber">{{ summary.critical_items_count }} položek</strong>
+                    <span class="overview-note text-warning-amber">disponibilní zásoba klesla pod stanovené minimum!</span>
                 {% else %}
                     <span class="overview-label">Stav minimálních zásob:</span>
                     <strong class="overview-value text-teal">Vše v pořádku</strong>
@@ -130,7 +130,7 @@
             <div class="critical-card-quantities">
                 <div class="quant-col">
                     <span class="quant-label">Disponibilní:</span>
-                    <span class="quant-val text-danger">{{ item.total_available }} ks</span>
+                    <span class="quant-val {% if item.total_available <= 0 %}text-danger{% else %}text-warning-amber{% endif %}">{{ item.total_available }} ks</span>
                 </div>
                 <div class="quant-col">
                     <span class="quant-label">Min. limit:</span>
@@ -283,7 +283,7 @@
             </thead>
             <tbody>
                 {% for item in stocks %}
-                <tr class="{% if item.is_below_min %}row-danger-bg{% endif %}">
+                <tr class="{% if item.total_available <= 0 %}row-soldout-bg{% elif item.is_below_min %}row-warning-bg{% endif %}">
                     <td>
                         <span class="sku-badge">{{ item.product_code }}</span>
                     </td>
@@ -336,7 +336,7 @@
 
                     <!-- Celkem k prodeji -->
                     <td style="text-align: center;">
-                        <strong class="total-avail-chip {% if item.is_below_min %}text-danger{% else %}text-teal{% endif %}">
+                        <strong class="total-avail-chip {% if item.total_available <= 0 %}text-danger{% elif item.is_below_min %}text-warning-amber{% else %}text-teal{% endif %}">
                             {{ item.total_available }} ks
                         </strong>
                     </td>
@@ -348,10 +348,12 @@
 
                     <!-- Barevný status zásoby -->
                     <td style="text-align: center;">
-                        {% if item.status == 'danger' %}
-                            <span class="stock-pill pill-danger">Dochází</span>
+                        {% if item.total_available <= 0 %}
+                            <span class="stock-pill pill-soldout">Vyprodáno</span>
+                        {% elif item.status == 'danger' %}
+                            <span class="stock-pill pill-low">Dochází</span>
                         {% elif item.status == 'warning' %}
-                            <span class="stock-pill pill-warning">Blízko minima</span>
+                            <span class="stock-pill pill-warning-near">Blízko minima</span>
                         {% else %}
                             <span class="stock-pill pill-ok">V pořádku</span>
                         {% endif %}
