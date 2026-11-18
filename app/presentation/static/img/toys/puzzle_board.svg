@@ -4,7 +4,7 @@
   <rect x="52" y="28" width="136" height="104" rx="10" fill="#8b5e34"/>
   <rect x="62" y="38" width="116" height="84" rx="6" fill="#f3d5b5"/>
   <!-- Tangram / puzzle tiles -->
-  <path d="M64 40 L120 40 L92 72 Z" fill="#b7094c"/>
+  <path d="M64 40 L120 40 L92 72 Z" fill="#b83d2b"/>
   <path d="M64 40 L92 72 L64 120 Z" fill="#0f766e"/>
   <path d="M120 40 L176 40 L176 80 L146 80 Z" fill="#d97706"/>
   <rect x="96" y="74" width="38" height="44" rx="4" fill="#d4a373"/>

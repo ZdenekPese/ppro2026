@@ -7,8 +7,8 @@
   <path d="M60 118 L84 82 L108 118 Z" fill="#0f766e" opacity="0.35"/>
   <path d="M128 118 L156 76 L180 118 Z" fill="#0f766e" opacity="0.45"/>
   <!-- Crimson curtains -->
-  <path d="M60 46 L86 46 Q78 82 68 118 L60 118 Z" fill="#b7094c"/>
-  <path d="M180 46 L154 46 Q162 82 172 118 L180 118 Z" fill="#b7094c"/>
+  <path d="M60 46 L86 46 Q78 82 68 118 L60 118 Z" fill="#b83d2b"/>
+  <path d="M180 46 L154 46 Q162 82 172 118 L180 118 Z" fill="#b83d2b"/>
   <path d="M60 46 Q120 62 180 46 L180 56 Q120 68 60 56 Z" fill="#9d023f"/>
   <!-- Puppet figure -->
   <circle cx="120" cy="78" r="10" fill="#f3d5b5"/>

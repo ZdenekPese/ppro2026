@@ -3,11 +3,11 @@
   <!-- Wagon -->
   <rect x="24" y="84" width="66" height="32" rx="6" fill="#d97706"/>
   <rect x="30" y="72" width="22" height="14" rx="3" fill="#0f766e"/>
-  <rect x="58" y="68" width="24" height="18" rx="3" fill="#b7094c"/>
+  <rect x="58" y="68" width="24" height="18" rx="3" fill="#b83d2b"/>
   <rect x="88" y="106" width="14" height="5" rx="2.5" fill="#7c5338"/>
   <!-- Locomotive body -->
   <rect x="100" y="72" width="84" height="44" rx="7" fill="#d4a373"/>
-  <rect x="100" y="44" width="42" height="42" rx="6" fill="#b7094c"/>
+  <rect x="100" y="44" width="42" height="42" rx="6" fill="#b83d2b"/>
   <rect x="95" y="38" width="52" height="10" rx="4" fill="#8b5e34"/>
   <rect x="110" y="53" width="22" height="18" rx="3" fill="#fef3c7"/>
   <!-- Boiler & chimney -->
@@ -18,7 +18,7 @@
   <circle cx="180" cy="28" r="7" fill="#cbd5e1" opacity="0.8"/>
   <circle cx="194" cy="21" r="9" fill="#cbd5e1" opacity="0.65"/>
   <!-- Front bumper -->
-  <path d="M198 102 L214 116 L196 116 Z" fill="#b7094c"/>
+  <path d="M198 102 L214 116 L196 116 Z" fill="#b83d2b"/>
   <!-- Wheels -->
   <circle cx="42" cy="122" r="13" fill="#6f4518"/>
   <circle cx="42" cy="122" r="5" fill="#f3d5b5"/>

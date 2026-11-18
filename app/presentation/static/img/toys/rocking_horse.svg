@@ -20,7 +20,7 @@
   <path d="M156 34 L161 21 L167 34 Z" fill="#bc8a5f"/>
   <circle cx="171" cy="43" r="3" fill="#1e293b"/>
   <!-- Saddle -->
-  <path d="M100 63 Q118 74 136 63 L136 82 Q118 88 100 82 Z" fill="#b7094c"/>
+  <path d="M100 63 Q118 74 136 63 L136 82 Q118 88 100 82 Z" fill="#b83d2b"/>
   <!-- Handle peg -->
   <line x1="158" y1="46" x2="146" y2="42" stroke="#8b5e34" stroke-width="4" stroke-linecap="round"/>
 </svg>

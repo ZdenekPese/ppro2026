@@ -3,7 +3,7 @@
   <!-- Mast -->
   <rect x="116" y="22" width="7" height="86" rx="3.5" fill="#8b5e34"/>
   <!-- Pennant -->
-  <path d="M123 24 L152 31 L123 38 Z" fill="#b7094c"/>
+  <path d="M123 24 L152 31 L123 38 Z" fill="#b83d2b"/>
   <!-- Main sail -->
   <path d="M123 36 L176 96 L123 96 Z" fill="#fef3c7" stroke="#d4a373" stroke-width="2"/>
   <!-- Jib sail -->

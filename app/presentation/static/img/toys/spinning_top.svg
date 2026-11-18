@@ -5,11 +5,11 @@
   <path d="M184 76 Q194 84 184 92" stroke="#0f766e" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
   <!-- Handle spindle -->
   <rect x="113" y="20" width="14" height="36" rx="7" fill="#8b5e34"/>
-  <circle cx="120" cy="22" r="9" fill="#b7094c"/>
+  <circle cx="120" cy="22" r="9" fill="#b83d2b"/>
   <!-- Conical beech body -->
   <path d="M64 72 C64 56 176 56 176 72 C176 86 138 118 122 134 C121 136 119 136 118 134 C102 118 64 86 64 72 Z" fill="#deb887"/>
   <!-- Painted rings -->
-  <path d="M68 70 C68 62 172 62 172 70 C172 76 68 76 68 70 Z" fill="#b7094c"/>
+  <path d="M68 70 C68 62 172 62 172 70 C172 76 68 76 68 70 Z" fill="#b83d2b"/>
   <path d="M76 84 C94 88 146 88 164 84 L156 93 C138 97 102 97 84 93 Z" fill="#0f766e"/>
   <path d="M94 103 C106 106 134 106 146 103 L138 112 C126 114 114 114 102 112 Z" fill="#d97706"/>
   <ellipse cx="120" cy="60" rx="50" ry="10" fill="#f3d5b5"/>

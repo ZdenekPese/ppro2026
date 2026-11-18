@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" fill="none">
   <ellipse cx="120" cy="138" rx="82" ry="8" fill="#000" opacity="0.08"/>
   <!-- Tail fin -->
-  <path d="M46 86 L64 52 L80 52 L74 86 Z" fill="#b7094c"/>
+  <path d="M46 86 L64 52 L80 52 L74 86 Z" fill="#b83d2b"/>
   <!-- Fuselage -->
   <path d="M44 86 C44 74 148 64 186 74 C196 76 196 96 186 98 C148 106 54 98 44 86 Z" fill="#deb887"/>
   <!-- Lower wing -->
@@ -10,7 +10,7 @@
   <rect x="108" y="54" width="6" height="40" fill="#8b5e34"/>
   <rect x="148" y="54" width="6" height="40" fill="#8b5e34"/>
   <!-- Upper wing -->
-  <rect x="84" y="44" width="94" height="13" rx="6" fill="#b7094c"/>
+  <rect x="84" y="44" width="94" height="13" rx="6" fill="#b83d2b"/>
   <!-- Propeller -->
   <rect x="192" y="52" width="7" height="64" rx="3.5" fill="#8b5e34"/>
   <circle cx="195" cy="84" r="7" fill="#d97706"/>

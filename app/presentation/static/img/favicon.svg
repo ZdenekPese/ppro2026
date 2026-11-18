@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
     <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#b7094c"/>
-      <stop offset="100%" stop-color="#723c70"/>
+      <stop offset="0%" stop-color="#1f5e4b"/>
+      <stop offset="100%" stop-color="#17493a"/>
     </linearGradient>
     <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#fcedd0"/>
+      <stop offset="100%" stop-color="#f6e7cb"/>
     </linearGradient>
   </defs>
-  <!-- Zaoblený podklad ve firemní karmínové paletě -->
+  <!-- Zaoblený podklad ve firemní lesní borovicové paletě -->
   <rect width="64" height="64" rx="14" fill="url(#brandGrad)"/>
   
   <!-- Tradiční dřevěný houpací koník Dřevěnka -->
@@ -38,5 +38,5 @@
   <path d="M21 35 C17 33 16 26.5 19 22.5" fill="none" stroke="url(#woodGrad)" stroke-width="3" stroke-linecap="round"/>
   
   <!-- Sedlo -->
-  <path d="M28.5 34.5 Q31.5 37.5 34.5 34.5" fill="none" stroke="#b7094c" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M28.5 34.5 Q31.5 37.5 34.5 34.5" fill="none" stroke="#1f5e4b" stroke-width="2.2" stroke-linecap="round"/>
 </svg>

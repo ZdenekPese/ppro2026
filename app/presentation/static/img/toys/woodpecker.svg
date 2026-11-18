@@ -3,14 +3,14 @@
   <!-- Base & vertical rod -->
   <rect x="86" y="126" width="68" height="14" rx="7" fill="#8b5e34"/>
   <rect x="117" y="18" width="6" height="110" rx="3" fill="#94a3b8"/>
-  <circle cx="120" cy="18" r="8" fill="#b7094c"/>
+  <circle cx="120" cy="18" r="8" fill="#b83d2b"/>
   <!-- Coil collar -->
   <rect x="112" y="54" width="16" height="14" rx="4" fill="#d97706"/>
   <!-- Wooden bird body -->
   <path d="M124 44 C144 36 164 46 162 66 C160 80 140 82 126 70 Z" fill="#0f766e"/>
   <circle cx="136" cy="40" r="14" fill="#deb887"/>
   <!-- Red crest -->
-  <path d="M132 26 C138 18 148 22 146 32 Z" fill="#b7094c"/>
+  <path d="M132 26 C138 18 148 22 146 32 Z" fill="#b83d2b"/>
   <!-- Beak pecking at pole -->
   <path d="M123 40 L110 43 L123 47 Z" fill="#d97706"/>
   <circle cx="132" cy="39" r="2.5" fill="#1e293b"/>

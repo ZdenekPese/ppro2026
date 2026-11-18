@@ -7,10 +7,10 @@
   <!-- Middle layer -->
   <rect x="58" y="68" width="46" height="32" rx="4" fill="#d97706"/>
   <path d="M108 100 L108 82 A18 18 0 0 1 144 82 L144 100 L132 100 L132 88 A6 6 0 0 0 120 88 L120 100 Z" fill="#f3d5b5"/>
-  <rect x="148" y="68" width="38" height="32" rx="4" fill="#b7094c"/>
+  <rect x="148" y="68" width="38" height="32" rx="4" fill="#b83d2b"/>
   <!-- Roof triangles -->
   <path d="M54 68 L81 36 L108 68 Z" fill="#0f766e"/>
   <rect x="108" y="42" width="36" height="26" rx="4" fill="#d4a373"/>
-  <path d="M104 42 L126 18 L148 42 Z" fill="#b7094c"/>
+  <path d="M104 42 L126 18 L148 42 Z" fill="#b83d2b"/>
   <path d="M148 68 L167 42 L186 68 Z" fill="#eab308"/>
 </svg>

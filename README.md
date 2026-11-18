@@ -732,6 +732,11 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Ze zákaznických šablon v [`shop.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/shop.html) odstraněny všechny středové tečky před a mezi textem (nahrazeno za pomlčku v nadpisu a oddělené řádky v kontaktních údajích profilu).
   - **Testy (`pytest`):**
     - V [`tests/test_auth.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_auth.py) i [`tests/test_customer_portal.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_customer_portal.py) aktualizovány testy na ověření nepřítomnosti demo karet v přihlášení a správné komponenty `.shop-search-bar` a `.shop-stock-toggle`.
+  - **Barevný redesign obou režimů (*Woodcraft & Pine* + *Warm Charcoal & Pine*):**
+    - Na podnět uživatele kompletně odstraněna původní karmínově růžová paleta (`#b7094c` / `#b7285e`) a studené modrošedé pozadí tmavého režimu (`#182234`) v [`style.css`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/css/style.css).
+    - **Světlý režim (*Woodcraft & Pine 2026*):** Teplé přírodní smetanové pozadí (`#f6f4ef`), pískové okraje (`#e3dfd6`), primární akcent hluboké lesní borovice (`#1f5e4b`) pro tlačítka a odznak `DŘEVĚNKA` a sekundární akcent medového dubu (`#b46927`).
+    - **Tmavý režim (*Warm Charcoal & Pine 2026*):** Čistá teplá uhlová čerň (`#141311`, karty `#1e1c19`), jemné teplé neutralizované okraje (`rgba(255, 248, 235, 0.11)`), tlumená šalvějově-lesní zelená (`#2d8a6e`), teplý dubový akcent (`#d98a41`) a klidné přírodní sémantické odznaky bez neonových barev.
+    - Sladěna vektorová ikona webu [`favicon.svg`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/img/favicon.svg) do lesní borovicové palety, nahrazeny růžové odstíny na ilustracích hraček v `app/presentation/static/img/toys/` za klasickou teplou dřevěnou červeň (`#b83d2b`) a zvýšena verze CSS cache-busteru na `?v=20261118_v2` v [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html) i [`login.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/login.html).
 
 
 

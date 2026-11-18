@@ -2,7 +2,7 @@
   <ellipse cx="120" cy="138" rx="76" ry="9" fill="#000" opacity="0.08"/>
   <!-- Pull string -->
   <path d="M174 96 Q204 112 222 104" stroke="#8b5e34" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 3"/>
-  <circle cx="223" cy="104" r="5" fill="#b7094c"/>
+  <circle cx="223" cy="104" r="5" fill="#b83d2b"/>
   <!-- Duck base -->
   <rect x="64" y="104" width="110" height="14" rx="7" fill="#8b5e34"/>
   <!-- Duck body -->

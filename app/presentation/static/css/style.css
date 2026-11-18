@@ -1,82 +1,83 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
 
 /* ==========================================================================
-   DESIGN SYSTÉM: Sklad Dřevěnka s.r.o. (Standard 2026)
-   Barevná paleta: ["#b7094c","#a01a58","#892b64","#723c70","#5c4d7d","#455e89","#2e6f95","#1780a1","#0091ad"]
+   DESIGN SYSTÉM: Sklad Dřevěnka s.r.o. (Woodcraft & Pine 2026)
+   Barevná paleta: Lesní borovice (#1f5e4b) + Teplý dub (#b46927) + Přírodní neutrální plochy
    ========================================================================== */
 
 :root {
   color-scheme: light;
-  /* Sjednocená denní B2B paleta Dřevěnka s.r.o. (Warm Daylight Woodcraft 2026) */
-  --c-1: #b7094c; /* Primární brand akcent - karmínová (CTA tlačítka, brand badge) */
-  --c-2: #98073f; /* Karmínová hover */
-  --c-3: #892b64; /* Vínová pro jemné brand přechody */
-  --c-4: #723c70; /* Tlumená švestková */
-  --c-5: #5c4d7d; /* Břidlicová */
-  --c-6: #455e89; /* Ocelová modř */
-  --c-7: #2b5f8a; /* Aktivní stavy, záložky, sekundární akcent */
-  --c-8: #17738c; /* Petroliová modř */
-  --c-9: #0f766e; /* Svěží borovicová zelená (pozitivní marže, dostupnost, příjem) */
+  /* Denní paleta Woodcraft & Pine 2026 */
+  --c-1: #1f5e4b; /* Primární brand akcent - lesní borovice (CTA tlačítka, brand badge) */
+  --c-2: #17493a; /* Tmavší borovice hover */
+  --c-3: #2a725c; /* Střední borovicová pro jemné přechody */
+  --c-4: #8c5a2b; /* Kaštanové dřevo */
+  --c-5: #5c5850; /* Teplá břidlicová */
+  --c-6: #9a6330; /* Okrový dub */
+  --c-7: #b46927; /* Sekundární akcent - medový dub (aktivní čipy, focus, záložky) */
+  --c-8: #246858; /* Tlumená smrková */
+  --c-9: #1f6b53; /* Borovicová zelená (pozitivní marže, dostupnost, příjem) */
 
-  /* Vzdušné teplé denní plochy (příjemné pro celodenní práci u obrazovky) */
-  --bg-body: #f5f4f0;
+  /* Teplé přírodní plochy (příjemné pro celodenní práci) */
+  --bg-body: #f6f4ef;
   --bg-navbar: #ffffff;
   --bg-navbar-glass: rgba(255, 255, 255, 0.94);
   --bg-card: #ffffff;
-  --bg-card-hover: #f7f8fa;
-  --bg-input: #f8f9fb;
-  --surface-subtle: #f3f5f8;
-  --surface-hover: #e4e9f0;
-  --surface-soft: #fafbfc;
-  --surface-inset: #f4f6f9;
+  --bg-card-hover: #f9f7f2;
+  --bg-input: #f9f8f4;
+  --surface-subtle: #f2efe8;
+  --surface-hover: #e8e3d9;
+  --surface-soft: #faf9f6;
+  --surface-inset: #f4f1ea;
 
-  /* Ostrá, ale jemná ohraničení */
-  --border-color: #dde1e8;
-  --border-color-hover: #c5ccd8;
-  --border-subtle: #ebeef3;
-  --border-focus: rgba(43, 95, 138, 0.45);
-  --focus-ring: rgba(43, 95, 138, 0.12);
+  /* Ostrá, ale teplá a jemná ohraničení */
+  --border-color: #e3dfd6;
+  --border-color-hover: #ccc6ba;
+  --border-subtle: #eeebe4;
+  --border-focus: rgba(31, 94, 75, 0.45);
+  --focus-ring: rgba(31, 94, 75, 0.14);
 
-  /* Typografie a čitelné inkoustové barvy */
+  /* Typografie a čitelné teplé inkoustové barvy */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
 
-  --text-main: #18202c;
-  --text-muted: #4b5565;
-  --text-dim: #6e7889;
+  --text-main: #1c1b18;
+  --text-muted: #5c5850;
+  --text-dim: #7c766c;
 
-  --nav-active-bg: #18202c;
-  --nav-active-border: #18202c;
+  --nav-active-bg: #1c1b18;
+  --nav-active-border: #1c1b18;
   --nav-active-text: #ffffff;
 
   /* Sémantické stavy a odznaky (denní režim) */
-  --success-bg: #eaf7f1;
-  --success-border: #b8e3cf;
-  --success-text: #0f766e;
-  --success-tint: linear-gradient(135deg, #f3faf7 0%, #ffffff 55%);
-  --success-soft: #f3faf7;
+  --success-bg: #e9f5ef;
+  --success-border: #b6decb;
+  --success-text: #1b654e;
+  --success-text-strong: #144d3b;
+  --success-tint: linear-gradient(135deg, #f2faf6 0%, #ffffff 55%);
+  --success-soft: #f2faf6;
 
-  --info-bg: #edf4fa;
-  --info-border: #c7dcef;
-  --info-text: #2b5f8a;
+  --info-bg: #fdf3e7;
+  --info-border: #edd3b2;
+  --info-text: #965218;
 
   --warning-bg: #fef7e6;
-  --warning-border: #f6d899;
-  --warning-text: #a15c07;
+  --warning-border: #f5d68a;
+  --warning-text: #9a5b08;
 
-  --danger-bg: #fdf0f2;
-  --danger-border: #f5c2ca;
-  --danger-text: #be123c;
-  --danger-text-strong: #9f1239;
-  --danger-row-bg: #fff5f6;
-  --danger-card-bg: #fff6f7;
-  --danger-soft-bg: #fffafa;
+  --danger-bg: #fdf1ef;
+  --danger-border: #f2c4bc;
+  --danger-text: #b83227;
+  --danger-text-strong: #942319;
+  --danger-row-bg: #fff6f4;
+  --danger-card-bg: #fff7f5;
+  --danger-soft-bg: #fffbfa;
 
-  --brand-tint: #fdf0f4;
-  --progress-bar-fill: #93b4d4;
-  --shadow-sm: 0 1px 4px rgba(24, 32, 44, 0.04);
-  --shadow-md: 0 4px 12px rgba(24, 32, 44, 0.06);
-  --shadow-lg: 0 10px 28px rgba(24, 32, 44, 0.09);
+  --brand-tint: #eef6f3;
+  --progress-bar-fill: #b46927;
+  --shadow-sm: 0 1px 4px rgba(28, 27, 24, 0.04);
+  --shadow-md: 0 4px 12px rgba(28, 27, 24, 0.06);
+  --shadow-lg: 0 10px 28px rgba(28, 27, 24, 0.09);
 
   /* Rádiusy */
   --radius-sm: 6px;
@@ -84,71 +85,72 @@
   --radius-lg: 14px;
 }
 
-/* Přepínatelný tmavý režim (Soft Slate 2026) */
+/* Přepínatelný tmavý režim (Warm Charcoal & Pine 2026) */
 [data-theme="dark"] {
   color-scheme: dark;
-  --c-1: #b7285e;
-  --c-2: #9e2050;
-  --c-3: #8a3562;
-  --c-4: #764a78;
-  --c-5: #64618d;
-  --c-6: #56739c;
-  --c-7: #4b7ba6;
-  --c-8: #3a8ea5;
-  --c-9: #34a88f;
+  --c-1: #2d8a6e;
+  --c-2: #24725a;
+  --c-3: #349678;
+  --c-4: #a66c38;
+  --c-5: #8c857b;
+  --c-6: #c2854c;
+  --c-7: #d98a41;
+  --c-8: #469c82;
+  --c-9: #52b788;
 
-  --bg-body: #182234;
-  --bg-navbar: #1f2b40;
-  --bg-navbar-glass: rgba(31, 43, 64, 0.94);
-  --bg-card: #233148;
-  --bg-card-hover: #2b3b56;
-  --bg-input: #1a2538;
-  --surface-subtle: #1d293d;
-  --surface-hover: #2d3e59;
-  --surface-soft: #1f2c42;
-  --surface-inset: #192436;
+  --bg-body: #141311;
+  --bg-navbar: #1a1815;
+  --bg-navbar-glass: rgba(26, 24, 21, 0.94);
+  --bg-card: #1e1c19;
+  --bg-card-hover: #26231f;
+  --bg-input: #171513;
+  --surface-subtle: #24211d;
+  --surface-hover: #2d2924;
+  --surface-soft: #1b1916;
+  --surface-inset: #161512;
 
-  --border-color: rgba(140, 175, 225, 0.24);
-  --border-color-hover: rgba(140, 175, 225, 0.42);
-  --border-subtle: rgba(140, 175, 225, 0.14);
-  --border-focus: rgba(75, 123, 166, 0.65);
-  --focus-ring: rgba(75, 123, 166, 0.22);
+  --border-color: rgba(255, 248, 235, 0.11);
+  --border-color-hover: rgba(255, 248, 235, 0.24);
+  --border-subtle: rgba(255, 248, 235, 0.06);
+  --border-focus: rgba(217, 138, 65, 0.65);
+  --focus-ring: rgba(217, 138, 65, 0.18);
 
-  --text-main: #f3f6fc;
-  --text-muted: #b8c7db;
-  --text-dim: #8fa2bd;
+  --text-main: #f2efe9;
+  --text-muted: #b8b1a6;
+  --text-dim: #8a8378;
 
-  --nav-active-bg: #4b7ba6;
-  --nav-active-border: #4b7ba6;
+  --nav-active-bg: #2d8a6e;
+  --nav-active-border: #2d8a6e;
   --nav-active-text: #ffffff;
 
-  --success-bg: rgba(52, 168, 143, 0.14);
-  --success-border: rgba(52, 168, 143, 0.36);
-  --success-text: #5eead4;
-  --success-tint: linear-gradient(135deg, rgba(52, 168, 143, 0.12) 0%, #233148 60%);
-  --success-soft: rgba(52, 168, 143, 0.08);
+  --success-bg: rgba(82, 183, 136, 0.13);
+  --success-border: rgba(82, 183, 136, 0.30);
+  --success-text: #74c69d;
+  --success-text-strong: #95d5b2;
+  --success-tint: linear-gradient(135deg, rgba(82, 183, 136, 0.10) 0%, #1e1c19 60%);
+  --success-soft: rgba(82, 183, 136, 0.07);
 
-  --info-bg: rgba(75, 123, 166, 0.18);
-  --info-border: rgba(110, 160, 210, 0.36);
-  --info-text: #93c5fd;
+  --info-bg: rgba(217, 138, 65, 0.14);
+  --info-border: rgba(217, 138, 65, 0.32);
+  --info-text: #ebb073;
 
-  --warning-bg: rgba(245, 158, 11, 0.14);
-  --warning-border: rgba(245, 158, 11, 0.36);
-  --warning-text: #fcd34d;
+  --warning-bg: rgba(234, 179, 8, 0.13);
+  --warning-border: rgba(234, 179, 8, 0.30);
+  --warning-text: #f3c85c;
 
-  --danger-bg: rgba(225, 29, 72, 0.14);
-  --danger-border: rgba(244, 63, 94, 0.36);
-  --danger-text: #fda4af;
-  --danger-text-strong: #fecdd3;
-  --danger-row-bg: rgba(225, 29, 72, 0.1);
-  --danger-card-bg: rgba(225, 29, 72, 0.08);
-  --danger-soft-bg: rgba(225, 29, 72, 0.1);
+  --danger-bg: rgba(217, 72, 65, 0.14);
+  --danger-border: rgba(217, 72, 65, 0.32);
+  --danger-text: #f28b82;
+  --danger-text-strong: #f6aba4;
+  --danger-row-bg: rgba(217, 72, 65, 0.09);
+  --danger-card-bg: rgba(217, 72, 65, 0.07);
+  --danger-soft-bg: rgba(217, 72, 65, 0.09);
 
-  --brand-tint: rgba(183, 40, 94, 0.18);
-  --progress-bar-fill: #4b7ba6;
-  --shadow-sm: 0 2px 6px rgba(8, 13, 24, 0.25);
-  --shadow-md: 0 6px 16px rgba(8, 13, 24, 0.32);
-  --shadow-lg: 0 12px 28px rgba(8, 13, 24, 0.42);
+  --brand-tint: rgba(45, 138, 110, 0.16);
+  --progress-bar-fill: #d98a41;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.30);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.40);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.50);
 }
 
 /* ==========================================================================
@@ -235,7 +237,7 @@ body {
   letter-spacing: 0.08em;
   padding: 0.35rem 0.65rem;
   border-radius: var(--radius-sm);
-  box-shadow: 0 2px 8px rgba(183, 9, 76, 0.35);
+  box-shadow: 0 2px 8px rgba(31, 94, 75, 0.25);
 }
 
 .brand-text {
@@ -541,7 +543,7 @@ body {
   background-color: var(--c-1);
   color: #fff;
   border-color: var(--c-1);
-  box-shadow: 0 1px 3px rgba(183, 9, 76, 0.22);
+  box-shadow: 0 1px 3px rgba(31, 94, 75, 0.22);
 }
 
 .btn-primary:hover {
@@ -1345,16 +1347,16 @@ select.form-control {
 .pulse-indicator {
   width: 10px;
   height: 10px;
-  background-color: #e11d48;
+  background-color: #d94841;
   border-radius: 50%;
   display: inline-block;
   animation: pulse-danger 1.5s infinite;
 }
 
 @keyframes pulse-danger {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.45); }
-  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(217, 72, 65, 0.45); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(217, 72, 65, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(217, 72, 65, 0); }
 }
 
 .critical-title {
@@ -1693,13 +1695,13 @@ select.form-control {
 
 .dot-danger,
 .dot-critical {
-  background-color: #f43f5e;
-  box-shadow: 0 0 6px rgba(244, 63, 94, 0.45);
+  background-color: #d94841;
+  box-shadow: 0 0 6px rgba(217, 72, 65, 0.45);
 }
 
 .dot-danger-pulse {
-  background-color: #f43f5e;
-  box-shadow: 0 0 8px rgba(244, 63, 94, 0.85);
+  background-color: #d94841;
+  box-shadow: 0 0 8px rgba(217, 72, 65, 0.85);
   animation: pulse-danger 1.6s infinite ease-in-out;
 }
 
