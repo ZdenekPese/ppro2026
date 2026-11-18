@@ -723,13 +723,15 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - **Odebrání technických odkazů pro zákazníky v patičce:**
     - V šabloně [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html) upravena patička aplikace – pro roli `customer` se nezobrazují vývojářské odkazy *REST API (Swagger)* ani *Healthcheck*. Interní personál (manažer, skladník) tyto odkazy nadále vidí v plném rozsahu.
   - **Zarovnání a oprava vyhledávacího pole na e-shopu:**
-    - V šabloně [`shop.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/shop.html) a stylu [`style.css`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/css/style.css) sjednocen vyhledávací formulář do `.shop-toolbar-card` a `.search-input-wrapper`.
-    - Ikona lupy je nyní vložena přímo uvnitř textového pole na levé straně s patřičným odsazením textu (`.shop-search-field`).
-    - Přepínač *Pouze skladem* a tlačítka *Hledat* a *Zrušit filtr* jsou horizontálně uspořádány v `.shop-toolbar-actions` a responzivně ošetřeny pro mobilní zařízení.
+    - V šabloně [`shop.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/shop.html) a stylu [`style.css`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/css/style.css) sjednoceno vyhledávání do celistvého moderního panelu `.shop-search-bar`: ikona lupy je umístěna na levém okraji a tlačítko **Hledat** (`.shop-search-submit-btn`) je čistě integrováno přímo na pravém konci vyhledávacího pruhu.
+    - Přepínač **Pouze skladem** (`.shop-stock-toggle`) je přesunut na samostatný řádek `.shop-filter-row` pod vyhledávacím pruhem s dostatečným odsazením od tlačítek, bez vzájemného mačkání prvků, a s možností okamžitého zrušení filtru (`.shop-clear-filter-link`).
+  - **Odebrání demo účtů z přihlašovací obrazovky:**
+    - Z přihlašovací šablony [`login.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/login.html) odstraněn blok *„Demo účty podle rolí ze zadání“* s předvyplněnými kartami; přihlašovací formulář je nyní čistý a autentický, s odkazem na registraci zákazníka.
+    - Zvýšena verze CSS cache-busteru na `?v=20261118_v1` v [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html) i [`login.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/login.html).
   - **Odstranění typických AI středových teček (`·`):**
     - Ze zákaznických šablon v [`shop.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/shop.html) odstraněny všechny středové tečky před a mezi textem (nahrazeno za pomlčku v nadpisu a oddělené řádky v kontaktních údajích profilu).
   - **Testy (`pytest`):**
-    - V [`tests/test_customer_portal.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_customer_portal.py) rozšířeny testy ověřující nepřítomnost Swaggeru i středových teček v zákaznickém zobrazení a správné styly vyhledávacího panelu.
+    - V [`tests/test_auth.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_auth.py) i [`tests/test_customer_portal.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_customer_portal.py) aktualizovány testy na ověření nepřítomnosti demo karet v přihlášení a správné komponenty `.shop-search-bar` a `.shop-stock-toggle`.
 
 
 

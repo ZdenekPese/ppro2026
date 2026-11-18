@@ -13,7 +13,7 @@
             } catch (e) {}
         })();
     </script>
-    <link rel="stylesheet" href="/static/css/style.css?v=20261113_v18">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261118_v1">
     <!-- Ikona webu (Favicon) - Dřevěnka s.r.o. -->
     <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg">
     <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
@@ -107,70 +107,6 @@
                 <span>Nakupujete u nás poprvé?</span>
                 <a href="/register" class="auth-switch-link">Vytvořit účet zákazníka</a>
             </div>
-
-            {% if show_demo %}
-            <div class="demo-panel">
-                <div class="demo-panel-header">
-                    <span class="demo-panel-title">Demo účty podle rolí ze zadání</span>
-                    <span class="demo-panel-hint">Kliknutím předvyplníte údaje</span>
-                </div>
-                <div class="demo-accounts-grid">
-                    <button
-                        type="button"
-                        class="demo-account-card"
-                        data-username="dolezal"
-                        data-password="{{ demo_manager_password }}"
-                    >
-                        <div class="demo-account-top">
-                            <span class="demo-account-name">Petr Doležal</span>
-                            <span class="role-badge role-manager">Jednatel / Manažer</span>
-                        </div>
-                        <div class="demo-account-meta">
-                            Login: <code>dolezal</code> | Heslo: <code>{{ demo_manager_password }}</code>
-                        </div>
-                        <p class="demo-account-desc">
-                            Plný přístup včetně správy ceníku, katalogu a finančních reportů.
-                        </p>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="demo-account-card"
-                        data-username="skladnik"
-                        data-password="{{ demo_warehouse_password }}"
-                    >
-                        <div class="demo-account-top">
-                            <span class="demo-account-name">Jan Novák</span>
-                            <span class="role-badge role-warehouse">Skladník</span>
-                        </div>
-                        <div class="demo-account-meta">
-                            Login: <code>skladnik</code> | Heslo: <code>{{ demo_warehouse_password }}</code>
-                        </div>
-                        <p class="demo-account-desc">
-                            Operace u regálu: příjem, převody HK/Třebechovice, inventura, expedice objednávek.
-                        </p>
-                    </button>
-
-                    <button
-                        type="button"
-                        class="demo-account-card"
-                        data-username="zakaznik"
-                        data-password="{{ demo_customer_password }}"
-                    >
-                        <div class="demo-account-top">
-                            <span class="demo-account-name">Marie Svobodová</span>
-                            <span class="role-badge role-customer">Zákazník</span>
-                        </div>
-                        <div class="demo-account-meta">
-                            Login: <code>zakaznik</code> | Heslo: <code>{{ demo_customer_password }}</code>
-                        </div>
-                        <p class="demo-account-desc">
-                            E-shop hraček, výběr a objednání kusů skladem, přehled a storno vlastních objednávek.
-                        </p>
-                    </button>
-                </div>
-            </div>
-            {% endif %}
         </section>
 
         <footer class="auth-footer">
@@ -218,20 +154,6 @@
                     toggleBtn.textContent = isHidden ? 'Skrýt' : 'Zobrazit';
                 });
             }
-
-            document.querySelectorAll('.demo-account-card').forEach(function (card) {
-                card.addEventListener('click', function () {
-                    if (usernameInput) {
-                        usernameInput.value = card.getAttribute('data-username') || '';
-                    }
-                    if (passwordInput) {
-                        passwordInput.value = card.getAttribute('data-password') || '';
-                    }
-                    if (usernameInput) {
-                        usernameInput.focus();
-                    }
-                });
-            });
         })();
     </script>
 </body>

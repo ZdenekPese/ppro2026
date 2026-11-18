@@ -7,12 +7,12 @@ from app.core.config import settings
 from app.main import app
 
 
-def test_login_shows_customer_demo_and_redirects_to_shop(anon_client):
-    """Přihlašovací stránka nabízí demo zákazníka + registraci a po přihlášení míří do /shop."""
+def test_login_shows_clean_form_and_redirects_customer_to_shop(anon_client):
+    """Přihlašovací stránka nabízí registraci a po přihlášení zákazník míří do /shop."""
     login_page = anon_client.get("/login")
     assert login_page.status_code == 200
-    assert "Marie Svobodová" in login_page.text
-    assert "zakaznik" in login_page.text
+    assert "Demo účty podle rolí ze zadání" not in login_page.text
+    assert "Marie Svobodová" not in login_page.text
     assert "Vytvořit účet zákazníka" in login_page.text
     assert "status-dot" not in login_page.text
     assert "&bull;" not in login_page.text
@@ -409,7 +409,9 @@ def test_customer_shop_renders_eshop_storefront_and_product_images(customer_clie
     assert "·" not in html
     assert "&middot;" not in html
     assert "REST API (Swagger)" not in html
-    assert "shop-search-input-wrapper" in html
+    assert "shop-search-bar" in html
+    assert "shop-search-submit-btn" in html
+    assert "shop-stock-toggle" in html
 
     # Zákaznické čipy jsou omezené na čistou sadu bez zahlcení z DB
     assert html.count('class="shop-cat-chip') == 6

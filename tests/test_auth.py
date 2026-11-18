@@ -22,16 +22,18 @@ def test_unauthenticated_web_routes_redirect_to_login(anon_client):
         assert resp.headers["location"].startswith("/login")
 
 
-def test_login_page_renders_with_demo_roles_and_without_dots(anon_client):
-    """Přihlašovací obrazovka se vykreslí s demo rolemi a bez kruhových teček."""
+def test_login_page_renders_clean_form_without_demo_accounts_and_without_dots(anon_client):
+    """Přihlašovací obrazovka se vykreslí s čistým formulářem bez demo účtů a bez kruhových teček."""
     resp = anon_client.get("/login")
     assert resp.status_code == 200
     body = resp.text
     assert "Dřevěnka s.r.o." in body
-    assert "Petr Doležal" in body
-    assert "Jan Novák" in body
+    assert "Demo účty podle rolí ze zadání" not in body
+    assert "Petr Doležal" not in body
+    assert "Jan Novák" not in body
     assert "status-dot" not in body
     assert "&bull;" not in body
+    assert "Vytvořit účet zákazníka" in body
 
 
 def test_login_invalid_credentials_returns_401(anon_client):
