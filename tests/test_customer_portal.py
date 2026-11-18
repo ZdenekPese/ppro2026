@@ -38,10 +38,12 @@ def test_customer_rbac_blocks_internal_routes(customer_client):
     assert "E-shop dřevěných hraček" in shop_resp.text
     assert "Marie Svobodová" in shop_resp.text
     assert "Nákupní cena" not in shop_resp.text
+    assert "REST API (Swagger)" not in shop_resp.text
 
     my_orders_resp = customer_client.get("/my-orders")
     assert my_orders_resp.status_code == 200
     assert "Moje objednávky" in my_orders_resp.text
+    assert "REST API (Swagger)" not in my_orders_resp.text
 
     for forbidden_path in [
         "/products",
@@ -404,6 +406,10 @@ def test_customer_shop_renders_eshop_storefront_and_product_images(customer_clie
     assert "Dárky500-" not in html
     assert "status-dot" not in html
     assert "&bull;" not in html
+    assert "·" not in html
+    assert "&middot;" not in html
+    assert "REST API (Swagger)" not in html
+    assert "shop-search-input-wrapper" in html
 
     # Zákaznické čipy jsou omezené na čistou sadu bez zahlcení z DB
     assert html.count('class="shop-cat-chip') == 6
@@ -444,3 +450,4 @@ def test_staff_views_render_toy_thumbnails(client, warehouse_client):
     assert reports_res.status_code == 200
     assert "staff-toy-thumb" in reports_res.text
     assert "/static/img/toys/" in reports_res.text
+    assert "REST API (Swagger)" in reports_res.text

@@ -206,12 +206,19 @@
         <!-- Patička -->
         <footer class="app-footer">
             <div class="footer-inner">
+                {% if current_user and current_user.role == 'customer' %}
+                <span>Dřevěnka s.r.o. — E-shop poctivých českých dřevěných hraček</span>
+                <div class="footer-links">
+                    <span>FIM UHK Pokročilé programování 2026/2027</span>
+                </div>
+                {% else %}
                 <span>Dřevěnka s.r.o. Zadání B: Sklad pro malý e-shop</span>
                 <div class="footer-links">
                     <a href="/docs" target="_blank" class="footer-link">REST API (Swagger)</a>
                     <a href="/api/health" target="_blank" class="footer-link">Healthcheck</a>
                     <span>FIM UHK Pokročilé programování 2026/2027</span>
                 </div>
+                {% endif %}
             </div>
         </footer>
     </div>

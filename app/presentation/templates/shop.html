@@ -6,7 +6,7 @@
 <!-- E-shop Hero Banner -->
 <section class="shop-hero">
     <div class="shop-hero-main">
-        <span class="shop-hero-kicker">E-shop dřevěných hraček · Dřevěnka s.r.o.</span>
+        <span class="shop-hero-kicker">Dřevěnka s.r.o. — E-shop dřevěných hraček</span>
         <h1 class="shop-hero-title">Poctivé české hračky ze dřeva</h1>
         <p class="shop-hero-subtitle">
             Ručně opracované hračky z přírodního bukového a smrkového dřeva. Reálná dostupnost a okamžitá rezervace přímo z našeho skladu v Hradci Králové.
@@ -33,7 +33,12 @@
             <span class="shop-customer-kicker">Přihlášený zákazník</span>
             <strong class="shop-hero-profile-name">{{ customer_profile.full_name }}</strong>
             <span class="shop-customer-meta">{{ customer_profile.address }}</span>
-            <span class="font-mono shop-hero-profile-contact">{{ customer_profile.email }}{% if customer_profile.phone %} · {{ customer_profile.phone }}{% endif %}</span>
+            <div class="shop-hero-profile-contact font-mono">
+                <span>{{ customer_profile.email }}</span>
+                {% if customer_profile.phone %}
+                <span>{{ customer_profile.phone }}</span>
+                {% endif %}
+            </div>
         </div>
         {% endif %}
 
@@ -55,33 +60,31 @@
 {% endif %}
 
 <!-- Vyhledávání hraček -->
-<form method="get" action="/shop" class="toolbar-panel shop-toolbar">
+<form method="get" action="/shop" class="shop-toolbar-card">
     {% if selected_tag %}
     <input type="hidden" name="tag" value="{{ selected_tag }}">
     {% endif %}
 
-    <div class="search-wrap">
-        <span class="search-icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </span>
+    <div class="search-input-wrapper shop-search-input-wrapper">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <input
             type="text"
             name="search"
-            class="form-control search-input"
+            class="search-field shop-search-field"
             value="{{ search }}"
             placeholder="Hledat hračku (např. vláček, kostky, koník)..."
         >
     </div>
 
-    <div class="filter-group">
-        <label class="checkbox-filter-label">
+    <div class="shop-toolbar-actions">
+        <label class="filter-toggle-label">
             <input type="checkbox" name="only_in_stock" value="true" {% if only_in_stock %}checked{% endif %}>
             <span>Pouze skladem</span>
         </label>
 
-        <button type="submit" class="btn btn-secondary">Hledat</button>
+        <button type="submit" class="btn btn-secondary btn-sm">Hledat</button>
         {% if search or selected_tag or only_in_stock %}
-        <a href="/shop" class="btn btn-secondary">Zrušit filtr</a>
+        <a href="/shop" class="btn btn-ghost btn-sm">Zrušit filtr</a>
         {% endif %}
     </div>
 </form>
