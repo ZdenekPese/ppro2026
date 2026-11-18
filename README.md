@@ -744,6 +744,8 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
       - **Vyprodáno (0 ks):** Plná zemitá cihlová červeň (`.pill-soldout` / `.shop-stock-out` `#b83d2b` s bílým písmem, svislá cihlová lišta na bílém řádku `.row-soldout-bg`).
       - **Blízko minima:** Jemný pískový odstín (`.pill-warning-near`).
     - Tmavý režim (`[data-theme="dark"]`) zůstal beze změny zachován.
+  - **Aktualizace Word dokumentace projektu ([`PPRO-dokumentace-sablona-v1.docx`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/PPRO-dokumentace-sablona-v1.docx)):**
+    - Doplněno rozhodnutí **R12** (*Design systém Woodcraft & Pine a dvouúrovňová sémantika zásob*), požadavky klienta **Z11** (zarovnání vyhledávací lišty a odebrání demo účtů z loginu) a **Z12** (přebarvení do lesní borovice, teplého dubu a odstranění vybledlé růžové) a aktualizován popis řešení.
 
 
 
