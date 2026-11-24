@@ -3009,37 +3009,39 @@ select.form-control {
     width: 100%;
     max-width: 100%;
     height: 60px;
-    padding: 0 0.9rem;
-    gap: 0.65rem;
+    padding: 0 clamp(0.6rem, 2.5vw, 1.1rem);
+    gap: clamp(0.4rem, 1.6vw, 0.75rem);
   }
   .navbar-brand-section {
     min-width: 0;
-    flex-shrink: 1;
-    gap: 0.5rem;
+    flex-shrink: 0;
+    gap: clamp(0.35rem, 1.2vw, 0.55rem);
   }
   .brand-link {
-    gap: 0.5rem;
+    gap: clamp(0.35rem, 1.4vw, 0.6rem);
     min-width: 0;
   }
   .brand-badge {
-    font-size: 0.68rem;
-    padding: 0.25rem 0.5rem;
+    font-size: clamp(0.56rem, 1.85vw, 0.72rem);
+    padding: clamp(0.18rem, 0.65vw, 0.28rem) clamp(0.34rem, 1.15vw, 0.55rem);
+    letter-spacing: 0.04em;
     flex-shrink: 0;
   }
   .brand-text {
     min-width: 0;
   }
   .brand-title {
-    font-size: 0.92rem;
+    font-size: clamp(0.74rem, 2.75vw, 0.96rem);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
   }
   .brand-subtitle {
-    font-size: 0.64rem;
+    display: block;
+    font-size: clamp(0.52rem, 1.85vw, 0.66rem);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
   }
   .nav-links {
     display: none; /* Skryjeme lištu na tabletech a mobilech */
@@ -3281,28 +3283,13 @@ select.form-control {
 /* Breakpoint 3: Mobilní telefony a malé tablety (do 768px) */
 @media (max-width: 768px) {
   .navbar-inner {
-    height: 62px;
-    padding: 0 0.9rem;
-    gap: 0.65rem;
+    height: 58px;
   }
   .navbar-right {
-    gap: 0.5rem;
-  }
-  .user-session-bar {
-    display: none; /* Na mobilech je přihlášený uživatel a odhlášení v hamburger menu */
+    gap: 0.4rem;
   }
   .warehouse-nodes {
     display: none;
-  }
-  .brand-title {
-    font-size: 0.95rem;
-  }
-  .brand-subtitle {
-    font-size: 0.65rem;
-  }
-  .brand-badge {
-    font-size: 0.7rem;
-    padding: 0.25rem 0.5rem;
   }
   .main-container {
     padding: 1.15rem 0.85rem;
@@ -3498,8 +3485,16 @@ select.form-control {
 
 /* Breakpoint 4: Menší mobilní obrazovky (do 520px) */
 @media (max-width: 520px) {
-  .brand-subtitle {
-    display: none;
+  .navbar-right {
+    gap: 0.35rem;
+  }
+  .theme-toggle-btn,
+  .mobile-avatar-btn,
+  .navbar-toggle {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
   }
   .kpi-grid,
   .summary-grid,
