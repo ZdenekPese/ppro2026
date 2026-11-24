@@ -2936,9 +2936,9 @@ select.form-control {
   margin-bottom: 0.35rem;
 }
 
-/* Kompaktní avatar uživatele pro tablety a mobily */
+/* Kompaktní avatar uživatele v hlavičce (pro všechna zařízení) */
 .mobile-avatar-wrap {
-  display: none;
+  display: inline-flex;
   position: relative;
   align-items: center;
 }
