@@ -28,7 +28,7 @@
         }
     </style>
     
-    <link rel="stylesheet" href="/static/css/style.css?v=20261124_v1">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261124_v2">
     <!-- Ikona webu (Favicon) - Dřevěnka s.r.o. -->
     <link rel="icon" type="image/svg+xml" href="/static/img/toys/puzzle_tower.svg">
     <link rel="alternate icon" type="image/x-icon" href="/favicon.ico">
@@ -132,37 +132,29 @@
                     <nav class="mobile-nav-list">
                         {% if current_user and current_user.role == 'customer' %}
                         <a href="/shop" class="mobile-nav-link {% if request.url.path.startswith('/shop') %}active{% endif %}">
-                            <span class="mobile-nav-icon">🧸</span>
                             <span>E-shop hraček</span>
                         </a>
                         <a href="/my-orders" class="mobile-nav-link {% if request.url.path.startswith('/my-orders') %}active{% endif %}">
-                            <span class="mobile-nav-icon">🛒</span>
                             <span>Moje objednávky</span>
                         </a>
                         {% else %}
                         <a href="/products" class="mobile-nav-link {% if request.url.path.startswith('/products') %}active{% endif %}">
-                            <span class="mobile-nav-icon">🧸</span>
                             <span>Katalog hraček</span>
                         </a>
                         <a href="/" class="mobile-nav-link {% if request.url.path == '/' %}active{% endif %}">
-                            <span class="mobile-nav-icon">📊</span>
                             <span>Přehled skladu</span>
                         </a>
                         <a href="/movements" class="mobile-nav-link {% if request.url.path.startswith('/movements') %}active{% endif %}">
-                            <span class="mobile-nav-icon">📦</span>
                             <span>Pohyby &amp; Audit</span>
                         </a>
                         <a href="/orders" class="mobile-nav-link {% if request.url.path.startswith('/orders') %}active{% endif %}">
-                            <span class="mobile-nav-icon">🛒</span>
                             <span>Objednávky</span>
                         </a>
                         <a href="/customers" class="mobile-nav-link {% if request.url.path.startswith('/customers') %}active{% endif %}">
-                            <span class="mobile-nav-icon">👥</span>
                             <span>Zákazníci</span>
                         </a>
                         {% if current_user and current_user.role == 'manager' %}
                         <a href="/reports" class="mobile-nav-link {% if request.url.path.startswith('/reports') %}active{% endif %}">
-                            <span class="mobile-nav-icon">📈</span>
                             <span>Reporty &amp; Analytika</span>
                         </a>
                         {% endif %}

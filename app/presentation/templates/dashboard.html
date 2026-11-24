@@ -85,8 +85,12 @@
                 <span class="warehouse-code-badge">{{ wh.warehouse_code }}</span>
                 {% if wh.is_primary %}
                     <span class="warehouse-status-chip chip-primary">Centrální expedice</span>
-                {% else %}
+                {% elif wh.warehouse_code == 'WH-TREB' or 'garáž' in wh.warehouse_name.lower() %}
                     <span class="warehouse-status-chip chip-secondary">Sezónní odkladiště</span>
+                {% elif wh.warehouse_code == 'WH-DILNA' or 'dílna' in wh.warehouse_name.lower() or 'výrob' in wh.warehouse_name.lower() %}
+                    <span class="warehouse-status-chip chip-secondary">Výrobní mezisklad</span>
+                {% else %}
+                    <span class="warehouse-status-chip chip-secondary">Vedlejší sklad</span>
                 {% endif %}
             </div>
             <h3 class="warehouse-card-title">{{ wh.warehouse_name }}</h3>
