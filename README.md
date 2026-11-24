@@ -755,6 +755,11 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Odebrán efekt nadskakování (`translateY(-2px)`) z neklikacích karet skladů (`.warehouse-card`) a produktových karet (`.shop-product-card`).
     - Z mobilního výsuvného menu v [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html) odstraněny emoji ikony pro sjednocení s čistou desktopovou navigací.
     - V [`dashboard.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/dashboard.html) zpřesněno označování typů skladů (*Centrální expedice*, *Sezónní odkladiště* pro garáž, *Výrobní mezisklad* pro dílnu a *Vedlejší sklad* pro ostatní).
+  - **Kompletní revize a oprava responzivity na mobily a tablety napříč všemi rolemi (`manager`, `warehouse`, `customer`, anonymní uživatel):**
+    - Přidána globální ochrana proti horizontálnímu přetékání (`html, body { overflow-x: clip; }`) a opraven přetékající `.table-responsive` uvnitř `.panel-card` (odebrán negativní margin `-0.85rem` a doplněn plynulý horizontální scroll pro `.table-responsive` i `.table-container`).
+    - Na mobilech (`<= 768px`) skryt duplicitní `.user-session-bar` v horní liště (uživatel i odhlášení jsou přehledně v hamburger menu) a na úzkých displejích (`<= 520px`) skryt podtitul značky, aby hlavička nikdy nepřetékala.
+    - Opraveny chybné selektory breakpointů v [`style.css`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/css/style.css) (`.order-grid`, `.kpi-grid`, `.restock-card-top`), doplněny mobilní rozložení pro modální okno `.quick-modal`, detail objednávky (`.order-actions-bar`), přepínač záložek pohybů (`.tab-btn`), filtry reportů (`.filter-controls`, `.report-period-banner`), zákaznický e-shop (`.shop-product-grid`, `.shop-card-footer`, `.shop-cart-item`) a formulářové stránky (`.form-card`, `.auth-brand`).
+    - Navýšena verze CSS cache-busteru na `?v=20261124_v4` v [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html) i [`login.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/login.html).
 
 
 
