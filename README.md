@@ -354,28 +354,48 @@ Design systém staví na vyladěné devítiúrovňové paletě přecházející 
 
 ## 🚀 Instalace a spuštění
 
-Celé prostředí včetně relační databáze je připraveno ke spuštění pomocí **Docker Compose**:
+Celé prostředí včetně relační databáze, automatických migrací i syntetických dat je připraveno ke spuštění jediným příkazem pomocí **Docker Compose**:
 
 ### 1. Prerekvizity
-- Docker Desktop a Docker Compose v aktuální verzi
-- Git
+- **Git**
+- **Docker Desktop** a **Docker Compose v2** (běžící na pozadí)
 
 ### 2. Spuštění aplikace
 V kořenovém adresáři projektu spusťte:
 ```bash
+git clone https://github.com/ZdenekPese/ppro2026.git
+cd ppro2026
+# Volitelně: cp .env.example .env
 docker compose up --build
 ```
-Tento příkaz:
-1. Spustí kontejner s relační databází (PostgreSQL).
-2. Provede automatické databázové migrace na nejnovější verzi schématu.
-3. Naplní databázi syntetickými počátečními daty (katalog hraček, 2 sklady, demo zákazníci).
-4. Spustí aplikační server a zpřístupní webové rozhraní.
+Tento příkaz přes startovací skript [`docker/entrypoint.sh`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/docker/entrypoint.sh) automaticky:
+1. Spustí kontejner s relační databází **PostgreSQL 16** (perzistentní svazek `drevenka_pgdata`) a počká na `healthcheck`.
+2. Sestaví obraz aplikace pod neprivilegovaným uživatelem `appuser` (bez běhu pod `root`em, s `.dockerignore`).
+3. Provede automatické databázové migrace na nejnovější verzi schématu (`alembic upgrade head`).
+4. Idempotentně naplní databázi syntetickými počátečními daty (`python -m app.infrastructure.db.seed`: 3 sklady, kategorie, 25 hraček, ukázkové pohyby a 3 uživatelské účty).
+5. Spustí aplikační server Uvicorn na portu `8000`.
 
-### 3. Spuštění testů
+### 3. Adresy služeb a výchozí testovací účty (syntetická data)
+- **Webová aplikace (přihlášení):** `http://localhost:8000`
+- **Registrace nového zákazníka:** `http://localhost:8000/register`
+- **REST API (Swagger UI):** `http://localhost:8000/docs`
+- **Healthcheck:** `http://localhost:8000/api/health`
+
+Výchozí testovací účty (konfigurovatelné přes `.env` dle [`.env.example`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/.env.example)):
+- **Jednatel / Manažer:** uživatel `dolezal`, heslo `drevenka2026`
+- **Skladník:** uživatel `skladnik`, heslo `sklad2026`
+- **Zákazník e-shopu:** uživatel `zakaznik`, heslo `zakaznik2026`
+
+### 4. Spuštění testů a zastavení
 ```bash
-# Spuštění automatizovaných testů byznys pravidel a integrity
+# Spuštění automatizovaných testů byznys pravidel a integrity v Dockeru
 docker compose run --rm app-tests
+
+# Zastavení kontejnerů (data v DB zůstávají zachována)
+docker compose down
 ```
+
+Kompletní technická dokumentace k odevzdání (včetně ER diagramu, architektury, protokolu o zacyklení a přiznání práce s AI) je uložena v PDF v [`docs/technicka-dokumentace.pdf`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/docs/technicka-dokumentace.pdf).
 
 ---
 
@@ -763,6 +783,12 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
   - **Kompaktní mobilní/tabletový header s avatarem a bezscrollové karty tabulek (`<= 860px`):**
     - Do [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html) a [`style.css`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/css/style.css) sjednocena uživatelská sekce v hlavičce na čistou kruhovou ikonku avatara (`.mobile-avatar-btn`) s rozbalovacím oknem účtu/odhlášení (`.avatar-popover`) pro všechna rozlišení; široký obdélník `.user-session-bar` byl z hlavičky zcela odstraněn a logo i název značky se na mobilech plynule zmenšují pomocí `clamp()` tak, aby se text nikdy nezkracoval (CSS `?v=20261124_v7`).
     - Všechny tabulky (`.inventory-table`, `.data-table` — včetně `/orders`, `/my-orders`, `/`, `/products`, `/movements`, `/customers`, `/reports`) i kompaktní hlavička s hamburger menu se aktivují už od šířky **`<= 1250px`** a přepínají se na plnošířkové vertikální karty s popisky sloupců (`data-label`) a zalamujícími se bublinami zcela bez vodorovného scrollu (CSS `?v=20261124_v8`).
+  - **100% dotažení požadavků PPRO (Docker hardening, CI/CD, 3vrstvá čistota a PDF dokumentace v `docs/`):**
+    - Přidán [`.dockerignore`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/.dockerignore), [`.gitattributes`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/.gitattributes) a [`docker/entrypoint.sh`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/docker/entrypoint.sh); [`Dockerfile`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/Dockerfile) přepnut na neprivilegovaného uživatele `appuser` (zákaz běhu pod `root`em) s automatickým spouštěním `alembic upgrade head` a idempotentního seedování při `docker compose up --build`.
+    - Do [`docker-compose.yml`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/docker-compose.yml) doplněna interpolace proměnných z `.env` a testovací služba `app-tests` (`docker compose run --rm app-tests`).
+    - Databázový ping (`SELECT 1`) přesunut z [`health_router.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/api/health_router.py) do infrastrukturního modulu [`app/infrastructure/db/health.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/infrastructure/db/health.py), takže prezentační vrstva neobsahuje žádné SQL.
+    - Přidán GitHub Actions CI workflow [`.github/workflows/ci.yml`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/.github/workflows/ci.yml) (PostgreSQL 16 + migrace + seed + pytest + Docker build).
+    - Vygenerována kompletní 9kapitolová technická dokumentace v PDF [`docs/technicka-dokumentace.pdf`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/docs/technicka-dokumentace.pdf) včetně vektorového ER diagramu, protokolu o zacyklení a přiznání práce s AI.
 
 
 

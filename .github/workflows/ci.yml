@@ -1,0 +1,69 @@
+name: CI – Build a testy (PPRO)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: Pytest + Alembic migrace (PostgreSQL 16)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: drevenka
+          POSTGRES_PASSWORD: drevenka_ci_password
+          POSTGRES_DB: drevenka_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U drevenka -d drevenka_db"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgresql+psycopg://drevenka:drevenka_ci_password@localhost:5432/drevenka_db
+      APP_ENV: development
+      DEBUG: "True"
+
+    steps:
+      - name: Stažení repozitáře
+        uses: actions/checkout@v4
+
+      - name: Nastavení Pythonu 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Instalace závislostí
+        run: pip install --no-cache-dir -r requirements.txt
+
+      - name: Kontrola syntaxe (kompilace Python modulů)
+        run: python -m compileall -q app tests
+
+      - name: Aplikace databázových migrací (Alembic)
+        run: alembic upgrade head
+
+      - name: Inicializace syntetických dat (seed)
+        run: python -m app.infrastructure.db.seed
+
+      - name: Spuštění automatizovaných testů (pytest)
+        run: pytest -q
+
+  docker-build:
+    name: Ověření Docker image buildu
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Stažení repozitáře
+        uses: actions/checkout@v4
+
+      - name: Sestavení Docker obrazu aplikace
+        run: docker build -t drevenka-app:ci .

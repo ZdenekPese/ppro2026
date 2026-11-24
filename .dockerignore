@@ -1,0 +1,32 @@
+# Git & editor metadata
+.git
+.gitignore
+.githooks
+.vscode
+.idea
+.agents
+
+# Python virtual environments & caches
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Local secrets & environment files
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+*.pem
+
+# Documentation & scratch artifacts not needed in runtime image
+docs
+*.docx
+*.pdf
+*.log
