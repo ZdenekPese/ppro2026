@@ -666,10 +666,9 @@ body {
   padding: 0.95rem 1.25rem;
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-left: 3px solid var(--c-7);
   border-radius: var(--radius-sm);
   max-width: 620px;
-  box-shadow: 0 1px 3px rgba(24, 32, 44, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .overview-row {
@@ -1286,7 +1285,7 @@ select.form-control {
 }
 
 .warehouse-card-primary {
-  border-left: 4px solid var(--c-9);
+  border-color: var(--success-border);
   background: var(--success-tint);
 }
 
@@ -1372,7 +1371,6 @@ select.form-control {
 .critical-alert-section {
   background-color: var(--alert-card-bg);
   border: 1px solid var(--alert-card-border);
-  border-left: 4px solid var(--alert-card-stripe);
   border-radius: var(--radius-md);
   padding: 1.35rem 1.5rem;
   margin-top: 1.5rem;
@@ -1622,7 +1620,6 @@ select.form-control {
 .modal-warning-banner {
   background-color: var(--warning-bg);
   border: 1px solid var(--warning-border);
-  border-left: 4px solid var(--warning-text);
   color: var(--warning-text);
   border-radius: var(--radius-sm);
   padding: 0.75rem 0.95rem;
@@ -1710,12 +1707,10 @@ select.form-control {
 
 .row-warning-bg {
   background-color: var(--warning-row-bg) !important;
-  box-shadow: inset 3px 0 0 var(--warning-stripe);
 }
 
 .row-soldout-bg {
   background-color: var(--danger-row-bg) !important;
-  box-shadow: inset 3px 0 0 var(--soldout-stripe);
 }
 
 /* ==========================================================================
@@ -2826,7 +2821,6 @@ select.form-control {
 .restock-action-box {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-left: 3px solid var(--c-7);
   border-radius: var(--radius-sm);
   padding: 0.9rem 1.05rem;
   display: flex;
@@ -2835,15 +2829,15 @@ select.form-control {
 }
 
 .action-box-transfer_from_garage {
-  border-left-color: var(--c-7);
+  border-color: var(--info-border);
 }
 
 .action-box-produce_in_workshop {
-  border-left-color: var(--c-1);
+  border-color: var(--danger-border);
 }
 
 .action-box-transfer_and_produce {
-  border-left-color: var(--warning-text);
+  border-color: var(--warning-border);
 }
 
 .chip-action {
@@ -3634,7 +3628,6 @@ select.form-control {
 .shop-hero-profile {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-left: 4px solid var(--c-7);
   border-radius: var(--radius-md);
   padding: 0.85rem 1rem;
   display: flex;

@@ -746,6 +746,9 @@ Cílem pilotního dema je vytvořit **funkční, minimální, ale architektonick
     - Tmavý režim (`[data-theme="dark"]`) zůstal beze změny zachován.
   - **Aktualizace Word dokumentace projektu ([`PPRO-dokumentace-sablona-v1.docx`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/PPRO-dokumentace-sablona-v1.docx)):**
     - Doplněno rozhodnutí **R12** (*Design systém Woodcraft & Pine a dvouúrovňová sémantika zásob*), požadavky klienta **Z11** (zarovnání vyhledávací lišty a odebrání demo účtů z loginu) a **Z12** (přebarvení do lesní borovice, teplého dubu a odstranění vybledlé růžové) a aktualizován popis řešení.
+- **2026-11-24 (Odstranění levých akcentních pruhů/stínů a změna ikony webu na `puzzle_tower.svg`):**
+  - V [`style.css`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/css/style.css) odebrány všechny tlusté levé ohraničení (`border-left: 3px/4px`) a vnitřní levé stíny řádků (`box-shadow: inset 3px 0 0`) u karet (`.overview-vertical-list`, `.warehouse-card-primary`, `.critical-alert-section`, `.modal-warning-banner`, `.restock-action-box`, `.shop-hero-profile`) i tabulkových řádků (`.row-warning-bg`, `.row-soldout-bg`) pro čistší, přirozenější vzhled bez AI klišé.
+  - Ikona webu (favicon) v [`base.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/base.html), [`login.html`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/templates/login.html) a [`favicon.svg`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/img/favicon.svg) změněna na vektorovou věž z dřevěných kroužků ([`puzzle_tower.svg`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/app/presentation/static/img/toys/puzzle_tower.svg)); aktualizován test `test_favicon_served` v [`tests/test_health.py`](file:///c:/Users/zzden/OneDrive/Dokumenty/ppro2026/tests/test_health.py) a navýšena verze CSS na `?v=20261124_v1`.
 
 
 
