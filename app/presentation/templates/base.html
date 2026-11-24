@@ -28,7 +28,7 @@
         }
     </style>
     
-    <link rel="stylesheet" href="/static/css/style.css?v=20261124_v4">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261124_v5">
     <!-- Ikona webu (Favicon) - Dřevěnka s.r.o. -->
     <link rel="icon" type="image/svg+xml" href="/static/img/favicon.svg?v=20261124_v3">
     <link rel="alternate icon" type="image/x-icon" href="/favicon.ico?v=20261124_v3">
@@ -111,6 +111,32 @@
                         <form method="post" action="/logout" class="logout-form">
                             <button type="submit" class="btn-logout" title="Odhlásit se ze systému">Odhlásit</button>
                         </form>
+                    </div>
+
+                    <!-- Kompaktní avatar uživatele pro tablety a mobily -->
+                    <div class="mobile-avatar-wrap">
+                        <button
+                            type="button"
+                            class="mobile-avatar-btn"
+                            id="mobileAvatarBtn"
+                            aria-label="Účet uživatele {{ current_user.full_name }}"
+                            aria-expanded="false"
+                            title="{{ current_user.full_name }} ({{ current_user.role_label }})"
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </button>
+                        <div class="avatar-popover" id="avatarPopover">
+                            <div class="avatar-popover-info">
+                                <strong class="user-name">{{ current_user.full_name }}</strong>
+                                <span class="role-badge role-{{ current_user.role }}">{{ current_user.role_label }}</span>
+                            </div>
+                            <form method="post" action="/logout">
+                                <button type="submit" class="btn btn-secondary btn-sm avatar-logout-btn">Odhlásit se</button>
+                            </form>
+                        </div>
                     </div>
                     {% else %}
                     <a href="/login" class="btn btn-secondary btn-sm">Přihlásit se</a>
@@ -247,21 +273,68 @@
 
             var toggleBtn = document.getElementById('navbarToggle');
             var drawer = document.getElementById('mobileDrawer');
+            var avatarBtn = document.getElementById('mobileAvatarBtn');
+            var avatarPopover = document.getElementById('avatarPopover');
+
+            var closeAvatar = function() {
+                if (!avatarPopover || !avatarBtn) return;
+                avatarPopover.classList.remove('is-open');
+                avatarBtn.setAttribute('aria-expanded', 'false');
+            };
+
+            var closeDrawer = function() {
+                if (!drawer || !toggleBtn) return;
+                drawer.classList.remove('is-open');
+                toggleBtn.classList.remove('is-active');
+                toggleBtn.setAttribute('aria-expanded', 'false');
+            };
+
             if (toggleBtn && drawer) {
                 toggleBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
+                    closeAvatar();
                     var isOpen = drawer.classList.toggle('is-open');
                     toggleBtn.classList.toggle('is-active', isOpen);
                     toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 });
-                document.addEventListener('click', function(e) {
-                    if (!drawer.contains(e.target) && !toggleBtn.contains(e.target)) {
-                        drawer.classList.remove('is-open');
-                        toggleBtn.classList.remove('is-active');
-                        toggleBtn.setAttribute('aria-expanded', 'false');
-                    }
+            }
+
+            if (avatarBtn && avatarPopover) {
+                avatarBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    closeDrawer();
+                    var isOpen = avatarPopover.classList.toggle('is-open');
+                    avatarBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
                 });
             }
+
+            document.addEventListener('click', function(e) {
+                if (drawer && toggleBtn && !drawer.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    closeDrawer();
+                }
+                if (avatarPopover && avatarBtn && !avatarPopover.contains(e.target) && !avatarBtn.contains(e.target)) {
+                    closeAvatar();
+                }
+            });
+
+            // Automatické přiřazení popisků sloupců pro mobilní kartové zobrazení tabulek (bez bočního scrollu)
+            document.querySelectorAll('table.inventory-table, table.data-table').forEach(function(tbl) {
+                var headers = Array.prototype.map.call(tbl.querySelectorAll('thead th'), function(th) {
+                    var clone = th.cloneNode(true);
+                    clone.querySelectorAll('small').forEach(function(s) { s.remove(); });
+                    return (clone.textContent || '').replace(/\s+/g, ' ').trim();
+                });
+                if (!headers.length) return;
+                tbl.querySelectorAll('tbody tr').forEach(function(tr) {
+                    var cells = tr.querySelectorAll('td');
+                    if (cells.length === 1 && cells[0].hasAttribute('colspan')) return;
+                    cells.forEach(function(td, idx) {
+                        if (!td.hasAttribute('data-label') && headers[idx]) {
+                            td.setAttribute('data-label', headers[idx]);
+                        }
+                    });
+                });
+            });
         })();
     </script>
 </body>
