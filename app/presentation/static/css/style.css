@@ -2999,8 +2999,8 @@ select.form-control {
    KOMPLEXNÍ RESPONZIVITA (TABLET & MOBIL)
    ========================================================================== */
 
-/* Breakpoint 1: Tablety & menší laptopy (do 1140px) — kompaktní hlavička s avatarem a hamburgerem */
-@media (max-width: 1140px) {
+/* Breakpoint 1: Tablety & menší laptopy (do 1250px) — kompaktní hlavička s avatarem a hamburgerem */
+@media (max-width: 1250px) {
   .navbar {
     width: 100%;
     max-width: 100%;
@@ -3071,8 +3071,8 @@ select.form-control {
   }
 }
 
-/* Breakpoint 2: Standardní tablety (do 992px) */
-@media (max-width: 992px) {
+/* Breakpoint 2: Standardní tablety (do 1250px) */
+@media (max-width: 1250px) {
   .main-container {
     padding: 1.5rem 1.25rem;
   }
@@ -3120,8 +3120,8 @@ select.form-control {
   }
 }
 
-/* Breakpoint 2.5: Přepnutí tabulek na plnošířkové karty bez bočního scrollu (do 860px) */
-@media (max-width: 860px) {
+/* Breakpoint 2.5: Přepnutí tabulek na plnošířkové karty bez bočního scrollu (do 1250px) */
+@media (max-width: 1250px) {
   .main-container,
   .panel-card,
   .table-responsive,
@@ -3893,7 +3893,7 @@ select.form-control {
   flex-wrap: wrap;
 }
 
-@media (max-width: 1140px) {
+@media (max-width: 1250px) {
   .user-info-compact .role-badge {
     display: none;
   }
@@ -4642,7 +4642,7 @@ select.form-control {
   padding: 0.16rem;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1250px) {
   .shop-hero {
     grid-template-columns: 1fr;
   }
